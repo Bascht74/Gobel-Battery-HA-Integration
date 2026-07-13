@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.0.11] - 2026-07-13
+### Fixed
+-   [Pace BMS] Fixed false-positive structural matches in dynamic U/W byte calculation (e.g. when battery is fully charged and current is 0A) by checking for non-zero cell and temperature counts and utilizing a hybrid division calculation with fallback.
+
+---------------
+
 ## [2.0.10] - 2026-06-24
 ### Fixed
 -   [BMS] Fixed socket buffer truncation and telemetry protocol desynchronization over Ethernet/WiFi connections by implementing TCP stream buffering and reading until carriage return delimiter.
