@@ -21,8 +21,11 @@ Im Gegensatz zur vorherigen Add-on-Version **benötigt diese Integration keinen 
 
 ## Dashboard-Beispiel:
 
+<a href="https://www.gobelpower.com/ha_dashboard_integration_ap84.html">Online Home Assistant Dashboard Generator</a>
+
 ![image](https://www.gobelpower.com/images/github/dashboard-gobel-power-home-assistant-addon-1.webp)
 ![image](../../img/screen-1.png)
+
 
 ---
 
