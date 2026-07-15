@@ -21,8 +21,11 @@
 
 ## 仪表盘示例：
 
+<a href="https://www.gobelpower.com/ha_dashboard_integration_ap84.html">在线 Home Assistant 仪表盘生成器</a>
+
 ![image](https://www.gobelpower.com/images/github/dashboard-gobel-power-home-assistant-addon-1.webp)
 ![image](../../img/screen-1.png)
+
 
 ---
 
