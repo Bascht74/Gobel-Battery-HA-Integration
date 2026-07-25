@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.0.12] - 2026-07-25
+### Fixed
+-   [JKBMS] Fixed setup frame voltage register parsing for `VolInverterMaxCharge` (Inverter Max Charge Voltage) at offset 38 and `VolFloatCharge` (Float Charge Voltage) at offset 42 (previously misidentified as battery undervoltage/overvoltage protection).
+
+---------------
+
 ## [2.0.11] - 2026-07-13
 ### Fixed
 -   [Pace BMS] Fixed false-positive structural matches in dynamic U/W byte calculation (e.g. when battery is fully charged and current is 0A) by checking for non-zero cell and temperature counts and utilizing a hybrid division calculation with fallback.
