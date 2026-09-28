@@ -11,6 +11,11 @@ LIMITER_ON = "0B"
 LIMITER_OFF = "0A"
 GEAR_HIGH = "08"
 GEAR_LOW = "09"
+# PBmsTools on the wire. The header enum has the buzzer bytes reversed.
+BUZZER_ON = "0C"
+BUZZER_OFF = "0D"
+LED_ON = "07"
+LED_OFF = "06"
 
 
 def build_pace_request(bms, cid2, info, pack_number=None):
@@ -66,6 +71,14 @@ def write_limiter(bms, enabled, pack_number=None):
 def write_limiter_gear(bms, gear, pack_number=None):
     info = GEAR_HIGH if gear == "high" else GEAR_LOW
     return _send(bms, "99", info, pack_number)
+
+
+def write_buzzer(bms, enabled, pack_number=None):
+    return _send(bms, "99", BUZZER_ON if enabled else BUZZER_OFF, pack_number)
+
+
+def write_led(bms, enabled, pack_number=None):
+    return _send(bms, "99", LED_ON if enabled else LED_OFF, pack_number)
 
 
 def _address(bms, pack_number):

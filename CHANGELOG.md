@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.5] - 2026-09-29
+### Added
+-   Expert mode can switch the Pace buzzer and the LED alarm. Shutdown stays unavailable.
+
+---------------
+
 ## [2.4.4] - 2026-09-29
 ### Added
 -   If the typed TCP port does not answer, setup tries 9999 and 8899.

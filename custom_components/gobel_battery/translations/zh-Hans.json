@@ -621,6 +621,12 @@
       },
       "status_current_limit_enabled": {
         "name": "限流已启用"
+      },
+      "buzzer_warn_function": {
+        "name": "蜂鸣器已启用"
+      },
+      "led_warn_function": {
+        "name": "LED告警已启用"
       }
     },
     "select": {

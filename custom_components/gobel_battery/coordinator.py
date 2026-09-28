@@ -40,7 +40,7 @@ from .pace_config import (
     read_group,
     write_configuration_field,
 )
-from .pace_write import write_limiter, write_limiter_gear, write_mosfet
+from .pace_write import write_buzzer, write_led, write_limiter, write_limiter_gear, write_mosfet
 from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
 from .pacebms_rs485 import PACEBMS485
@@ -438,6 +438,10 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                 ok = write_mosfet(self.bms, "discharge", bool(value), pack_id)
             elif kind == "limiter_switch":
                 ok = write_limiter(self.bms, bool(value), pack_id)
+            elif kind == "buzzer_switch":
+                ok = write_buzzer(self.bms, bool(value), pack_id)
+            elif kind == "led_switch":
+                ok = write_led(self.bms, bool(value), pack_id)
             elif kind == "limiter_gear":
                 ok = write_limiter_gear(self.bms, value, pack_id)
                 if ok:
@@ -458,16 +462,19 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
 
     def _set_switch_flag(self, pack_id, kind, value):
         flags = {
-            "charge_switch": "status_charge_enabled",
-            "discharge_switch": "status_discharge_enabled",
-            "limiter_switch": "status_current_limit_enabled",
+            "charge_switch": ("instruction_state", "status_charge_enabled"),
+            "discharge_switch": ("instruction_state", "status_discharge_enabled"),
+            "limiter_switch": ("instruction_state", "status_current_limit_enabled"),
+            "buzzer_switch": ("control_state", "buzzer_warn_function"),
+            "led_switch": ("control_state", "led_warn_function"),
         }
-        flag = flags.get(kind)
-        if flag is None:
+        target = flags.get(kind)
+        if target is None:
             return
+        section, flag = target
         for pack in (self.data or {}).get("warning", []):
             if pack.get("pack_id") == pack_id:
-                pack.setdefault("instruction_state", {})[flag] = bool(value)
+                pack.setdefault(section, {})[flag] = bool(value)
 
     async def _async_update_data(self):
         """Fetch data from BMS."""

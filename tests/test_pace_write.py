@@ -24,6 +24,14 @@ def _bms():
     return PACEBMS232(_Comm(), object(), "PACE_LV", 5, 0, 0)
 
 
+def test_buzzer_and_led_frames_match_pbms_tools():
+    bms = _bms()
+    assert build_pace_request(bms, "99", "0C") == b"~25004699E0020CFD13\r"
+    assert build_pace_request(bms, "99", "0D") == b"~25004699E0020DFD12\r"
+    assert build_pace_request(bms, "99", "07") == b"~25004699E00207FD1F\r"
+    assert build_pace_request(bms, "99", "06") == b"~25004699E00206FD20\r"
+
+
 def test_charge_mosfet_frames_match_pbms_tools():
     bms = _bms()
     assert build_pace_request(bms, "9A", "00") == b"~2500469AE00200FD1E\r"

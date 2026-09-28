@@ -109,6 +109,8 @@ async def async_setup_entry(
                         "status_charge_enabled",
                         "status_discharge_enabled",
                         "status_current_limit_enabled",
+                        "buzzer_warn_function",
+                        "led_warn_function",
                     ):
                         continue
                     new_entities.append(

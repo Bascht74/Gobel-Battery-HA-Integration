@@ -621,6 +621,12 @@
       },
       "status_current_limit_enabled": {
         "name": "Limitador de corriente activo"
+      },
+      "buzzer_warn_function": {
+        "name": "Zumbador activado"
+      },
+      "led_warn_function": {
+        "name": "Alarma LED activada"
       }
     },
     "select": {

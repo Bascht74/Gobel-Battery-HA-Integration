@@ -517,6 +517,8 @@ SWITCH_KEYS = (
     "status_charge_enabled",
     "status_discharge_enabled",
     "status_current_limit_enabled",
+    "buzzer_warn_function",
+    "led_warn_function",
 )
 
 

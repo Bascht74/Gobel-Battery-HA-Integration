@@ -10,9 +10,11 @@ from .const import DOMAIN
 from .expert_entity import GobelExpertEntity
 
 SWITCHES = (
-    ("charge_switch", "status_charge_enabled", "mdi:battery-charging"),
-    ("discharge_switch", "status_discharge_enabled", "mdi:battery-arrow-down"),
-    ("limiter_switch", "status_current_limit_enabled", "mdi:speedometer"),
+    ("charge_switch", "status_charge_enabled", "instruction_state", "mdi:battery-charging"),
+    ("discharge_switch", "status_discharge_enabled", "instruction_state", "mdi:battery-arrow-down"),
+    ("limiter_switch", "status_current_limit_enabled", "instruction_state", "mdi:speedometer"),
+    ("buzzer_switch", "buzzer_warn_function", "control_state", "mdi:volume-high"),
+    ("led_switch", "led_warn_function", "control_state", "mdi:led-on"),
 )
 
 
@@ -36,8 +38,10 @@ async def async_setup_entry(
             if pack_id in registered:
                 continue
             registered.add(pack_id)
-            for key, translation_key, icon in SWITCHES:
-                entities.append(GobelExpertSwitch(coordinator, pack_id, key, translation_key, icon))
+            for key, translation_key, section, icon in SWITCHES:
+                entities.append(
+                    GobelExpertSwitch(coordinator, pack_id, key, translation_key, section, icon)
+                )
         if entities:
             async_add_entities(entities)
 
@@ -48,22 +52,23 @@ async def async_setup_entry(
 class GobelExpertSwitch(GobelExpertEntity, SwitchEntity):
     """MOSFET or charge-limiter switch."""
 
-    def __init__(self, coordinator, pack_id, key, translation_key, icon):
+    def __init__(self, coordinator, pack_id, key, translation_key, section, icon):
         super().__init__(coordinator, pack_id, key, translation_key)
         self._flag = translation_key
+        self._section_name = section
         self._attr_icon = icon
 
     @property
     def available(self):
         pack = self._section("warning")
-        return super().available and isinstance((pack or {}).get("instruction_state"), dict)
+        return super().available and isinstance((pack or {}).get(self._section_name), dict)
 
     @property
     def is_on(self):
         pack = self._section("warning")
         if not pack:
             return None
-        return bool(pack.get("instruction_state", {}).get(self._flag))
+        return bool(pack.get(self._section_name, {}).get(self._flag))
 
     async def async_turn_on(self, **kwargs):
         await self._set(True)

@@ -621,6 +621,12 @@
       },
       "status_current_limit_enabled": {
         "name": "Limiteur de courant actif"
+      },
+      "buzzer_warn_function": {
+        "name": "Buzzer activé"
+      },
+      "led_warn_function": {
+        "name": "Alarme LED activée"
       }
     },
     "select": {

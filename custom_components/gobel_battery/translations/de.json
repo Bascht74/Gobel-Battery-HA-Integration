@@ -718,6 +718,12 @@
       },
       "status_current_limit_enabled": {
         "name": "Strombegrenzer aktiv"
+      },
+      "buzzer_warn_function": {
+        "name": "Summer aktiv"
+      },
+      "led_warn_function": {
+        "name": "LED-Alarm aktiv"
       }
     },
     "select": {
