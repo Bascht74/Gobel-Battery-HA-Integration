@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.4] - 2026-09-29
+### Added
+-   If the typed TCP port does not answer, setup tries 9999 and 8899.
+
+---------------
+
 ## [2.4.3] - 2026-09-29
 ### Changed
 -   The Pace choices are now named Pace BMS and Pace BMS, internal Wi-Fi.

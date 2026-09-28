@@ -40,7 +40,7 @@ from .const import (
     BMS_TYPE_PACE_LV_WIFI,
 )
 
-from .pace_probe import ACTIVE, PASSIVE, probe_pace_tcp
+from .pace_probe import ACTIVE, PASSIVE, probe_pace_ports
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -137,18 +137,24 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_data = self._connection_data(user_input, network=True)
             if user_data[CONF_BMS_TYPE] in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 self._pending_entry = user_data
+                typed_port = user_data[CONF_IP_PORT]
                 try:
-                    self._probe_result = await self.hass.async_add_executor_job(
-                        probe_pace_tcp,
+                    result, found_port = await self.hass.async_add_executor_job(
+                        probe_pace_ports,
                         user_data[CONF_IP_ADDRESS],
-                        user_data[CONF_IP_PORT],
+                        typed_port,
                     )
                 except OSError as err:
                     _LOGGER.debug("Pace probe failed: %s", err)
-                    self._probe_result = "unreachable"
-                if self._probe_result == ACTIVE:
+                    result, found_port = "unreachable", typed_port
+                self._probe_result = result
+                self._probe_port_note = ""
+                if result in (ACTIVE, PASSIVE) and found_port != int(typed_port):
+                    self._pending_entry[CONF_IP_PORT] = found_port
+                    self._probe_port_note = f", Port {found_port}"
+                if result == ACTIVE:
                     self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV
-                elif self._probe_result == PASSIVE:
+                elif result == PASSIVE:
                     self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV_WIFI
                 return await self.async_step_probe()
             return self._create_from_data(user_data)
@@ -186,7 +192,7 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             "silent": "keine Antwort" if german else "no answer",
             "unreachable": "keine Verbindung" if german else "no connection",
         }
-        return labels.get(self._probe_result, self._probe_result)
+        return labels.get(self._probe_result, self._probe_result) + getattr(self, "_probe_port_note", "")
 
     async def _create_from_data(self, user_data):
         unique_id = f"{user_data[CONF_IP_ADDRESS]}_{user_data[CONF_IP_PORT]}"

@@ -29,6 +29,7 @@
       },
       "network": {
         "title": "Network connection",
+        "description": "The TCP port is probed. 9999 and 8899 are tried if the typed port does not answer. Baud rate is set on the dongle, not here: 115200 for a new Pace RS232, 9600 for an older Pace or for RS485. Always 8 data bits, 1 stop bit, no parity.",
         "data": {
           "ip_address": "IP address",
           "ip_port": "TCP port"

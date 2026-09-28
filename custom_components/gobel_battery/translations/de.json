@@ -29,6 +29,7 @@
       },
       "network": {
         "title": "Netzwerkverbindung",
+        "description": "Der TCP-Port wird geprüft. Antwortet der eingegebene Port nicht, werden 9999 und 8899 versucht. Die Baudrate stellst du am Dongle ein, nicht hier: 115200 bei einem neuen Pace an RS232, 9600 bei einem älteren Pace oder an RS485. Immer 8 Datenbits, 1 Stoppbit, keine Parität.",
         "data": {
           "ip_address": "IP-Adresse",
           "ip_port": "TCP-Port"

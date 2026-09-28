@@ -1,6 +1,6 @@
 """The setup probe must not confuse a pushed frame with a command reply."""
 
-from pace_probe import ACTIVE, PASSIVE, SILENT, classify_pace_traffic
+from pace_probe import ACTIVE, PASSIVE, SILENT, candidate_ports, classify_pace_traffic
 
 
 def test_command_reply_is_active_even_if_the_bms_also_pushes():
@@ -21,3 +21,8 @@ def test_dongle_heartbeat_is_passive():
 
 def test_no_bytes_is_silent():
     assert classify_pace_traffic(b"", b"") == SILENT
+
+
+def test_documented_ports_follow_the_typed_port():
+    assert candidate_ports(9999) == [9999, 8899]
+    assert candidate_ports(80) == [80, 9999, 8899]
