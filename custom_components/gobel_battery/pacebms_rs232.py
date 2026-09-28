@@ -977,6 +977,8 @@ class PACEBMS232:
             
             fault_state = warnstate_bytes[index]
             pack_info['fault_state'] = {
+                'fault_heater': bool(fault_state & 0b10000000),
+                'fault_comm': bool(fault_state & 0b00001000),
                 'fault_sampling': bool(fault_state & 0b00100000),
                 'fault_cell': bool(fault_state & 0b00010000),
                 'fault_NTC': bool(fault_state & 0b00000100),
@@ -1186,6 +1188,8 @@ class PACEBMS232:
             
             fault_state = warnstate_bytes[index]
             pack_info['fault_state'] = {
+                'fault_heater': bool(fault_state & 0b10000000),
+                'fault_comm': bool(fault_state & 0b00001000),
                 'fault_sampling': bool(fault_state & 0b00100000),
                 'fault_cell': bool(fault_state & 0b00010000),
                 'fault_NTC': bool(fault_state & 0b00000100),

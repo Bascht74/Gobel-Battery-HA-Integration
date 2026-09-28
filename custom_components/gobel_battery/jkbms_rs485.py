@@ -1075,6 +1075,7 @@ class JKBMS485:
             if static:
                 pack_data['hardware_version'] = static.get('hardware_version', '')
                 pack_data['software_version'] = static.get('software_version', '')
+                pack_data['serial_number'] = static.get('serial_number', '')
             else:
                 pack_data['hardware_version'] = ''
                 pack_data['software_version'] = ''
@@ -1236,6 +1237,7 @@ class JKBMS485:
             if static:
                 data['hardware_version'] = static.get('hardware_version', '')
                 data['software_version'] = static.get('software_version', '')
+                data['serial_number'] = static.get('serial_number', '')
             else:
                 data['hardware_version'] = ''
                 data['software_version'] = ''

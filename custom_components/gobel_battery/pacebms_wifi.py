@@ -476,6 +476,8 @@ class PACEBMSWIFI:
             if offset < len(fields):
                 val = int(fields[offset], 16)
                 pack['fault_state'] = {
+                    'fault_heater': bool(val & 0b10000000),
+                    'fault_comm': bool(val & 0b00001000),
                     'fault_sampling': bool(val & 0b00010000),
                     'fault_cell': bool(val & 0b00001000),
                     'fault_NTC': bool(val & 0b00000100),

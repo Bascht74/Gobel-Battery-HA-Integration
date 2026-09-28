@@ -4,6 +4,13 @@ description:
 
 # Changelog
 
+## [2.4.7] - 2026-09-29
+### Added
+-   Pace firmware (C1), hardware version (C6) and serial number (C2) are shown on the Home Assistant device.
+-   Heater and communication faults are binary sensors.
+
+---------------
+
 ## [2.4.6] - 2026-09-29
 ### Added
 -   Pace setup tries TCP ports 9999 and 8899 before asking for a port.

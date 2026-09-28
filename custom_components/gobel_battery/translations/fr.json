@@ -351,6 +351,12 @@
       "fault_sampling": {
         "name": "Défaut de mesure"
       },
+      "fault_heater": {
+        "name": "Défaut du chauffage"
+      },
+      "fault_comm": {
+        "name": "Défaut de communication"
+      },
       "fault_cell": {
         "name": "Défaut du nombre de cellules"
       },

@@ -35,6 +35,8 @@ BINARY_SENSORS_METADATA = {
         "protect_low_discharge_temp": ("Discharge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
     },
     "fault_state": {
+        "fault_heater": ("Heater Fault", BinarySensorDeviceClass.PROBLEM, None),
+        "fault_comm": ("Communication Fault", BinarySensorDeviceClass.PROBLEM, None),
         "fault_sampling": ("Sampling Fault", BinarySensorDeviceClass.PROBLEM, None),
         "fault_cell": ("Cell Count Mismatch/Fault", BinarySensorDeviceClass.PROBLEM, None),
         "fault_NTC": ("Temperature Sensor Fault", BinarySensorDeviceClass.PROBLEM, None),
@@ -178,12 +180,7 @@ class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
     @property
     def device_info(self):
         """Return device info for individual pack child device."""
-        display_pack = self.pack_id + (0 if self.coordinator.jk_display_index_start == "00" else 1)
-        return {
-            "identifiers": {(DOMAIN, f"{self.coordinator.entry.entry_id}_pack_{self.pack_id}")},
-            "name": f"{self.coordinator.device_name} Pack {display_pack:02d}",
-            "via_device": (DOMAIN, f"{self.coordinator.entry.entry_id}_total"),
-        }
+        return self.coordinator.pack_device_info(self.pack_id)
 
     @property
     def available(self) -> bool:
@@ -240,12 +237,7 @@ class GobelBatteryIndexedWarningSensor(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def device_info(self):
-        display_pack = self.pack_id + (0 if self.coordinator.jk_display_index_start == "00" else 1)
-        return {
-            "identifiers": {(DOMAIN, f"{self.coordinator.entry.entry_id}_pack_{self.pack_id}")},
-            "name": f"{self.coordinator.device_name} Pack {display_pack:02d}",
-            "via_device": (DOMAIN, f"{self.coordinator.entry.entry_id}_total"),
-        }
+        return self.coordinator.pack_device_info(self.pack_id)
 
     def _pack_warnings(self):
         data = self.coordinator.data
@@ -296,12 +288,7 @@ class GobelBatteryBalanceSensor(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def device_info(self):
-        display_pack = self.pack_id + (0 if self.coordinator.jk_display_index_start == "00" else 1)
-        return {
-            "identifiers": {(DOMAIN, f"{self.coordinator.entry.entry_id}_pack_{self.pack_id}")},
-            "name": f"{self.coordinator.device_name} Pack {display_pack:02d}",
-            "via_device": (DOMAIN, f"{self.coordinator.entry.entry_id}_total"),
-        }
+        return self.coordinator.pack_device_info(self.pack_id)
 
     def _pack_warnings(self):
         data = self.coordinator.data

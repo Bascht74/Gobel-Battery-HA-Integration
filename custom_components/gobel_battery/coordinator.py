@@ -40,6 +40,7 @@ from .pace_config import (
     read_group,
     write_configuration_field,
 )
+from .pace_identity import read_identity
 from .pace_write import write_buzzer, write_clock, write_led, write_limiter, write_limiter_gear, write_mosfet
 from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
@@ -106,6 +107,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._energy_ts = None
         self._limit_cache = {}
         self._config_cache = {}
+        self._identity = {}
         self._limiter_gear = {}
         self._bus_lock = threading.Lock()
         self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
@@ -307,6 +309,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                         _LOGGER.warning("Pack %s data unavailable after %s consecutive failures", p_id, failures)
 
         self._attach_current_limits(final_analog_data)
+        self._attach_identity(final_analog_data)
         self._apply_energy_totals(final_analog_data)
 
         return {
@@ -344,6 +347,85 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             values = self._config_cache.get(cache_key, {}).get("values")
             if values:
                 pack.update(values)
+
+    def _attach_identity(self, packs):
+        """Read firmware, hardware version and serial about once per hour."""
+        if (
+            not packs
+            or not self.bms
+            or not hasattr(self.bms, "generate_bms_request")
+            or self.bms_type in (BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV_WIFI)
+        ):
+            return
+        now = time.monotonic()
+        per_pack = self.battery_port == "rs485"
+        for pack in packs:
+            pack_id = pack.get("pack_id", 0)
+            slot = self._identity.setdefault(pack_id, {"ts": 0})
+            if slot.get("software_version") and now - slot["ts"] < 3600:
+                self._copy_identity(pack, slot)
+                continue
+            try:
+                found = read_identity(self.bms, pack_id if per_pack else None)
+            except Exception as err:
+                _LOGGER.debug("Identity read failed: %s", err)
+                found = {}
+            if any(found.get(key) for key in ("software_version", "hardware_version", "serial_number")):
+                slot.update(found)
+                slot["ts"] = now
+            self._copy_identity(pack, slot)
+
+    @staticmethod
+    def _copy_identity(pack, slot):
+        for key in ("software_version", "hardware_version", "serial_number"):
+            if slot.get(key):
+                pack[key] = slot[key]
+
+    def version_fields(self, pack_id=None):
+        """Home Assistant device-registry fields for one pack, or the bank."""
+        slot = {}
+        if pack_id is not None:
+            slot = self._identity.get(pack_id, {})
+        elif self._identity:
+            slot = next(iter(self._identity.values()))
+        pack = None
+        for item in (self.data or {}).get("analog", []):
+            if pack_id is None or item.get("pack_id") == pack_id:
+                pack = item
+                break
+        software = slot.get("software_version") or (pack or {}).get("software_version") or ""
+        hardware = slot.get("hardware_version") or (pack or {}).get("hardware_version") or ""
+        serial = slot.get("serial_number") or (pack or {}).get("serial_number") or ""
+        fields = {}
+        if software:
+            fields["sw_version"] = software
+        if hardware:
+            fields["hw_version"] = hardware
+        if serial:
+            fields["serial_number"] = serial
+        return fields
+
+    def total_device_info(self):
+        info = {
+            "identifiers": {(DOMAIN, f"{self.entry.entry_id}_total")},
+            "name": f"{self.device_name} (Total)",
+            "manufacturer": "Gobel Power",
+            "model": f"{self.bms_type} Bank",
+        }
+        info.update(self.version_fields())
+        return info
+
+    def pack_device_info(self, pack_id):
+        display = pack_id + (0 if self.jk_display_index_start == "00" else 1)
+        info = {
+            "identifiers": {(DOMAIN, f"{self.entry.entry_id}_pack_{pack_id}")},
+            "name": f"{self.device_name} Pack {display:02d}",
+            "via_device": (DOMAIN, f"{self.entry.entry_id}_total"),
+            "manufacturer": "Gobel Power",
+            "model": self.bms_type,
+        }
+        info.update(self.version_fields(pack_id))
+        return info
 
     def _apply_energy_totals(self, packs):
         """Publish charged and discharged energy in kWh.

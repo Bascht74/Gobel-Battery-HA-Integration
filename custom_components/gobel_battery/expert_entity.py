@@ -3,8 +3,6 @@
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
-
 
 class GobelExpertEntity(CoordinatorEntity):
     """Configuration control shown only while expert mode is enabled."""
@@ -21,12 +19,7 @@ class GobelExpertEntity(CoordinatorEntity):
 
     @property
     def device_info(self):
-        display = self.pack_id + (0 if self.coordinator.jk_display_index_start == "00" else 1)
-        return {
-            "identifiers": {(DOMAIN, f"{self.coordinator.entry.entry_id}_pack_{self.pack_id}")},
-            "name": f"{self.coordinator.device_name} Pack {display:02d}",
-            "via_device": (DOMAIN, f"{self.coordinator.entry.entry_id}_total"),
-        }
+        return self.coordinator.pack_device_info(self.pack_id)
 
     def _section(self, name):
         data = self.coordinator.data or {}

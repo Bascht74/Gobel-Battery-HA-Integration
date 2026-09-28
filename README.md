@@ -72,8 +72,12 @@ Unlike the previous Add-on version, this integration **does not require an MQTT 
 4. Follow the configuration steps on-screen to choose your BMS type, connection method (Network vs. Serial), and input connection parameters.
 5. If you have multiple battery banks with different IPs/ports, simply click **Add Integration** again to configure additional instances.
 
-To change an existing device, open it under **Settings -> Devices & Services** and choose **Reconfigure** (IP, port, BMS type, serial device). **Configure** changes the poll interval, the parallel-pack limit and the JK pack index. Home Assistant reloads the device after either change.
+To change an existing device, open it under **Settings -> Devices & Services** and choose **Reconfigure** (IP, port, BMS type, serial device). **Configure** changes the poll interval, the parallel-pack limit, the JK pack index and expert mode. Home Assistant reloads the device after either change.
 
-Daily sensors (SOC, voltage, current, power, energy) stay on the device page and record long-term statistics. Cell voltages are in volts, power is in watts and energy is in kWh. BMS limits, including Pace charge and discharge current limits, are under **Configuration**. Individual cell voltages, warnings and balance flags are under **Diagnostic**.
+For a Pace battery on the network, enter the dongle address. The setup tries TCP ports **9999** and **8899**. A port field appears only if neither port returns Pace data. **Pace BMS** is the right type for an external Wi-Fi or Ethernet dongle. **Pace BMS, internal Wi-Fi** is only for a battery that pushes data by itself and does not answer commands.
+
+Daily sensors (SOC, voltage, current, power, energy) stay on the device page and record long-term statistics. Cell voltages are in volts, power is in watts and energy is in kWh. The device page shows the Pace firmware from command C1, the hardware version from command C6, and the serial number from command C2 when the BMS sends them. BMS limits, including Pace charge and discharge current limits, are under **Configuration**. Individual cell voltages, warnings and balance flags are under **Diagnostic**.
+
+Expert mode, under **Configure**, makes Pace and TDT settings writable. The same configuration names stay, but sensors become numbers, selects and switches. Turn it off again after the change. JK and internal Pace Wi-Fi stay read-only. The BMS clock is always a sensor. In expert mode, **Set BMS clock** writes the current local time. Shutdown is not available.
 
 This repository is a maintained fork of [fancyui/Gobel-Battery-HA-Integration](https://github.com/fancyui/Gobel-Battery-HA-Integration).

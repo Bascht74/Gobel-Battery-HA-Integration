@@ -419,6 +419,12 @@
       "fault_sampling": {
         "name": "Sampling Fault"
       },
+      "fault_heater": {
+        "name": "Heater Fault"
+      },
+      "fault_comm": {
+        "name": "Communication Fault"
+      },
       "fault_cell": {
         "name": "Cell Count Mismatch/Fault"
       },

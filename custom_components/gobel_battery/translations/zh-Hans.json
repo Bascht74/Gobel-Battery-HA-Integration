@@ -351,6 +351,12 @@
       "fault_sampling": {
         "name": "采样故障"
       },
+      "fault_heater": {
+        "name": "加热故障"
+      },
+      "fault_comm": {
+        "name": "通信故障"
+      },
       "fault_cell": {
         "name": "单体数量故障"
       },

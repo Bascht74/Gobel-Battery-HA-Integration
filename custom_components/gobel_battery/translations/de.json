@@ -455,6 +455,12 @@
       "fault_sampling": {
         "name": "Messfehler"
       },
+      "fault_heater": {
+        "name": "Heizungsfehler"
+      },
+      "fault_comm": {
+        "name": "Kommunikationsfehler"
+      },
       "fault_cell": {
         "name": "Zellenanzahlfehler"
       },

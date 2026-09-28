@@ -351,6 +351,12 @@
       "fault_sampling": {
         "name": "Fallo de muestreo"
       },
+      "fault_heater": {
+        "name": "Fallo del calentador"
+      },
+      "fault_comm": {
+        "name": "Fallo de comunicación"
+      },
       "fault_cell": {
         "name": "Fallo de número de celdas"
       },
