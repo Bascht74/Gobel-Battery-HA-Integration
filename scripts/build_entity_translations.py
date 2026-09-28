@@ -515,16 +515,20 @@ def names(mapping):
 
 
 def entity_block(lang):
-    sensors = names(PACK[lang])
+    extra = json.loads((ROOT.parents[1] / "scripts" / "config_labels.json").read_text())
+    labels = dict(PACK[lang])
+    labels.update(extra[lang])
+    sensors = names(labels)
     sensors.update(names(TOTAL[lang]))
+    number_keys = list(NUMBER_KEYS) + [key for key in extra["en"] if key not in NUMBER_KEYS]
     return {
         "sensor": sensors,
         "binary_sensor": names(BINARY[lang]),
-        "number": names({key: PACK[lang][key] for key in NUMBER_KEYS}),
+        "number": names({key: labels[key] for key in number_keys}),
         "switch": names({key: BINARY[lang][key] for key in SWITCH_KEYS}),
         "select": {
             "limiter_gear": {
-                "name": PACK[lang]["limiter_gear"],
+                "name": labels["limiter_gear"],
                 "state": GEAR[lang],
             }
         },

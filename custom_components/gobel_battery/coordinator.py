@@ -30,8 +30,17 @@ from .const import (
 )
 
 from .bms_comm import BMSCommunication
-from .pace_limits import LIMIT_POLL_SECONDS, read_pace_current_limits
-from .pace_write import write_limiter, write_limiter_gear, write_mosfet, write_overcurrent
+from .pace_limits import LIMIT_POLL_SECONDS
+from .pace_config import (
+    FIELD_BY_KEY,
+    GROUP_BY_NAME,
+    GROUPS,
+    decode_group,
+    read_configuration_slice,
+    read_group,
+    write_configuration_field,
+)
+from .pace_write import write_limiter, write_limiter_gear, write_mosfet
 from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
 from .pacebms_rs485 import PACEBMS485
@@ -96,6 +105,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._energy = {}
         self._energy_ts = None
         self._limit_cache = {}
+        self._config_cache = {}
         self._limiter_gear = {}
         self._bus_lock = threading.Lock()
         self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
@@ -305,41 +315,35 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         }
 
     def _attach_current_limits(self, packs):
-        """Read Pace/TDT CCL and DCL. JK limits are already in the setup frame."""
+        """Read a few Pace/TDT configuration groups per poll. JK limits come from the setup frame."""
         if not packs or not self.bms or not hasattr(self.bms, "generate_bms_request"):
             return
         now = time.monotonic()
         per_pack = self.bms_type != BMS_TYPE_JK_PB and self.battery_port == "rs485"
         targets = [pack.get("pack_id", 0) for pack in packs] if per_pack else [None]
-        fetched = {}
         for target in targets:
             cache_key = "all" if target is None else str(target)
-            cached = self._limit_cache.get(cache_key)
-            if cached and now - cached["ts"] < LIMIT_POLL_SECONDS:
-                fetched[cache_key] = cached["limits"]
+            slot = self._config_cache.setdefault(
+                cache_key, {"cursor": 0, "values": {}, "raw": {}, "ts": 0}
+            )
+            if slot["cursor"] == 0 and slot["values"] and now - slot["ts"] < LIMIT_POLL_SECONDS:
                 continue
             try:
-                limits = read_pace_current_limits(self.bms, target)
+                values, raw = read_configuration_slice(self.bms, slot["cursor"], pack_number=target)
             except Exception as err:
-                _LOGGER.debug("Current limit read failed: %s", err)
-                limits = cached["limits"] if cached else None
-            if limits:
-                self._limit_cache[cache_key] = {"ts": now, "limits": limits}
-                fetched[cache_key] = limits
-            else:
-                # Keep the last good reading, but do not retry on every poll.
-                self._limit_cache[cache_key] = {
-                    "ts": now,
-                    "limits": cached["limits"] if cached else None,
-                }
-                if cached and cached["limits"]:
-                    fetched[cache_key] = cached["limits"]
+                _LOGGER.debug("Configuration read failed: %s", err)
+                values, raw = {}, {}
+            slot["values"].update(values)
+            slot["raw"].update(raw)
+            slot["cursor"] = (slot["cursor"] + 4) % len(GROUPS)
+            if slot["cursor"] == 0:
+                slot["ts"] = now
 
         for pack in packs:
             cache_key = str(pack.get("pack_id", 0)) if per_pack else "all"
-            limits = fetched.get(cache_key)
-            if limits:
-                pack.update(limits)
+            values = self._config_cache.get(cache_key, {}).get("values")
+            if values:
+                pack.update(values)
 
     def _apply_energy_totals(self, packs):
         """Publish charged and discharged energy in kWh.
@@ -409,32 +413,25 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             return False
         try:
             pack = self._analog_pack(pack_id)
-            if kind in ("charge_current_alarm", "charge_current_limit"):
-                alarm = int(pack.get("view_charge_current_alarm") or value)
-                protection = int(pack.get("view_charge_current_limit") or value)
-                delay = int(pack.get("view_charge_oc_delay") or 10)
-                if kind == "charge_current_alarm":
-                    alarm = int(value)
-                else:
-                    protection = int(value)
-                ok = write_overcurrent(self.bms, "charge", alarm, protection, delay, pack_id)
-                if ok:
-                    pack["view_charge_current_alarm"] = min(alarm, protection)
-                    pack["view_charge_current_limit"] = protection
-                return ok
-            if kind in ("discharge_current_alarm", "discharge_current_limit"):
-                alarm = int(pack.get("view_discharge_current_alarm") or value)
-                protection = int(pack.get("view_discharge_current_limit") or value)
-                delay = int(pack.get("view_discharge_oc_delay") or 10)
-                if kind == "discharge_current_alarm":
-                    alarm = int(value)
-                else:
-                    protection = int(value)
-                ok = write_overcurrent(self.bms, "discharge", alarm, protection, delay, pack_id)
-                if ok:
-                    pack["view_discharge_current_alarm"] = min(alarm, protection)
-                    pack["view_discharge_current_limit"] = protection
-                return ok
+            if kind in FIELD_BY_KEY:
+                cache_key = str(pack_id) if self.battery_port == "rs485" else "all"
+                slot = self._config_cache.setdefault(
+                    cache_key, {"cursor": 0, "values": {}, "raw": {}, "ts": 0}
+                )
+                group = GROUP_BY_NAME[FIELD_BY_KEY[kind]["group"]]
+                raw = slot["raw"].get(group["name"])
+                if raw is None:
+                    raw = read_group(self.bms, group, pack_id)
+                if raw is None:
+                    return False
+                updated = write_configuration_field(self.bms, kind, value, raw, pack_id)
+                if updated is None:
+                    return False
+                slot["raw"][group["name"]] = updated
+                decoded = decode_group(group, updated)
+                slot["values"].update(decoded)
+                pack.update(decoded)
+                return True
             if kind == "charge_switch":
                 ok = write_mosfet(self.bms, "charge", bool(value), pack_id)
             elif kind == "discharge_switch":

@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.0] - 2026-09-29
+### Added
+-   The Pace/TDT protection and system pages from PBmsTools: cell and pack over/undervoltage, current delays, fast discharge current, short-circuit delay, balance, sleep, full charge, temperature protections and the limiter start current. They are configuration sensors, and the same names become number controls in expert mode.
+
+---------------
+
 ## [2.3.1] - 2026-09-29
 ### Changed
 -   Read-only configuration sensors and the expert-mode number, switch and select controls use the same names and stay in the Configuration category. The current limiter is configuration as well.

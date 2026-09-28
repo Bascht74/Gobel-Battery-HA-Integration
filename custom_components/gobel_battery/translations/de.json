@@ -163,6 +163,156 @@
       "temperature": {
         "name": "Temperatur {index}"
       },
+      "cell_ov_alarm": {
+        "name": "Zell-Überspannungsalarm"
+      },
+      "cell_ov_protect": {
+        "name": "Zell-Überspannungsschutz"
+      },
+      "cell_ov_release": {
+        "name": "Zell-Überspannungsfreigabe"
+      },
+      "cell_ov_delay": {
+        "name": "Zell-Überspannungsverzögerung"
+      },
+      "pack_ov_alarm": {
+        "name": "Pack-Überspannungsalarm"
+      },
+      "pack_ov_protect": {
+        "name": "Pack-Überspannungsschutz"
+      },
+      "pack_ov_release": {
+        "name": "Pack-Überspannungsfreigabe"
+      },
+      "pack_ov_delay": {
+        "name": "Pack-Überspannungsverzögerung"
+      },
+      "cell_uv_alarm": {
+        "name": "Zell-Unterspannungsalarm"
+      },
+      "cell_uv_protect": {
+        "name": "Zell-Unterspannungsschutz"
+      },
+      "cell_uv_release": {
+        "name": "Zell-Unterspannungsfreigabe"
+      },
+      "cell_uv_delay": {
+        "name": "Zell-Unterspannungsverzögerung"
+      },
+      "pack_uv_alarm": {
+        "name": "Pack-Unterspannungsalarm"
+      },
+      "pack_uv_protect": {
+        "name": "Pack-Unterspannungsschutz"
+      },
+      "pack_uv_release": {
+        "name": "Pack-Unterspannungsfreigabe"
+      },
+      "pack_uv_delay": {
+        "name": "Pack-Unterspannungsverzögerung"
+      },
+      "charge_current_delay": {
+        "name": "Ladestromverzögerung"
+      },
+      "discharge_current_delay": {
+        "name": "Entladestromverzögerung"
+      },
+      "discharge_fast_current": {
+        "name": "Schnelle Entladestromgrenze"
+      },
+      "discharge_fast_delay": {
+        "name": "Schnelle Entladestromverzögerung"
+      },
+      "short_circuit_delay": {
+        "name": "Kurzschlussverzögerung"
+      },
+      "balance_voltage": {
+        "name": "Balancerspannung"
+      },
+      "balance_delta": {
+        "name": "Balancerdifferenz"
+      },
+      "sleep_voltage": {
+        "name": "Schlaf-Zellspannung"
+      },
+      "sleep_delay": {
+        "name": "Schlafverzögerung"
+      },
+      "full_charge_voltage": {
+        "name": "Vollladespannung"
+      },
+      "full_charge_current": {
+        "name": "Vollladestrom"
+      },
+      "low_soc_alarm": {
+        "name": "Niedriger-SOC-Alarm"
+      },
+      "charge_ot_alarm": {
+        "name": "Laden Übertemperaturalarm"
+      },
+      "charge_ot_protect": {
+        "name": "Laden Übertemperaturschutz"
+      },
+      "charge_ot_release": {
+        "name": "Laden Übertemperaturfreigabe"
+      },
+      "discharge_ot_alarm": {
+        "name": "Entladen Übertemperaturalarm"
+      },
+      "discharge_ot_protect": {
+        "name": "Entladen Übertemperaturschutz"
+      },
+      "discharge_ot_release": {
+        "name": "Entladen Übertemperaturfreigabe"
+      },
+      "charge_ut_alarm": {
+        "name": "Laden Untertemperaturalarm"
+      },
+      "charge_ut_protect": {
+        "name": "Laden Untertemperaturschutz"
+      },
+      "charge_ut_release": {
+        "name": "Laden Untertemperaturfreigabe"
+      },
+      "discharge_ut_alarm": {
+        "name": "Entladen Untertemperaturalarm"
+      },
+      "discharge_ut_protect": {
+        "name": "Entladen Untertemperaturschutz"
+      },
+      "discharge_ut_release": {
+        "name": "Entladen Untertemperaturfreigabe"
+      },
+      "mosfet_ot_alarm": {
+        "name": "MOSFET-Übertemperaturalarm"
+      },
+      "mosfet_ot_protect": {
+        "name": "MOSFET-Übertemperaturschutz"
+      },
+      "mosfet_ot_release": {
+        "name": "MOSFET-Übertemperaturfreigabe"
+      },
+      "env_ut_alarm": {
+        "name": "Umgebung Untertemperaturalarm"
+      },
+      "env_ut_protect": {
+        "name": "Umgebung Untertemperaturschutz"
+      },
+      "env_ut_release": {
+        "name": "Umgebung Untertemperaturfreigabe"
+      },
+      "env_ot_alarm": {
+        "name": "Umgebung Übertemperaturalarm"
+      },
+      "env_ot_protect": {
+        "name": "Umgebung Übertemperaturschutz"
+      },
+      "env_ot_release": {
+        "name": "Umgebung Übertemperaturfreigabe"
+      },
+      "limiter_start_current": {
+        "name": "Startstrom des Ladestrombegrenzers"
+      },
       "packs_count": {
         "name": "{device} Packanzahl"
       },
@@ -352,6 +502,156 @@
       },
       "discharge_current_limit": {
         "name": "Entladestromgrenze"
+      },
+      "cell_ov_alarm": {
+        "name": "Zell-Überspannungsalarm"
+      },
+      "cell_ov_protect": {
+        "name": "Zell-Überspannungsschutz"
+      },
+      "cell_ov_release": {
+        "name": "Zell-Überspannungsfreigabe"
+      },
+      "cell_ov_delay": {
+        "name": "Zell-Überspannungsverzögerung"
+      },
+      "pack_ov_alarm": {
+        "name": "Pack-Überspannungsalarm"
+      },
+      "pack_ov_protect": {
+        "name": "Pack-Überspannungsschutz"
+      },
+      "pack_ov_release": {
+        "name": "Pack-Überspannungsfreigabe"
+      },
+      "pack_ov_delay": {
+        "name": "Pack-Überspannungsverzögerung"
+      },
+      "cell_uv_alarm": {
+        "name": "Zell-Unterspannungsalarm"
+      },
+      "cell_uv_protect": {
+        "name": "Zell-Unterspannungsschutz"
+      },
+      "cell_uv_release": {
+        "name": "Zell-Unterspannungsfreigabe"
+      },
+      "cell_uv_delay": {
+        "name": "Zell-Unterspannungsverzögerung"
+      },
+      "pack_uv_alarm": {
+        "name": "Pack-Unterspannungsalarm"
+      },
+      "pack_uv_protect": {
+        "name": "Pack-Unterspannungsschutz"
+      },
+      "pack_uv_release": {
+        "name": "Pack-Unterspannungsfreigabe"
+      },
+      "pack_uv_delay": {
+        "name": "Pack-Unterspannungsverzögerung"
+      },
+      "charge_current_delay": {
+        "name": "Ladestromverzögerung"
+      },
+      "discharge_current_delay": {
+        "name": "Entladestromverzögerung"
+      },
+      "discharge_fast_current": {
+        "name": "Schnelle Entladestromgrenze"
+      },
+      "discharge_fast_delay": {
+        "name": "Schnelle Entladestromverzögerung"
+      },
+      "short_circuit_delay": {
+        "name": "Kurzschlussverzögerung"
+      },
+      "balance_voltage": {
+        "name": "Balancerspannung"
+      },
+      "balance_delta": {
+        "name": "Balancerdifferenz"
+      },
+      "sleep_voltage": {
+        "name": "Schlaf-Zellspannung"
+      },
+      "sleep_delay": {
+        "name": "Schlafverzögerung"
+      },
+      "full_charge_voltage": {
+        "name": "Vollladespannung"
+      },
+      "full_charge_current": {
+        "name": "Vollladestrom"
+      },
+      "low_soc_alarm": {
+        "name": "Niedriger-SOC-Alarm"
+      },
+      "charge_ot_alarm": {
+        "name": "Laden Übertemperaturalarm"
+      },
+      "charge_ot_protect": {
+        "name": "Laden Übertemperaturschutz"
+      },
+      "charge_ot_release": {
+        "name": "Laden Übertemperaturfreigabe"
+      },
+      "discharge_ot_alarm": {
+        "name": "Entladen Übertemperaturalarm"
+      },
+      "discharge_ot_protect": {
+        "name": "Entladen Übertemperaturschutz"
+      },
+      "discharge_ot_release": {
+        "name": "Entladen Übertemperaturfreigabe"
+      },
+      "charge_ut_alarm": {
+        "name": "Laden Untertemperaturalarm"
+      },
+      "charge_ut_protect": {
+        "name": "Laden Untertemperaturschutz"
+      },
+      "charge_ut_release": {
+        "name": "Laden Untertemperaturfreigabe"
+      },
+      "discharge_ut_alarm": {
+        "name": "Entladen Untertemperaturalarm"
+      },
+      "discharge_ut_protect": {
+        "name": "Entladen Untertemperaturschutz"
+      },
+      "discharge_ut_release": {
+        "name": "Entladen Untertemperaturfreigabe"
+      },
+      "mosfet_ot_alarm": {
+        "name": "MOSFET-Übertemperaturalarm"
+      },
+      "mosfet_ot_protect": {
+        "name": "MOSFET-Übertemperaturschutz"
+      },
+      "mosfet_ot_release": {
+        "name": "MOSFET-Übertemperaturfreigabe"
+      },
+      "env_ut_alarm": {
+        "name": "Umgebung Untertemperaturalarm"
+      },
+      "env_ut_protect": {
+        "name": "Umgebung Untertemperaturschutz"
+      },
+      "env_ut_release": {
+        "name": "Umgebung Untertemperaturfreigabe"
+      },
+      "env_ot_alarm": {
+        "name": "Umgebung Übertemperaturalarm"
+      },
+      "env_ot_protect": {
+        "name": "Umgebung Übertemperaturschutz"
+      },
+      "env_ot_release": {
+        "name": "Umgebung Übertemperaturfreigabe"
+      },
+      "limiter_start_current": {
+        "name": "Startstrom des Ladestrombegrenzers"
       }
     },
     "switch": {

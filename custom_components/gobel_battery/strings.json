@@ -163,6 +163,156 @@
       "temperature": {
         "name": "Temperature {index}"
       },
+      "cell_ov_alarm": {
+        "name": "Cell Overvoltage Alarm"
+      },
+      "cell_ov_protect": {
+        "name": "Cell Overvoltage Protection"
+      },
+      "cell_ov_release": {
+        "name": "Cell Overvoltage Release"
+      },
+      "cell_ov_delay": {
+        "name": "Cell Overvoltage Delay"
+      },
+      "pack_ov_alarm": {
+        "name": "Pack Overvoltage Alarm"
+      },
+      "pack_ov_protect": {
+        "name": "Pack Overvoltage Protection"
+      },
+      "pack_ov_release": {
+        "name": "Pack Overvoltage Release"
+      },
+      "pack_ov_delay": {
+        "name": "Pack Overvoltage Delay"
+      },
+      "cell_uv_alarm": {
+        "name": "Cell Undervoltage Alarm"
+      },
+      "cell_uv_protect": {
+        "name": "Cell Undervoltage Protection"
+      },
+      "cell_uv_release": {
+        "name": "Cell Undervoltage Release"
+      },
+      "cell_uv_delay": {
+        "name": "Cell Undervoltage Delay"
+      },
+      "pack_uv_alarm": {
+        "name": "Pack Undervoltage Alarm"
+      },
+      "pack_uv_protect": {
+        "name": "Pack Undervoltage Protection"
+      },
+      "pack_uv_release": {
+        "name": "Pack Undervoltage Release"
+      },
+      "pack_uv_delay": {
+        "name": "Pack Undervoltage Delay"
+      },
+      "charge_current_delay": {
+        "name": "Charge Current Delay"
+      },
+      "discharge_current_delay": {
+        "name": "Discharge Current Delay"
+      },
+      "discharge_fast_current": {
+        "name": "Discharge Fast Current Limit"
+      },
+      "discharge_fast_delay": {
+        "name": "Discharge Fast Current Delay"
+      },
+      "short_circuit_delay": {
+        "name": "Short Circuit Delay"
+      },
+      "balance_voltage": {
+        "name": "Balance Voltage"
+      },
+      "balance_delta": {
+        "name": "Balance Delta"
+      },
+      "sleep_voltage": {
+        "name": "Sleep Cell Voltage"
+      },
+      "sleep_delay": {
+        "name": "Sleep Delay"
+      },
+      "full_charge_voltage": {
+        "name": "Full Charge Voltage"
+      },
+      "full_charge_current": {
+        "name": "Full Charge Current"
+      },
+      "low_soc_alarm": {
+        "name": "Low SOC Alarm"
+      },
+      "charge_ot_alarm": {
+        "name": "Charge Overtemperature Alarm"
+      },
+      "charge_ot_protect": {
+        "name": "Charge Overtemperature Protection"
+      },
+      "charge_ot_release": {
+        "name": "Charge Overtemperature Release"
+      },
+      "discharge_ot_alarm": {
+        "name": "Discharge Overtemperature Alarm"
+      },
+      "discharge_ot_protect": {
+        "name": "Discharge Overtemperature Protection"
+      },
+      "discharge_ot_release": {
+        "name": "Discharge Overtemperature Release"
+      },
+      "charge_ut_alarm": {
+        "name": "Charge Undertemperature Alarm"
+      },
+      "charge_ut_protect": {
+        "name": "Charge Undertemperature Protection"
+      },
+      "charge_ut_release": {
+        "name": "Charge Undertemperature Release"
+      },
+      "discharge_ut_alarm": {
+        "name": "Discharge Undertemperature Alarm"
+      },
+      "discharge_ut_protect": {
+        "name": "Discharge Undertemperature Protection"
+      },
+      "discharge_ut_release": {
+        "name": "Discharge Undertemperature Release"
+      },
+      "mosfet_ot_alarm": {
+        "name": "MOSFET Overtemperature Alarm"
+      },
+      "mosfet_ot_protect": {
+        "name": "MOSFET Overtemperature Protection"
+      },
+      "mosfet_ot_release": {
+        "name": "MOSFET Overtemperature Release"
+      },
+      "env_ut_alarm": {
+        "name": "Environment Undertemperature Alarm"
+      },
+      "env_ut_protect": {
+        "name": "Environment Undertemperature Protection"
+      },
+      "env_ut_release": {
+        "name": "Environment Undertemperature Release"
+      },
+      "env_ot_alarm": {
+        "name": "Environment Overtemperature Alarm"
+      },
+      "env_ot_protect": {
+        "name": "Environment Overtemperature Protection"
+      },
+      "env_ot_release": {
+        "name": "Environment Overtemperature Release"
+      },
+      "limiter_start_current": {
+        "name": "Charge Limiter Start Current"
+      },
       "packs_count": {
         "name": "{device} Packs Count"
       },
@@ -352,6 +502,156 @@
       },
       "discharge_current_limit": {
         "name": "Discharge Current Limit"
+      },
+      "cell_ov_alarm": {
+        "name": "Cell Overvoltage Alarm"
+      },
+      "cell_ov_protect": {
+        "name": "Cell Overvoltage Protection"
+      },
+      "cell_ov_release": {
+        "name": "Cell Overvoltage Release"
+      },
+      "cell_ov_delay": {
+        "name": "Cell Overvoltage Delay"
+      },
+      "pack_ov_alarm": {
+        "name": "Pack Overvoltage Alarm"
+      },
+      "pack_ov_protect": {
+        "name": "Pack Overvoltage Protection"
+      },
+      "pack_ov_release": {
+        "name": "Pack Overvoltage Release"
+      },
+      "pack_ov_delay": {
+        "name": "Pack Overvoltage Delay"
+      },
+      "cell_uv_alarm": {
+        "name": "Cell Undervoltage Alarm"
+      },
+      "cell_uv_protect": {
+        "name": "Cell Undervoltage Protection"
+      },
+      "cell_uv_release": {
+        "name": "Cell Undervoltage Release"
+      },
+      "cell_uv_delay": {
+        "name": "Cell Undervoltage Delay"
+      },
+      "pack_uv_alarm": {
+        "name": "Pack Undervoltage Alarm"
+      },
+      "pack_uv_protect": {
+        "name": "Pack Undervoltage Protection"
+      },
+      "pack_uv_release": {
+        "name": "Pack Undervoltage Release"
+      },
+      "pack_uv_delay": {
+        "name": "Pack Undervoltage Delay"
+      },
+      "charge_current_delay": {
+        "name": "Charge Current Delay"
+      },
+      "discharge_current_delay": {
+        "name": "Discharge Current Delay"
+      },
+      "discharge_fast_current": {
+        "name": "Discharge Fast Current Limit"
+      },
+      "discharge_fast_delay": {
+        "name": "Discharge Fast Current Delay"
+      },
+      "short_circuit_delay": {
+        "name": "Short Circuit Delay"
+      },
+      "balance_voltage": {
+        "name": "Balance Voltage"
+      },
+      "balance_delta": {
+        "name": "Balance Delta"
+      },
+      "sleep_voltage": {
+        "name": "Sleep Cell Voltage"
+      },
+      "sleep_delay": {
+        "name": "Sleep Delay"
+      },
+      "full_charge_voltage": {
+        "name": "Full Charge Voltage"
+      },
+      "full_charge_current": {
+        "name": "Full Charge Current"
+      },
+      "low_soc_alarm": {
+        "name": "Low SOC Alarm"
+      },
+      "charge_ot_alarm": {
+        "name": "Charge Overtemperature Alarm"
+      },
+      "charge_ot_protect": {
+        "name": "Charge Overtemperature Protection"
+      },
+      "charge_ot_release": {
+        "name": "Charge Overtemperature Release"
+      },
+      "discharge_ot_alarm": {
+        "name": "Discharge Overtemperature Alarm"
+      },
+      "discharge_ot_protect": {
+        "name": "Discharge Overtemperature Protection"
+      },
+      "discharge_ot_release": {
+        "name": "Discharge Overtemperature Release"
+      },
+      "charge_ut_alarm": {
+        "name": "Charge Undertemperature Alarm"
+      },
+      "charge_ut_protect": {
+        "name": "Charge Undertemperature Protection"
+      },
+      "charge_ut_release": {
+        "name": "Charge Undertemperature Release"
+      },
+      "discharge_ut_alarm": {
+        "name": "Discharge Undertemperature Alarm"
+      },
+      "discharge_ut_protect": {
+        "name": "Discharge Undertemperature Protection"
+      },
+      "discharge_ut_release": {
+        "name": "Discharge Undertemperature Release"
+      },
+      "mosfet_ot_alarm": {
+        "name": "MOSFET Overtemperature Alarm"
+      },
+      "mosfet_ot_protect": {
+        "name": "MOSFET Overtemperature Protection"
+      },
+      "mosfet_ot_release": {
+        "name": "MOSFET Overtemperature Release"
+      },
+      "env_ut_alarm": {
+        "name": "Environment Undertemperature Alarm"
+      },
+      "env_ut_protect": {
+        "name": "Environment Undertemperature Protection"
+      },
+      "env_ut_release": {
+        "name": "Environment Undertemperature Release"
+      },
+      "env_ot_alarm": {
+        "name": "Environment Overtemperature Alarm"
+      },
+      "env_ot_protect": {
+        "name": "Environment Overtemperature Protection"
+      },
+      "env_ot_release": {
+        "name": "Environment Overtemperature Release"
+      },
+      "limiter_start_current": {
+        "name": "Charge Limiter Start Current"
       }
     },
     "switch": {

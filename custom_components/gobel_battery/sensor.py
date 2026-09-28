@@ -9,8 +9,32 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI
 from .measurements import volts_from_millivolts, watts_from_kilowatts
+from .pace_config import FIELDS
 
 _LOGGER = logging.getLogger(__name__)
+
+_DEVICE_CLASS = {
+    "voltage": SensorDeviceClass.VOLTAGE,
+    "current": SensorDeviceClass.CURRENT,
+    "temperature": SensorDeviceClass.TEMPERATURE,
+}
+
+
+def _pace_configuration_sensors():
+    """Read-only copies of the Pace settings. Expert mode replaces them with numbers."""
+    return {
+        field["key"]: {
+            "name": field["name"],
+            "key": f"view_{field['key']}",
+            "unit": field["unit"],
+            "device_class": _DEVICE_CLASS.get(field["device_class"]),
+            "state_class": SensorStateClass.MEASUREMENT,
+            "icon": field["icon"],
+            "category": EntityCategory.CONFIG,
+            "precision": field["precision"],
+        }
+        for field in FIELDS
+    }
 
 # Predefined metadata for overall and pack sensors.
 # entity_category None keeps the value on the device page.
@@ -376,13 +400,17 @@ async def async_setup_entry(
                     )
                 )
 
-            extra = dict(CURRENT_LIMIT_SENSORS)
+            extra = {}
             if coordinator.bms_type == BMS_TYPE_JK_PB:
+                extra.update(CURRENT_LIMIT_SENSORS)
                 extra.update(JK_CONFIG_SENSORS)
+            elif coordinator.bms_type == BMS_TYPE_PACE_LV_WIFI:
+                extra.update(CURRENT_LIMIT_SENSORS)
+            else:
+                extra.update(_pace_configuration_sensors())
+                extra["limiter_gear"] = PACE_CONFIG_SENSORS["limiter_gear"]
             if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 extra.update(PACE_COUNTER_SENSORS)
-            if coordinator.bms_type not in (BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV_WIFI):
-                extra.update(PACE_CONFIG_SENSORS)
             for metric, meta in extra.items():
                 if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG:
                     continue

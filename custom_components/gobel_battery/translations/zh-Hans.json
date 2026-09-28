@@ -94,6 +94,156 @@
       "temperature": {
         "name": "温度 {index}"
       },
+      "cell_ov_alarm": {
+        "name": "单体过压告警"
+      },
+      "cell_ov_protect": {
+        "name": "单体过压保护"
+      },
+      "cell_ov_release": {
+        "name": "单体过压恢复"
+      },
+      "cell_ov_delay": {
+        "name": "单体过压延时"
+      },
+      "pack_ov_alarm": {
+        "name": "总压过压告警"
+      },
+      "pack_ov_protect": {
+        "name": "总压过压保护"
+      },
+      "pack_ov_release": {
+        "name": "总压过压恢复"
+      },
+      "pack_ov_delay": {
+        "name": "总压过压延时"
+      },
+      "cell_uv_alarm": {
+        "name": "单体欠压告警"
+      },
+      "cell_uv_protect": {
+        "name": "单体欠压保护"
+      },
+      "cell_uv_release": {
+        "name": "单体欠压恢复"
+      },
+      "cell_uv_delay": {
+        "name": "单体欠压延时"
+      },
+      "pack_uv_alarm": {
+        "name": "总压欠压告警"
+      },
+      "pack_uv_protect": {
+        "name": "总压欠压保护"
+      },
+      "pack_uv_release": {
+        "name": "总压欠压恢复"
+      },
+      "pack_uv_delay": {
+        "name": "总压欠压延时"
+      },
+      "charge_current_delay": {
+        "name": "充电过流延时"
+      },
+      "discharge_current_delay": {
+        "name": "放电过流延时"
+      },
+      "discharge_fast_current": {
+        "name": "放电二级过流保护"
+      },
+      "discharge_fast_delay": {
+        "name": "放电二级过流延时"
+      },
+      "short_circuit_delay": {
+        "name": "短路延时"
+      },
+      "balance_voltage": {
+        "name": "均衡启动电压"
+      },
+      "balance_delta": {
+        "name": "均衡压差"
+      },
+      "sleep_voltage": {
+        "name": "休眠单体电压"
+      },
+      "sleep_delay": {
+        "name": "休眠延时"
+      },
+      "full_charge_voltage": {
+        "name": "充满电压"
+      },
+      "full_charge_current": {
+        "name": "充满电流"
+      },
+      "low_soc_alarm": {
+        "name": "SOC过低告警"
+      },
+      "charge_ot_alarm": {
+        "name": "充电高温告警"
+      },
+      "charge_ot_protect": {
+        "name": "充电高温保护"
+      },
+      "charge_ot_release": {
+        "name": "充电高温恢复"
+      },
+      "discharge_ot_alarm": {
+        "name": "放电高温告警"
+      },
+      "discharge_ot_protect": {
+        "name": "放电高温保护"
+      },
+      "discharge_ot_release": {
+        "name": "放电高温恢复"
+      },
+      "charge_ut_alarm": {
+        "name": "充电低温告警"
+      },
+      "charge_ut_protect": {
+        "name": "充电低温保护"
+      },
+      "charge_ut_release": {
+        "name": "充电低温恢复"
+      },
+      "discharge_ut_alarm": {
+        "name": "放电低温告警"
+      },
+      "discharge_ut_protect": {
+        "name": "放电低温保护"
+      },
+      "discharge_ut_release": {
+        "name": "放电低温恢复"
+      },
+      "mosfet_ot_alarm": {
+        "name": "MOS高温告警"
+      },
+      "mosfet_ot_protect": {
+        "name": "MOS高温保护"
+      },
+      "mosfet_ot_release": {
+        "name": "MOS高温恢复"
+      },
+      "env_ut_alarm": {
+        "name": "环境低温告警"
+      },
+      "env_ut_protect": {
+        "name": "环境低温保护"
+      },
+      "env_ut_release": {
+        "name": "环境低温恢复"
+      },
+      "env_ot_alarm": {
+        "name": "环境高温告警"
+      },
+      "env_ot_protect": {
+        "name": "环境高温保护"
+      },
+      "env_ot_release": {
+        "name": "环境高温恢复"
+      },
+      "limiter_start_current": {
+        "name": "充电限流启动电流"
+      },
       "packs_count": {
         "name": "{device} 电池包数量"
       },
@@ -283,6 +433,156 @@
       },
       "discharge_current_limit": {
         "name": "放电电流限制"
+      },
+      "cell_ov_alarm": {
+        "name": "单体过压告警"
+      },
+      "cell_ov_protect": {
+        "name": "单体过压保护"
+      },
+      "cell_ov_release": {
+        "name": "单体过压恢复"
+      },
+      "cell_ov_delay": {
+        "name": "单体过压延时"
+      },
+      "pack_ov_alarm": {
+        "name": "总压过压告警"
+      },
+      "pack_ov_protect": {
+        "name": "总压过压保护"
+      },
+      "pack_ov_release": {
+        "name": "总压过压恢复"
+      },
+      "pack_ov_delay": {
+        "name": "总压过压延时"
+      },
+      "cell_uv_alarm": {
+        "name": "单体欠压告警"
+      },
+      "cell_uv_protect": {
+        "name": "单体欠压保护"
+      },
+      "cell_uv_release": {
+        "name": "单体欠压恢复"
+      },
+      "cell_uv_delay": {
+        "name": "单体欠压延时"
+      },
+      "pack_uv_alarm": {
+        "name": "总压欠压告警"
+      },
+      "pack_uv_protect": {
+        "name": "总压欠压保护"
+      },
+      "pack_uv_release": {
+        "name": "总压欠压恢复"
+      },
+      "pack_uv_delay": {
+        "name": "总压欠压延时"
+      },
+      "charge_current_delay": {
+        "name": "充电过流延时"
+      },
+      "discharge_current_delay": {
+        "name": "放电过流延时"
+      },
+      "discharge_fast_current": {
+        "name": "放电二级过流保护"
+      },
+      "discharge_fast_delay": {
+        "name": "放电二级过流延时"
+      },
+      "short_circuit_delay": {
+        "name": "短路延时"
+      },
+      "balance_voltage": {
+        "name": "均衡启动电压"
+      },
+      "balance_delta": {
+        "name": "均衡压差"
+      },
+      "sleep_voltage": {
+        "name": "休眠单体电压"
+      },
+      "sleep_delay": {
+        "name": "休眠延时"
+      },
+      "full_charge_voltage": {
+        "name": "充满电压"
+      },
+      "full_charge_current": {
+        "name": "充满电流"
+      },
+      "low_soc_alarm": {
+        "name": "SOC过低告警"
+      },
+      "charge_ot_alarm": {
+        "name": "充电高温告警"
+      },
+      "charge_ot_protect": {
+        "name": "充电高温保护"
+      },
+      "charge_ot_release": {
+        "name": "充电高温恢复"
+      },
+      "discharge_ot_alarm": {
+        "name": "放电高温告警"
+      },
+      "discharge_ot_protect": {
+        "name": "放电高温保护"
+      },
+      "discharge_ot_release": {
+        "name": "放电高温恢复"
+      },
+      "charge_ut_alarm": {
+        "name": "充电低温告警"
+      },
+      "charge_ut_protect": {
+        "name": "充电低温保护"
+      },
+      "charge_ut_release": {
+        "name": "充电低温恢复"
+      },
+      "discharge_ut_alarm": {
+        "name": "放电低温告警"
+      },
+      "discharge_ut_protect": {
+        "name": "放电低温保护"
+      },
+      "discharge_ut_release": {
+        "name": "放电低温恢复"
+      },
+      "mosfet_ot_alarm": {
+        "name": "MOS高温告警"
+      },
+      "mosfet_ot_protect": {
+        "name": "MOS高温保护"
+      },
+      "mosfet_ot_release": {
+        "name": "MOS高温恢复"
+      },
+      "env_ut_alarm": {
+        "name": "环境低温告警"
+      },
+      "env_ut_protect": {
+        "name": "环境低温保护"
+      },
+      "env_ut_release": {
+        "name": "环境低温恢复"
+      },
+      "env_ot_alarm": {
+        "name": "环境高温告警"
+      },
+      "env_ot_protect": {
+        "name": "环境高温保护"
+      },
+      "env_ot_release": {
+        "name": "环境高温恢复"
+      },
+      "limiter_start_current": {
+        "name": "充电限流启动电流"
       }
     },
     "switch": {

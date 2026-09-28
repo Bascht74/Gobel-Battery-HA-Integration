@@ -1,21 +1,34 @@
-"""Writable BMS limits. Created only while expert configuration is enabled."""
+"""Writable BMS settings. Created only while expert configuration is enabled."""
 
-from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfElectricCurrent
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
 from .expert_entity import GobelExpertEntity
+from .pace_config import FIELDS
 
-NUMBERS = (
-    ("charge_current_alarm", "view_charge_current_alarm"),
-    ("charge_current_limit", "view_charge_current_limit"),
-    ("discharge_current_alarm", "view_discharge_current_alarm"),
-    ("discharge_current_limit", "view_discharge_current_limit"),
-)
+_UNITS = {
+    "V": UnitOfElectricPotential.VOLT,
+    "A": UnitOfElectricCurrent.AMPERE,
+    "°C": UnitOfTemperature.CELSIUS,
+    "%": PERCENTAGE,
+    "min": UnitOfTime.MINUTES,
+}
+_CLASSES = {
+    "voltage": NumberDeviceClass.VOLTAGE,
+    "current": NumberDeviceClass.CURRENT,
+    "temperature": NumberDeviceClass.TEMPERATURE,
+}
 
 
 async def async_setup_entry(
@@ -38,8 +51,8 @@ async def async_setup_entry(
             if pack_id in registered:
                 continue
             registered.add(pack_id)
-            for key, source in NUMBERS:
-                entities.append(GobelExpertNumber(coordinator, pack_id, key, source))
+            for field in FIELDS:
+                entities.append(GobelExpertNumber(coordinator, pack_id, field))
         if entities:
             async_add_entities(entities)
 
@@ -48,18 +61,20 @@ async def async_setup_entry(
 
 
 class GobelExpertNumber(GobelExpertEntity, NumberEntity):
-    """Positive ampere threshold written back to the BMS."""
+    """One Pace setting. The name matches the read-only sensor."""
 
-    _attr_native_min_value = 1
-    _attr_native_max_value = 300
-    _attr_native_step = 1
-    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _attr_mode = NumberMode.BOX
-    _attr_icon = "mdi:current-dc"
 
-    def __init__(self, coordinator, pack_id, key, source):
-        super().__init__(coordinator, pack_id, key, key)
-        self._source = source
+    def __init__(self, coordinator, pack_id, field):
+        super().__init__(coordinator, pack_id, field["key"], field["key"])
+        self._source = f"view_{field['key']}"
+        self._attr_native_min_value = field["min"]
+        self._attr_native_max_value = field["max"]
+        self._attr_native_step = field["step"]
+        self._attr_native_unit_of_measurement = _UNITS.get(field["unit"], field["unit"])
+        self._attr_device_class = _CLASSES.get(field["device_class"])
+        self._attr_icon = field["icon"]
+        self._attr_suggested_display_precision = field["precision"]
 
     @property
     def available(self):
@@ -75,6 +90,6 @@ class GobelExpertNumber(GobelExpertEntity, NumberEntity):
 
     async def async_set_native_value(self, value: float):
         try:
-            await self.coordinator.async_apply_expert_change(self.pack_id, self._key, int(value))
+            await self.coordinator.async_apply_expert_change(self.pack_id, self._key, float(value))
         except RuntimeError as err:
             raise HomeAssistantError(str(err)) from err

@@ -94,6 +94,156 @@
       "temperature": {
         "name": "Température {index}"
       },
+      "cell_ov_alarm": {
+        "name": "Alarme surtension cellule"
+      },
+      "cell_ov_protect": {
+        "name": "Protection surtension cellule"
+      },
+      "cell_ov_release": {
+        "name": "Relâchement surtension cellule"
+      },
+      "cell_ov_delay": {
+        "name": "Délai surtension cellule"
+      },
+      "pack_ov_alarm": {
+        "name": "Alarme surtension pack"
+      },
+      "pack_ov_protect": {
+        "name": "Protection surtension pack"
+      },
+      "pack_ov_release": {
+        "name": "Relâchement surtension pack"
+      },
+      "pack_ov_delay": {
+        "name": "Délai surtension pack"
+      },
+      "cell_uv_alarm": {
+        "name": "Alarme sous-tension cellule"
+      },
+      "cell_uv_protect": {
+        "name": "Protection sous-tension cellule"
+      },
+      "cell_uv_release": {
+        "name": "Relâchement sous-tension cellule"
+      },
+      "cell_uv_delay": {
+        "name": "Délai sous-tension cellule"
+      },
+      "pack_uv_alarm": {
+        "name": "Alarme sous-tension pack"
+      },
+      "pack_uv_protect": {
+        "name": "Protection sous-tension pack"
+      },
+      "pack_uv_release": {
+        "name": "Relâchement sous-tension pack"
+      },
+      "pack_uv_delay": {
+        "name": "Délai sous-tension pack"
+      },
+      "charge_current_delay": {
+        "name": "Délai de courant de charge"
+      },
+      "discharge_current_delay": {
+        "name": "Délai de courant de décharge"
+      },
+      "discharge_fast_current": {
+        "name": "Limite rapide de courant de décharge"
+      },
+      "discharge_fast_delay": {
+        "name": "Délai rapide de courant de décharge"
+      },
+      "short_circuit_delay": {
+        "name": "Délai de court-circuit"
+      },
+      "balance_voltage": {
+        "name": "Tension d'équilibrage"
+      },
+      "balance_delta": {
+        "name": "Écart d'équilibrage"
+      },
+      "sleep_voltage": {
+        "name": "Tension de cellule en veille"
+      },
+      "sleep_delay": {
+        "name": "Délai de veille"
+      },
+      "full_charge_voltage": {
+        "name": "Tension de pleine charge"
+      },
+      "full_charge_current": {
+        "name": "Courant de pleine charge"
+      },
+      "low_soc_alarm": {
+        "name": "Alarme SOC bas"
+      },
+      "charge_ot_alarm": {
+        "name": "Alarme surtempérature de charge"
+      },
+      "charge_ot_protect": {
+        "name": "Protection surtempérature de charge"
+      },
+      "charge_ot_release": {
+        "name": "Relâchement surtempérature de charge"
+      },
+      "discharge_ot_alarm": {
+        "name": "Alarme surtempérature de décharge"
+      },
+      "discharge_ot_protect": {
+        "name": "Protection surtempérature de décharge"
+      },
+      "discharge_ot_release": {
+        "name": "Relâchement surtempérature de décharge"
+      },
+      "charge_ut_alarm": {
+        "name": "Alarme basse température de charge"
+      },
+      "charge_ut_protect": {
+        "name": "Protection basse température de charge"
+      },
+      "charge_ut_release": {
+        "name": "Relâchement basse température de charge"
+      },
+      "discharge_ut_alarm": {
+        "name": "Alarme basse température de décharge"
+      },
+      "discharge_ut_protect": {
+        "name": "Protection basse température de décharge"
+      },
+      "discharge_ut_release": {
+        "name": "Relâchement basse température de décharge"
+      },
+      "mosfet_ot_alarm": {
+        "name": "Alarme surtempérature MOSFET"
+      },
+      "mosfet_ot_protect": {
+        "name": "Protection surtempérature MOSFET"
+      },
+      "mosfet_ot_release": {
+        "name": "Relâchement surtempérature MOSFET"
+      },
+      "env_ut_alarm": {
+        "name": "Alarme basse température ambiante"
+      },
+      "env_ut_protect": {
+        "name": "Protection basse température ambiante"
+      },
+      "env_ut_release": {
+        "name": "Relâchement basse température ambiante"
+      },
+      "env_ot_alarm": {
+        "name": "Alarme haute température ambiante"
+      },
+      "env_ot_protect": {
+        "name": "Protection haute température ambiante"
+      },
+      "env_ot_release": {
+        "name": "Relâchement haute température ambiante"
+      },
+      "limiter_start_current": {
+        "name": "Courant de démarrage du limiteur"
+      },
       "packs_count": {
         "name": "{device} Nombre de packs"
       },
@@ -283,6 +433,156 @@
       },
       "discharge_current_limit": {
         "name": "Limite de courant de décharge"
+      },
+      "cell_ov_alarm": {
+        "name": "Alarme surtension cellule"
+      },
+      "cell_ov_protect": {
+        "name": "Protection surtension cellule"
+      },
+      "cell_ov_release": {
+        "name": "Relâchement surtension cellule"
+      },
+      "cell_ov_delay": {
+        "name": "Délai surtension cellule"
+      },
+      "pack_ov_alarm": {
+        "name": "Alarme surtension pack"
+      },
+      "pack_ov_protect": {
+        "name": "Protection surtension pack"
+      },
+      "pack_ov_release": {
+        "name": "Relâchement surtension pack"
+      },
+      "pack_ov_delay": {
+        "name": "Délai surtension pack"
+      },
+      "cell_uv_alarm": {
+        "name": "Alarme sous-tension cellule"
+      },
+      "cell_uv_protect": {
+        "name": "Protection sous-tension cellule"
+      },
+      "cell_uv_release": {
+        "name": "Relâchement sous-tension cellule"
+      },
+      "cell_uv_delay": {
+        "name": "Délai sous-tension cellule"
+      },
+      "pack_uv_alarm": {
+        "name": "Alarme sous-tension pack"
+      },
+      "pack_uv_protect": {
+        "name": "Protection sous-tension pack"
+      },
+      "pack_uv_release": {
+        "name": "Relâchement sous-tension pack"
+      },
+      "pack_uv_delay": {
+        "name": "Délai sous-tension pack"
+      },
+      "charge_current_delay": {
+        "name": "Délai de courant de charge"
+      },
+      "discharge_current_delay": {
+        "name": "Délai de courant de décharge"
+      },
+      "discharge_fast_current": {
+        "name": "Limite rapide de courant de décharge"
+      },
+      "discharge_fast_delay": {
+        "name": "Délai rapide de courant de décharge"
+      },
+      "short_circuit_delay": {
+        "name": "Délai de court-circuit"
+      },
+      "balance_voltage": {
+        "name": "Tension d'équilibrage"
+      },
+      "balance_delta": {
+        "name": "Écart d'équilibrage"
+      },
+      "sleep_voltage": {
+        "name": "Tension de cellule en veille"
+      },
+      "sleep_delay": {
+        "name": "Délai de veille"
+      },
+      "full_charge_voltage": {
+        "name": "Tension de pleine charge"
+      },
+      "full_charge_current": {
+        "name": "Courant de pleine charge"
+      },
+      "low_soc_alarm": {
+        "name": "Alarme SOC bas"
+      },
+      "charge_ot_alarm": {
+        "name": "Alarme surtempérature de charge"
+      },
+      "charge_ot_protect": {
+        "name": "Protection surtempérature de charge"
+      },
+      "charge_ot_release": {
+        "name": "Relâchement surtempérature de charge"
+      },
+      "discharge_ot_alarm": {
+        "name": "Alarme surtempérature de décharge"
+      },
+      "discharge_ot_protect": {
+        "name": "Protection surtempérature de décharge"
+      },
+      "discharge_ot_release": {
+        "name": "Relâchement surtempérature de décharge"
+      },
+      "charge_ut_alarm": {
+        "name": "Alarme basse température de charge"
+      },
+      "charge_ut_protect": {
+        "name": "Protection basse température de charge"
+      },
+      "charge_ut_release": {
+        "name": "Relâchement basse température de charge"
+      },
+      "discharge_ut_alarm": {
+        "name": "Alarme basse température de décharge"
+      },
+      "discharge_ut_protect": {
+        "name": "Protection basse température de décharge"
+      },
+      "discharge_ut_release": {
+        "name": "Relâchement basse température de décharge"
+      },
+      "mosfet_ot_alarm": {
+        "name": "Alarme surtempérature MOSFET"
+      },
+      "mosfet_ot_protect": {
+        "name": "Protection surtempérature MOSFET"
+      },
+      "mosfet_ot_release": {
+        "name": "Relâchement surtempérature MOSFET"
+      },
+      "env_ut_alarm": {
+        "name": "Alarme basse température ambiante"
+      },
+      "env_ut_protect": {
+        "name": "Protection basse température ambiante"
+      },
+      "env_ut_release": {
+        "name": "Relâchement basse température ambiante"
+      },
+      "env_ot_alarm": {
+        "name": "Alarme haute température ambiante"
+      },
+      "env_ot_protect": {
+        "name": "Protection haute température ambiante"
+      },
+      "env_ot_release": {
+        "name": "Relâchement haute température ambiante"
+      },
+      "limiter_start_current": {
+        "name": "Courant de démarrage du limiteur"
       }
     },
     "switch": {
