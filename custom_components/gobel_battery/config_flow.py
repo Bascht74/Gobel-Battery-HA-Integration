@@ -5,6 +5,11 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.helpers.selector import (
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
 from .const import (
     DOMAIN,
@@ -31,13 +36,27 @@ from .const import (
     DEFAULT_IP_PORT,
     DEFAULT_JK_DISPLAY_INDEX_START,
     DEFAULT_DEVICE_NAME,
+    BMS_TYPE_PACE_LV,
+    BMS_TYPE_PACE_LV_WIFI,
 )
+
+from .pace_probe import ACTIVE, PASSIVE, probe_pace_tcp
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def _is_network(connection_type: str) -> bool:
     return connection_type in (CONN_TYPE_ETHERNET, CONN_TYPE_WIFI)
+
+
+def _dropdown(options, translation_key):
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=options,
+            translation_key=translation_key,
+            mode=SelectSelectorMode.DROPDOWN,
+        )
+    )
 
 
 class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -79,15 +98,15 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ): str,
                 vol.Required(
                     CONF_BMS_TYPE, default=defaults.get(CONF_BMS_TYPE, BMS_TYPES[0])
-                ): vol.In(BMS_TYPES),
+                ): _dropdown(BMS_TYPES, "bms_type"),
                 vol.Required(
                     CONF_CONNECTION_TYPE,
                     default=defaults.get(CONF_CONNECTION_TYPE, CONNECTION_TYPES[0]),
-                ): vol.In(CONNECTION_TYPES),
+                ): _dropdown(CONNECTION_TYPES, "connection_type"),
                 vol.Required(
                     CONF_BATTERY_PORT,
                     default=defaults.get(CONF_BATTERY_PORT, BATTERY_PORTS[0]),
-                ): vol.In(BATTERY_PORTS),
+                ): _dropdown(BATTERY_PORTS, "battery_port"),
                 vol.Optional(
                     CONF_POLL_INTERVAL,
                     default=defaults.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL),
@@ -116,21 +135,23 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             user_data = self._connection_data(user_input, network=True)
-            unique_id = f"{user_data[CONF_IP_ADDRESS]}_{user_data[CONF_IP_PORT]}"
-            await self.async_set_unique_id(unique_id)
-            if self._reconfigure:
-                self._abort_if_unique_id_configured()
-                return self.async_update_reload_and_abort(
-                    self._get_reconfigure_entry(),
-                    title=user_data[CONF_DEVICE_NAME],
-                    data=user_data,
-                    options={},
-                    unique_id=unique_id,
-                )
-            self._abort_if_unique_id_configured()
-            return self.async_create_entry(
-                title=user_data[CONF_DEVICE_NAME], data=user_data
-            )
+            if user_data[CONF_BMS_TYPE] in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
+                self._pending_entry = user_data
+                try:
+                    self._probe_result = await self.hass.async_add_executor_job(
+                        probe_pace_tcp,
+                        user_data[CONF_IP_ADDRESS],
+                        user_data[CONF_IP_PORT],
+                    )
+                except OSError as err:
+                    _LOGGER.debug("Pace probe failed: %s", err)
+                    self._probe_result = "unreachable"
+                if self._probe_result == ACTIVE:
+                    self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV
+                elif self._probe_result == PASSIVE:
+                    self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV_WIFI
+                return await self.async_step_probe()
+            return self._create_from_data(user_data)
 
         network_schema = vol.Schema(
             {
@@ -146,6 +167,31 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="network", data_schema=network_schema, errors=errors
         )
+
+    async def async_step_probe(self, user_input=None):
+        """Show which Pace mode the dongle answered with, then save it."""
+        if user_input is not None:
+            return await self._create_from_data(self._pending_entry)
+        return self.async_show_form(
+            step_id="probe",
+            data_schema=vol.Schema({}),
+            description_placeholders={"result": self._probe_result},
+        )
+
+    async def _create_from_data(self, user_data):
+        unique_id = f"{user_data[CONF_IP_ADDRESS]}_{user_data[CONF_IP_PORT]}"
+        await self.async_set_unique_id(unique_id)
+        if self._reconfigure:
+            self._abort_if_unique_id_configured()
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
+                title=user_data[CONF_DEVICE_NAME],
+                data=user_data,
+                options={},
+                unique_id=unique_id,
+            )
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(title=user_data[CONF_DEVICE_NAME], data=user_data)
 
     async def async_step_serial(self, user_input=None):
         """Handle serial configuration parameters (Port and Baud rate)."""

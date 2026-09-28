@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Gobel Battery",
-        "description": "BMS und Verbindung wählen. Die Einstellungen lassen sich später über Neu konfigurieren ändern.",
+        "description": "BMS und Verbindung wählen. Ein Pace am WLAN- oder Ethernet-Dongle ist der aktive Pace-Eintrag. Die Einrichtung prüft die Antwort und korrigiert das, wenn der Akku nur von selbst sendet.",
         "data": {
           "device_name": "Gerätename",
           "bms_type": "BMS-Typ",
@@ -57,6 +57,10 @@
         "data": {
           "confirm_expert": "Ich habe die Warnung verstanden und möchte BMS-Werte ändern"
         }
+      },
+      "probe": {
+        "title": "Pace-Verbindungsprüfung",
+        "description": "Erkannt: {result}. active speichert Pace mit Befehlen, Grenzen und Schalter sind dann schreibbar. passive speichert den Nur-Empfangs-Modus, die Konfiguration bleibt nur lesbar. silent oder unreachable behält die gewählte Art, weil der Akku nicht geantwortet hat."
       }
     },
     "error": {
@@ -66,6 +70,29 @@
     "abort": {
       "already_configured": "Diese Verbindung ist bereits eingerichtet.",
       "reconfigure_successful": "Konfiguration aktualisiert. Das Gerät wird neu geladen."
+    }
+  },
+  "selector": {
+    "bms_type": {
+      "options": {
+        "PACE_LV": "Pace, mit Befehlen (RS232, RS485 oder TCP-Dongle)",
+        "PACE_LV_WIFI": "Pace, nur Empfang (der Akku sendet von selbst)",
+        "JK_PB": "JK-BMS",
+        "TDT": "TDT-BMS"
+      }
+    },
+    "connection_type": {
+      "options": {
+        "ethernet": "Netzwerk, Ethernet-Dongle",
+        "wifi": "Netzwerk, WLAN-Dongle",
+        "serial": "USB seriell"
+      }
+    },
+    "battery_port": {
+      "options": {
+        "rs232": "RS232",
+        "rs485": "RS485"
+      }
     }
   },
   "entity": {

@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.1] - 2026-09-29
+### Added
+-   Network setup probes a Pace battery. A command reply is saved as active Pace. A pushed stream is saved as receive-only Pace. The BMS type names say which is which.
+
+---------------
+
 ## [2.4.0] - 2026-09-29
 ### Added
 -   The Pace/TDT protection and system pages from PBmsTools: cell and pack over/undervoltage, current delays, fast discharge current, short-circuit delay, balance, sleep, full charge, temperature protections and the limiter start current. They are configuration sensors, and the same names become number controls in expert mode.
