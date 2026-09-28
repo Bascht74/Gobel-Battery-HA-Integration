@@ -637,6 +637,11 @@
           "low": "低"
         }
       }
+    },
+    "button": {
+      "set_bms_clock": {
+        "name": "设置BMS时钟"
+      }
     }
   }
 }

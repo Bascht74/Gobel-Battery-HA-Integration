@@ -81,6 +81,23 @@ def write_led(bms, enabled, pack_number=None):
     return _send(bms, "99", LED_ON if enabled else LED_OFF, pack_number)
 
 
+def write_clock(bms, moment, pack_number=None):
+    """Write B2. The year is stored as year minus 2000."""
+    if moment.year < 2000 or moment.year > 2255:
+        return False
+    payload = bytes(
+        [
+            moment.year - 2000,
+            moment.month,
+            moment.day,
+            moment.hour,
+            moment.minute,
+            moment.second,
+        ]
+    )
+    return _send(bms, "B2", payload.hex().upper(), pack_number)
+
+
 def _address(bms, pack_number):
     if type(bms).__name__ == "PACEBMS485":
         number = 0 if pack_number is None else int(pack_number)

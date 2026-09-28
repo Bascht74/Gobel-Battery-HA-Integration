@@ -29,9 +29,16 @@
       },
       "network": {
         "title": "Network connection",
-        "description": "The TCP port is probed. 9999 and 8899 are tried if the typed port does not answer. Baud rate is set on the dongle, not here: 115200 for a new Pace RS232, 9600 for an older Pace or for RS485. Always 8 data bits, 1 stop bit, no parity.",
+        "description": "Enter the dongle address. For Pace, ports 9999 and 8899 are tried first. A port field appears only if neither returns Pace data.",
         "data": {
           "ip_address": "IP address",
+          "ip_port": "TCP port"
+        }
+      },
+      "port": {
+        "title": "TCP port",
+        "description": "Ports 9999 and 8899 did not return Pace data. Enter the Local Port from the dongle.",
+        "data": {
           "ip_port": "TCP port"
         }
       },
@@ -733,6 +740,11 @@
           "high": "High",
           "low": "Low"
         }
+      }
+    },
+    "button": {
+      "set_bms_clock": {
+        "name": "Set BMS clock"
       }
     }
   }

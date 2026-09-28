@@ -40,7 +40,7 @@ from .pace_config import (
     read_group,
     write_configuration_field,
 )
-from .pace_write import write_buzzer, write_led, write_limiter, write_limiter_gear, write_mosfet
+from .pace_write import write_buzzer, write_clock, write_led, write_limiter, write_limiter_gear, write_mosfet
 from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
 from .pacebms_rs485 import PACEBMS485
@@ -442,6 +442,13 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                 ok = write_buzzer(self.bms, bool(value), pack_id)
             elif kind == "led_switch":
                 ok = write_led(self.bms, bool(value), pack_id)
+            elif kind == "set_clock":
+                ok = write_clock(self.bms, value, pack_id)
+                if ok:
+                    stamp = f"{value:%Y-%m-%d %H:%M:%S}"
+                    for item in (self.data or {}).get("analog", []):
+                        if item.get("pack_id") == pack_id:
+                            item["view_bms_clock"] = stamp
             elif kind == "limiter_gear":
                 ok = write_limiter_gear(self.bms, value, pack_id)
                 if ok:

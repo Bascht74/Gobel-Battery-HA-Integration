@@ -499,6 +499,14 @@ BINARY = {
     },
 }
 
+BUTTON = {
+    "en": {"set_bms_clock": "Set BMS clock"},
+    "de": {"set_bms_clock": "BMS-Uhr stellen"},
+    "zh-Hans": {"set_bms_clock": "设置BMS时钟"},
+    "es": {"set_bms_clock": "Ajustar reloj del BMS"},
+    "fr": {"set_bms_clock": "Régler l'horloge BMS"},
+}
+
 GEAR = {
     "en": {"high": "High", "low": "Low"},
     "de": {"high": "Hoch", "low": "Niedrig"},
@@ -546,6 +554,7 @@ def entity_block(lang):
                 "state": GEAR[lang],
             }
         },
+        "button": names(BUTTON[lang]),
     }
 
 

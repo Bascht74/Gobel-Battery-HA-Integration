@@ -637,6 +637,11 @@
           "low": "Bas"
         }
       }
+    },
+    "button": {
+      "set_bms_clock": {
+        "name": "Régler l'horloge BMS"
+      }
     }
   }
 }

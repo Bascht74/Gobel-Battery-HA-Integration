@@ -40,7 +40,7 @@ from .const import (
     BMS_TYPE_PACE_LV_WIFI,
 )
 
-from .pace_probe import ACTIVE, PASSIVE, probe_pace_ports
+from .pace_probe import ACTIVE, PASSIVE, probe_pace_tcp, probe_standard_ports
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -137,41 +137,81 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_data = self._connection_data(user_input, network=True)
             if user_data[CONF_BMS_TYPE] in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 self._pending_entry = user_data
-                typed_port = user_data[CONF_IP_PORT]
-                try:
-                    result, found_port = await self.hass.async_add_executor_job(
-                        probe_pace_ports,
-                        user_data[CONF_IP_ADDRESS],
-                        typed_port,
-                    )
-                except OSError as err:
-                    _LOGGER.debug("Pace probe failed: %s", err)
-                    result, found_port = "unreachable", typed_port
-                self._probe_result = result
-                self._probe_port_note = ""
-                if result in (ACTIVE, PASSIVE) and found_port != int(typed_port):
-                    self._pending_entry[CONF_IP_PORT] = found_port
-                    self._probe_port_note = f", Port {found_port}"
-                if result == ACTIVE:
-                    self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV
-                elif result == PASSIVE:
-                    self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV_WIFI
-                return await self.async_step_probe()
-            return self._create_from_data(user_data)
+                return await self._probe_and_continue(user_data[CONF_IP_ADDRESS], None)
+            if CONF_IP_PORT not in user_data:
+                return self.async_show_form(
+                    step_id="network",
+                    data_schema=self._network_schema(defaults, include_port=True),
+                    errors={"base": "port_required"},
+                )
+            return await self._create_from_data(user_data)
 
-        network_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_IP_ADDRESS, default=defaults.get(CONF_IP_ADDRESS, "")
-                ): str,
-                vol.Required(
-                    CONF_IP_PORT, default=defaults.get(CONF_IP_PORT, DEFAULT_IP_PORT)
-                ): int,
-            }
+        include_port = self.config_data.get(CONF_BMS_TYPE) not in (
+            BMS_TYPE_PACE_LV,
+            BMS_TYPE_PACE_LV_WIFI,
+        )
+        return self.async_show_form(
+            step_id="network",
+            data_schema=self._network_schema(defaults, include_port),
+            errors=errors,
         )
 
+    def _network_schema(self, defaults, include_port):
+        fields = {
+            vol.Required(
+                CONF_IP_ADDRESS, default=defaults.get(CONF_IP_ADDRESS, "")
+            ): str,
+        }
+        if include_port:
+            fields[
+                vol.Required(CONF_IP_PORT, default=defaults.get(CONF_IP_PORT, DEFAULT_IP_PORT))
+            ] = int
+        return vol.Schema(fields)
+
+    async def _probe_and_continue(self, ip, port):
+        """Use a standard port when it answers. Otherwise ask for one."""
+        if port is None:
+            try:
+                result, found = await self.hass.async_add_executor_job(probe_standard_ports, ip)
+            except OSError as err:
+                _LOGGER.debug("Pace port probe failed: %s", err)
+                result, found = "unreachable", None
+            if found is None:
+                return await self.async_step_port()
+            port = found
+        else:
+            try:
+                result = await self.hass.async_add_executor_job(probe_pace_tcp, ip, port)
+            except OSError as err:
+                _LOGGER.debug("Pace probe failed: %s", err)
+                result = "unreachable"
+        self._pending_entry[CONF_IP_PORT] = int(port)
+        self._probe_result = result
+        self._probe_port_note = f", Port {int(port)}"
+        if result == ACTIVE:
+            self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV
+        elif result == PASSIVE:
+            self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV_WIFI
+        return await self.async_step_probe()
+
+    async def async_step_port(self, user_input=None):
+        """Ask for a TCP port after 9999 and 8899 returned no Pace data."""
+        errors = {}
+        if user_input is not None:
+            return await self._probe_and_continue(
+                self._pending_entry[CONF_IP_ADDRESS], user_input[CONF_IP_PORT]
+            )
         return self.async_show_form(
-            step_id="network", data_schema=network_schema, errors=errors
+            step_id="port",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_IP_PORT,
+                        default=self.config_data.get(CONF_IP_PORT, DEFAULT_IP_PORT),
+                    ): int,
+                }
+            ),
+            errors=errors,
         )
 
     async def async_step_probe(self, user_input=None):

@@ -57,20 +57,10 @@ def classify_pace_traffic(before, after):
 COMMON_TCP_PORTS = (9999, 8899)
 
 
-def candidate_ports(preferred):
-    """The typed port first, then the two ports Gobel and Hi-Flying document."""
-    ports = []
-    for port in (int(preferred), *COMMON_TCP_PORTS):
-        if port not in ports and 1 <= port <= 65535:
-            ports.append(port)
-    return ports
-
-
-def probe_pace_ports(ip, preferred, timeout=3):
-    """Return (result, port). Another documented port is used only if it answers."""
+def probe_standard_ports(ip, timeout=3):
+    """Try 9999, then 8899. A port counts only when it returns Pace data."""
     last = "unreachable"
-    chosen = int(preferred)
-    for port in candidate_ports(preferred):
+    for port in COMMON_TCP_PORTS:
         try:
             result = probe_pace_tcp(ip, port, timeout=timeout)
         except OSError:
@@ -79,8 +69,7 @@ def probe_pace_ports(ip, preferred, timeout=3):
         if result in (ACTIVE, PASSIVE):
             return result, port
         last = result
-        chosen = port
-    return last, chosen
+    return last, None
 
 
 def probe_pace_tcp(ip, port, timeout=4):

@@ -1,5 +1,7 @@
 """Pace write frames match the bytes PBmsTools sends."""
 
+from datetime import datetime
+
 from pace_write import build_pace_request, write_limiter_gear, write_mosfet, write_overcurrent
 from pacebms_rs232 import PACEBMS232
 
@@ -24,7 +26,12 @@ def _bms():
     return PACEBMS232(_Comm(), object(), "PACE_LV", 5, 0, 0)
 
 
-def test_buzzer_and_led_frames_match_pbms_tools():
+def test_clock_write_matches_the_protocol_example():
+    bms = _bms()
+    moment = datetime(2024, 8, 20, 14, 15, 37)
+    payload = bytes([24, 8, 20, 14, 15, 37]).hex().upper()
+    assert build_pace_request(bms, "B2", payload) == b"~250046B2400C1808140E0F25FAFC\r"
+    assert moment.year - 2000 == 24
     bms = _bms()
     assert build_pace_request(bms, "99", "0C") == b"~25004699E0020CFD13\r"
     assert build_pace_request(bms, "99", "0D") == b"~25004699E0020DFD12\r"

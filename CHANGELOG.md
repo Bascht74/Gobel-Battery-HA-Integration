@@ -4,6 +4,13 @@ description:
 
 # Changelog
 
+## [2.4.6] - 2026-09-29
+### Added
+-   Pace setup tries TCP ports 9999 and 8899 before asking for a port.
+-   Expert mode has a button that writes the current local time to the BMS clock. The clock sensor stays.
+
+---------------
+
 ## [2.4.5] - 2026-09-29
 ### Added
 -   Expert mode can switch the Pace buzzer and the LED alarm. Shutdown stays unavailable.
