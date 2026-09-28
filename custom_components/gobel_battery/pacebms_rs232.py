@@ -1,6 +1,11 @@
 import struct
 import logging
 
+try:
+    from .measurements import resolve_soc, resolve_soh
+except ImportError:  # unit tests load this file outside the HA package
+    from measurements import resolve_soc, resolve_soh
+
 class PACEBMS232:
 
     def __init__(self, bms_comm, ha_comm, bms_type, data_refresh_interval, debug, if_random):
@@ -306,6 +311,8 @@ class PACEBMS232:
             'warning_info': b"\x34\x34",
             'get_time': b"\x42\x31",
             'pack_quantity': b"\x39\x30",
+            'charge_overcurrent': b"\x44\x39",
+            'discharge_overcurrent': b"\x44\x42",
         }
         
         lenids_table = {
@@ -317,6 +324,8 @@ class PACEBMS232:
             'warning_info': b"002",
             'get_time': b"000",
             'pack_quantity': b"000",
+            'charge_overcurrent': b"000",
+            'discharge_overcurrent': b"000",
         }
     
         if command not in commands_table:
@@ -761,21 +770,17 @@ class PACEBMS232:
                 pack_soc = int(fields[offset], 16)
                 offset += 1
                 u_offset += 1
-                full_cap = pack_data.get('view_full_capacity', 0) or 0
-                if pack_soc > 100 and full_cap > 0:
-                    pack_data['view_SOC'] = round(pack_remain_capacity / full_cap * 100, 1)
-                    self.logger.info(
-                        "SOC byte %s is above 100, using remain/full capacity ratio %.1f",
-                        pack_soc,
-                        pack_data['view_SOC'],
-                    )
-                else:
-                    pack_data['view_SOC'] = round(float(pack_soc), 1)
+                pack_data['view_SOC'] = resolve_soc(
+                    pack_soc,
+                    pack_remain_capacity,
+                    pack_data.get('view_full_capacity', 0),
+                )
             else:
-                if pack_data.get('view_full_capacity', 0) > 0:
-                    pack_data['view_SOC'] = round(pack_remain_capacity / pack_data['view_full_capacity'] * 100, 1)
-                else:
-                    pack_data['view_SOC'] = 0.0
+                pack_data['view_SOC'] = resolve_soc(
+                    None,
+                    pack_remain_capacity,
+                    pack_data.get('view_full_capacity', 0),
+                )
 
             # 5. Cumulative Charge Capacity (4 bytes, unit 1 Ah)
             if found_u - u_offset >= 4:
@@ -798,17 +803,17 @@ class PACEBMS232:
                 pack_soh = int(fields[offset], 16)
                 offset += 1
                 u_offset += 1
-                design_cap = pack_data.get('view_design_capacity', 0) or 0
-                full_cap = pack_data.get('view_full_capacity', 0) or 0
-                if (pack_soh == 0 or pack_soh > 100) and design_cap > 0 and full_cap > 0:
-                    pack_data['view_SOH'] = round(full_cap / design_cap * 100, 1)
-                else:
-                    pack_data['view_SOH'] = round(float(pack_soh), 1)
+                pack_data['view_SOH'] = resolve_soh(
+                    pack_soh,
+                    pack_data.get('view_full_capacity', 0),
+                    pack_data.get('view_design_capacity', 0),
+                )
             else:
-                if pack_data.get('view_design_capacity', 0) > 0:
-                    pack_data['view_SOH'] = round(pack_data['view_full_capacity'] / pack_data['view_design_capacity'] * 100, 0)
-                else:
-                    pack_data['view_SOH'] = 100.0
+                pack_data['view_SOH'] = resolve_soh(
+                    None,
+                    pack_data.get('view_full_capacity', 0),
+                    pack_data.get('view_design_capacity', 0),
+                )
 
             # Skip any remaining user-defined fields
             remaining_u = found_u - u_offset

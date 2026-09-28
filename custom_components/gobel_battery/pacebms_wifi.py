@@ -2,6 +2,11 @@ import logging
 import time
 import socket
 
+try:
+    from .measurements import resolve_soc, resolve_soh
+except ImportError:  # unit tests load this file outside the HA package
+    from measurements import resolve_soc, resolve_soh
+
 class PACEBMSWIFI:
     def __init__(self, bms_comm, ha_comm, bms_type, data_refresh_interval, debug, if_random):
         self.bms_comm = bms_comm
@@ -305,10 +310,9 @@ class PACEBMSWIFI:
             if offset < len(fields):
                 soc_percent = int(fields[offset], 16)
                 offset += 1
-                if soc_percent > 100 and pack_full_capacity > 0:
-                    pack_data['view_SOC'] = round(pack_remain_capacity / pack_full_capacity * 100.0, 1)
-                else:
-                    pack_data['view_SOC'] = round(float(soc_percent), 1)
+                pack_data['view_SOC'] = resolve_soc(soc_percent, pack_remain_capacity, pack_full_capacity)
+            else:
+                pack_data['view_SOC'] = resolve_soc(None, pack_remain_capacity, pack_full_capacity)
 
             # Accumulated Charge Capacity (4 bytes, unit 1 Ah)
             if offset + 3 < len(fields):
@@ -328,12 +332,9 @@ class PACEBMSWIFI:
             if offset < len(fields):
                 soh_percent = int(fields[offset], 16)
                 offset += 1
-                if (soh_percent == 0 or soh_percent > 100) and pack_design_capacity > 0 and pack_full_capacity > 0:
-                    pack_data['view_SOH'] = round(pack_full_capacity / pack_design_capacity * 100.0, 1)
-                else:
-                    pack_data['view_SOH'] = round(float(soh_percent), 1)
+                pack_data['view_SOH'] = resolve_soh(soh_percent, pack_full_capacity, pack_design_capacity)
             else:
-                pack_data['view_SOH'] = round(pack_full_capacity / pack_design_capacity * 100.0, 0) if pack_design_capacity > 0 else 100.0
+                pack_data['view_SOH'] = resolve_soh(None, pack_full_capacity, pack_design_capacity)
 
             # Skip Vbat (2 bytes)
             if offset + 1 < len(fields):

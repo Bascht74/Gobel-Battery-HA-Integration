@@ -68,6 +68,8 @@ class PACEBMS485:
             'capacity': b"\x41\x36",
             'warning_info': b"\x34\x34",
             'get_time': b"\x42\x31",
+            'charge_overcurrent': b"\x44\x39",
+            'discharge_overcurrent': b"\x44\x42",
         }
         
         lenids_table = {
@@ -78,6 +80,8 @@ class PACEBMS485:
             'capacity': b"000",
             'warning_info': b"002",
             'get_time': b"000",
+            'charge_overcurrent': b"000",
+            'discharge_overcurrent': b"000",
         }
     
         if command not in commands_table:

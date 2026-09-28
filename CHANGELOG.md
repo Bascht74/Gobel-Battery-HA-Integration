@@ -4,6 +4,21 @@ description:
 
 # Changelog
 
+## [2.2.0] - 2026-09-29
+### Changed
+-   Cell voltages are published in V with three decimal places. Power is in W. Energy is in kWh.
+-   Individual cell voltages, min/max/delta, SOH, cycles and warnings stay under Diagnostic. Charge and discharge current limits stay under Configuration. SOC, pack voltage, current, power, temperature and energy stay on the device page.
+
+### Added
+-   [PACE/TDT] Charge current limit and discharge current limit via protocol commands D9H and DBH. The protection threshold (amps) is the limit. Polled at most once a minute. Passive Pace WiFi does not send these commands.
+-   Tests for unit conversion, SOC/SOH fallback, energy integration, Pace limit frames and the JK power sign.
+-   Integrated energy is stored on disk, so a reload no longer starts the estimated counter at 0.
+
+### Notes
+-   Pace cumulative charge/discharge in the analog frame is amp-hours, not kWh. When that counter looks real it is converted with 3.2 V per cell and used as the energy sensor, so the number comes from the BMS. JK has no lifetime energy counter, so those packs still integrate power locally and keep the last value across restarts.
+
+---------------
+
 ## [2.1.0] - 2026-09-28
 ### Added
 -   [Config] Reconfigure flow so host, port, serial device, BMS type and poll interval can be changed without deleting the integration. A Configure menu edits poll interval, parallel-pack limit and the JK display index.

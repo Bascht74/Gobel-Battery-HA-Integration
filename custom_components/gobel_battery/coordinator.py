@@ -6,6 +6,7 @@ from datetime import timedelta
 import async_timeout
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.storage import Store
 from homeassistant.core import HomeAssistant
 
 from .const import (
@@ -27,6 +28,8 @@ from .const import (
 )
 
 from .bms_comm import BMSCommunication
+from .pace_limits import LIMIT_POLL_SECONDS, read_pace_current_limits
+from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
 from .pacebms_rs485 import PACEBMS485
 from .pacebms_wifi import PACEBMSWIFI
@@ -89,6 +92,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self.max_failures = 3
         self._energy = {}
         self._energy_ts = None
+        self._limit_cache = {}
+        self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
 
     def _setup_bms_sync(self):
         """Synchronous setup of the BMS communication and driver."""
@@ -157,7 +162,10 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             raise Exception(f"Unsupported BMS type: {self.bms_type}")
 
     async def async_setup(self):
-        """Set up the connection."""
+        """Set up the connection and restore energy counters."""
+        stored = await self._store.async_load()
+        if stored and isinstance(stored.get("packs"), dict):
+            self._energy = stored["packs"]
         try:
             await self.hass.async_add_executor_job(self._setup_bms_sync)
             return True
@@ -264,6 +272,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                     if failures == self.max_failures + 1:
                         _LOGGER.warning("Pack %s data unavailable after %s consecutive failures", p_id, failures)
 
+        self._attach_current_limits(final_analog_data)
         self._apply_energy_totals(final_analog_data)
 
         return {
@@ -271,43 +280,106 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             "warning": final_warning_data,
         }
 
-    def _apply_energy_totals(self, packs):
-        """Integrate signed pack power into session energy counters (Wh).
+    def _attach_current_limits(self, packs):
+        """Read Pace/TDT CCL and DCL. JK limits are already in the setup frame."""
+        if not packs or not self.bms or not hasattr(self.bms, "generate_bms_request"):
+            return
+        now = time.monotonic()
+        per_pack = self.bms_type != BMS_TYPE_JK_PB and self.battery_port == "rs485"
+        targets = [pack.get("pack_id", 0) for pack in packs] if per_pack else [None]
+        fetched = {}
+        for target in targets:
+            cache_key = "all" if target is None else str(target)
+            cached = self._limit_cache.get(cache_key)
+            if cached and now - cached["ts"] < LIMIT_POLL_SECONDS:
+                fetched[cache_key] = cached["limits"]
+                continue
+            try:
+                limits = read_pace_current_limits(self.bms, target)
+            except Exception as err:
+                _LOGGER.debug("Current limit read failed: %s", err)
+                limits = cached["limits"] if cached else None
+            if limits:
+                self._limit_cache[cache_key] = {"ts": now, "limits": limits}
+                fetched[cache_key] = limits
+            else:
+                # Keep the last good reading, but do not retry on every poll.
+                self._limit_cache[cache_key] = {
+                    "ts": now,
+                    "limits": cached["limits"] if cached else None,
+                }
+                if cached and cached["limits"]:
+                    fetched[cache_key] = cached["limits"]
 
-        The counters reset when the integration reloads. Sensor state class
-        total_increasing makes Home Assistant keep long-term statistics across
-        that reset.
+        for pack in packs:
+            cache_key = str(pack.get("pack_id", 0)) if per_pack else "all"
+            limits = fetched.get(cache_key)
+            if limits:
+                pack.update(limits)
+
+    def _apply_energy_totals(self, packs):
+        """Publish charged and discharged energy in kWh.
+
+        Pace analog frames carry cumulative amp-hours. Those are converted with
+        a fixed 3.2 V per cell, so the value comes from the BMS and survives a
+        restart. JK has no lifetime energy counter, so power is integrated and
+        the result is stored on disk.
         """
         now = time.monotonic()
         prev = self._energy_ts
         self._energy_ts = now
-        usable = prev is not None and 0 < (now - prev) <= 300
-        elapsed_h = ((now - prev) / 3600.0) if usable else 0.0
+        elapsed = None if prev is None else now - prev
 
         for pack in packs:
-            pack_id = pack.get("pack_id", 0)
+            pack_id = str(pack.get("pack_id", 0))
             slot = self._energy.setdefault(pack_id, {"charged": 0.0, "discharged": 0.0})
-            try:
-                power_kw = float(pack.get("view_power") or 0.0)
-            except (TypeError, ValueError):
-                power_kw = 0.0
-            if usable:
-                watt_hours = abs(power_kw) * elapsed_h * 1000.0
-                if power_kw >= 0:
-                    slot["charged"] += watt_hours
-                else:
-                    slot["discharged"] += watt_hours
-            pack["view_energy_charged"] = round(slot["charged"], 3)
-            pack["view_energy_discharged"] = round(slot["discharged"], 3)
+            cell_count = pack.get("view_num_cells") or len(pack.get("cell_voltages") or [])
+            design_ah = pack.get("view_design_capacity")
+            charged = bms_throughput_kwh(
+                pack.get("view_cumulative_charge_ah"),
+                pack.get("view_cumulative_discharge_ah"),
+                cell_count,
+                design_ah,
+            )
+            discharged = bms_throughput_kwh(
+                pack.get("view_cumulative_discharge_ah"),
+                pack.get("view_cumulative_charge_ah"),
+                cell_count,
+                design_ah,
+            )
+            source = "bms"
+            if charged is None or discharged is None:
+                source = "integrated"
+                power_w = watts_from_kilowatts(pack.get("view_power")) or 0.0
+                integrated_charged, integrated_discharged = integrate_energy_kwh(
+                    slot.get("charged", 0.0),
+                    slot.get("discharged", 0.0),
+                    power_w,
+                    elapsed,
+                )
+                if charged is None:
+                    charged = integrated_charged
+                if discharged is None:
+                    discharged = integrated_discharged
+            slot["charged"] = round(float(charged), 3)
+            slot["discharged"] = round(float(discharged), 3)
+            pack["view_energy_charged"] = slot["charged"]
+            pack["view_energy_discharged"] = slot["discharged"]
+            pack["energy_source"] = source
+
+    async def async_save_energy(self):
+        """Persist integrated energy so a reload does not start from zero."""
+        await self._store.async_save({"packs": self._energy})
 
     async def _async_update_data(self):
         """Fetch data from BMS."""
         # First fetch needs more time for pack discovery (up to 15s wait + processing)
-        timeout_seconds = 45 if not getattr(self, '_first_fetch_done', False) else 15
+        timeout_seconds = 45 if not getattr(self, '_first_fetch_done', False) else 20
         async with async_timeout.timeout(timeout_seconds):
             try:
                 data = await self.hass.async_add_executor_job(self._fetch_data_sync)
                 self._first_fetch_done = True
+                await self.async_save_energy()
                 return data
             except Exception as err:
                 raise UpdateFailed(f"BMS communication error: {err}") from err

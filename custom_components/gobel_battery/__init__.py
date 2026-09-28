@@ -51,6 +51,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     
     if unload_ok:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)
+        await coordinator.async_save_energy()
         # Release socket/serial/background threads
         await hass.async_add_executor_job(coordinator.shutdown)
 

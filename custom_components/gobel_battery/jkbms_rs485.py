@@ -1061,6 +1061,10 @@ class JKBMS485:
                 for set_k, pac_k in setup_mappings.items():
                     if set_k in setup:
                         pack_data[pac_k] = setup[set_k]
+                if 'cur_bat_c_oc' in setup:
+                    pack_data['view_charge_current_limit'] = setup['cur_bat_c_oc']
+                if 'cur_bat_dc_oc' in setup:
+                    pack_data['view_discharge_current_limit'] = setup['cur_bat_dc_oc']
                 
                 if 'wire_res_calib' in setup:
                     pack_data['wire_res_calib'] = setup['wire_res_calib']

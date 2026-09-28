@@ -74,6 +74,6 @@ Unlike the previous Add-on version, this integration **does not require an MQTT 
 
 To change an existing device, open it under **Settings -> Devices & Services** and choose **Reconfigure** (IP, port, BMS type, serial device). **Configure** changes the poll interval, the parallel-pack limit and the JK pack index. Home Assistant reloads the device after either change.
 
-Daily sensors (SOC, voltage, current, power, energy) stay on the device page and record long-term statistics. BMS limits are under **Configuration**. Cell voltages, warnings and balance flags are under **Diagnostic**.
+Daily sensors (SOC, voltage, current, power, energy) stay on the device page and record long-term statistics. Cell voltages are in volts, power is in watts and energy is in kWh. BMS limits, including Pace charge and discharge current limits, are under **Configuration**. Individual cell voltages, warnings and balance flags are under **Diagnostic**.
 
 This repository is a maintained fork of [fancyui/Gobel-Battery-HA-Integration](https://github.com/fancyui/Gobel-Battery-HA-Integration).
