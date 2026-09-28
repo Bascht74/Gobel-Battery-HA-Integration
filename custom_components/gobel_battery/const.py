@@ -13,6 +13,7 @@ CONF_BAUD_RATE = "baud_rate"
 CONF_POLL_INTERVAL = "poll_interval"
 CONF_JK_DISPLAY_INDEX_START = "jk_display_index_start"
 CONF_MAX_PARALLEL = "max_parallel_allowed"
+CONF_EXPERT_CONFIG = "expert_writable_config"
 
 # Option Choices
 BMS_TYPE_PACE_LV = "PACE_LV"

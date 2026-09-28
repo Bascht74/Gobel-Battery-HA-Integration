@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.3.0] - 2026-09-29
+### Added
+-   Expert mode in the integration options. It is off by default and asks for confirmation before it is enabled. While it is on, Pace and TDT configuration is writable: charge and discharge alarm/limit as number boxes, charge MOSFET, discharge MOSFET and the current limiter as switches, and the limiter gear as a select. The matching read-only sensors are removed. Turning the option off restores the sensors. JK and passive Pace WiFi stay read-only. Written current limits are positive amps.
+
+---------------
+
 ## [2.2.1] - 2026-09-29
 ### Fixed
 -   Pace discharge current limit. Real PBmsTools and esphome-pace-bms frames return the discharge threshold as a negative two's-complement word (110 A is `FF92`). Treating it as an unsigned word produced a value above 65000 A. Charge limits stay unsigned amps. The protection threshold is the limit; the alarm threshold is an entity attribute.

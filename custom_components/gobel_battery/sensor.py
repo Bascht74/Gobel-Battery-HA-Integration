@@ -350,6 +350,8 @@ async def async_setup_entry(
             if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 extra.update(PACE_COUNTER_SENSORS)
             for metric, meta in extra.items():
+                if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG:
+                    continue
                 new_entities.append(
                     GobelBatteryPackSensor(
                         coordinator,

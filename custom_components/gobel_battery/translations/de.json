@@ -43,16 +43,25 @@
       },
       "init": {
         "title": "Gobel-Battery-Optionen",
-        "description": "Diese Werte werden sofort übernommen. IP-Adresse, serieller Port oder BMS-Typ werden über Neu konfigurieren geändert.",
+        "description": "Der Expertenmodus macht die Pace- und TDT-Konfiguration beschreibbar. Falsche Stromgrenzen oder MOSFET-Schalter können den Akku trennen oder seinen Schutz aufheben. Nach der Änderung den Modus wieder ausschalten. Dann verschwinden die Steuerelemente und die Nur-Lese-Sensoren kommen zurück. JK und passives Pace-WLAN bleiben nur lesbar.",
         "data": {
           "poll_interval": "Abfrageintervall (Sekunden)",
           "max_parallel_allowed": "Max. parallele Packs",
-          "jk_display_index_start": "JK-Pack-Indexstart"
+          "jk_display_index_start": "JK-Pack-Indexstart",
+          "expert_writable_config": "Expertenmodus: BMS-Konfiguration beschreibbar"
+        }
+      },
+      "expert_warning": {
+        "title": "Expertenmodus",
+        "description": "Die BMS-Konfiguration wird beschreibbar. Eine falsche Ladegrenze, Entladegrenze oder ein MOSFET-Schalter kann Laden oder Entladen abschalten oder den eingestellten Schutz aufheben. Nur fortfahren, wenn dieses Risiko klar ist. Der Modus lässt sich danach wieder ausschalten.",
+        "data": {
+          "confirm_expert": "Ich habe die Warnung verstanden und möchte BMS-Werte ändern"
         }
       }
     },
     "error": {
-      "already_configured": "Diese Verbindung ist bereits eingerichtet."
+      "already_configured": "Diese Verbindung ist bereits eingerichtet.",
+      "expert_not_confirmed": "Die Warnung muss bestätigt werden, bevor der Expertenmodus aktiv wird."
     },
     "abort": {
       "already_configured": "Diese Verbindung ist bereits eingerichtet.",

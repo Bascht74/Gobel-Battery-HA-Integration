@@ -2,6 +2,7 @@
 import logging
 import asyncio
 import time
+import threading
 from datetime import timedelta
 import async_timeout
 
@@ -21,6 +22,7 @@ from .const import (
     CONF_POLL_INTERVAL,
     CONF_JK_DISPLAY_INDEX_START,
     CONF_MAX_PARALLEL,
+    CONF_EXPERT_CONFIG,
     BMS_TYPE_PACE_LV,
     BMS_TYPE_PACE_LV_WIFI,
     BMS_TYPE_JK_PB,
@@ -29,6 +31,7 @@ from .const import (
 
 from .bms_comm import BMSCommunication
 from .pace_limits import LIMIT_POLL_SECONDS, read_pace_current_limits
+from .pace_write import write_limiter, write_limiter_gear, write_mosfet, write_overcurrent
 from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
 from .pacebms_rs485 import PACEBMS485
@@ -93,6 +96,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._energy = {}
         self._energy_ts = None
         self._limit_cache = {}
+        self._limiter_gear = {}
+        self._bus_lock = threading.Lock()
         self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
 
     def _setup_bms_sync(self):
@@ -173,7 +178,26 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.error("Failed to set up BMS coordinator for %s: %s", self.device_name, err)
             return False
 
+    @property
+    def expert_config(self):
+        """True when the user enabled writable BMS configuration."""
+        return bool(self.entry.options.get(CONF_EXPERT_CONFIG, False))
+
+    @property
+    def can_write_config(self):
+        """Expert mode only replaces sensors when this protocol can be written."""
+        return self.expert_config and self.bms_type not in (BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV_WIFI)
+
     def _fetch_data_sync(self):
+        """Fetch data, waiting if an expert write is using the bus."""
+        if not self._bus_lock.acquire(timeout=20):
+            raise UpdateFailed("BMS bus is busy")
+        try:
+            return self._fetch_data_inner()
+        finally:
+            self._bus_lock.release()
+
+    def _fetch_data_inner(self):
         """Synchronous update call running inside thread executor."""
         if not self.bms:
             raise UpdateFailed("BMS driver is not set up")
@@ -370,6 +394,83 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
     async def async_save_energy(self):
         """Persist integrated energy so a reload does not start from zero."""
         await self._store.async_save({"packs": self._energy})
+
+    async def async_apply_expert_change(self, pack_id, kind, value):
+        """Write one BMS setting. Caller must only expose this in expert mode."""
+        if self.bms_type == BMS_TYPE_JK_PB or not hasattr(self.bms, "generate_bms_request"):
+            raise RuntimeError("Dieses BMS unterstützt das Schreiben der Konfiguration nicht.")
+        ok = await self.hass.async_add_executor_job(self._apply_expert_change_sync, pack_id, kind, value)
+        if not ok:
+            raise RuntimeError("Das BMS hat die Änderung nicht bestätigt.")
+        await self.async_request_refresh()
+
+    def _apply_expert_change_sync(self, pack_id, kind, value):
+        if not self._bus_lock.acquire(timeout=20):
+            return False
+        try:
+            pack = self._analog_pack(pack_id)
+            if kind in ("charge_current_alarm", "charge_current_limit"):
+                alarm = int(pack.get("view_charge_current_alarm") or value)
+                protection = int(pack.get("view_charge_current_limit") or value)
+                delay = int(pack.get("view_charge_oc_delay") or 10)
+                if kind == "charge_current_alarm":
+                    alarm = int(value)
+                else:
+                    protection = int(value)
+                ok = write_overcurrent(self.bms, "charge", alarm, protection, delay, pack_id)
+                if ok:
+                    pack["view_charge_current_alarm"] = min(alarm, protection)
+                    pack["view_charge_current_limit"] = protection
+                return ok
+            if kind in ("discharge_current_alarm", "discharge_current_limit"):
+                alarm = int(pack.get("view_discharge_current_alarm") or value)
+                protection = int(pack.get("view_discharge_current_limit") or value)
+                delay = int(pack.get("view_discharge_oc_delay") or 10)
+                if kind == "discharge_current_alarm":
+                    alarm = int(value)
+                else:
+                    protection = int(value)
+                ok = write_overcurrent(self.bms, "discharge", alarm, protection, delay, pack_id)
+                if ok:
+                    pack["view_discharge_current_alarm"] = min(alarm, protection)
+                    pack["view_discharge_current_limit"] = protection
+                return ok
+            if kind == "charge_switch":
+                ok = write_mosfet(self.bms, "charge", bool(value), pack_id)
+            elif kind == "discharge_switch":
+                ok = write_mosfet(self.bms, "discharge", bool(value), pack_id)
+            elif kind == "limiter_switch":
+                ok = write_limiter(self.bms, bool(value), pack_id)
+            elif kind == "limiter_gear":
+                ok = write_limiter_gear(self.bms, value, pack_id)
+                if ok:
+                    self._limiter_gear[pack_id] = value
+            else:
+                return False
+            if ok:
+                self._set_switch_flag(pack_id, kind, value)
+            return ok
+        finally:
+            self._bus_lock.release()
+
+    def _analog_pack(self, pack_id):
+        for pack in (self.data or {}).get("analog", []):
+            if pack.get("pack_id") == pack_id:
+                return pack
+        return {}
+
+    def _set_switch_flag(self, pack_id, kind, value):
+        flags = {
+            "charge_switch": "status_charge_enabled",
+            "discharge_switch": "status_discharge_enabled",
+            "limiter_switch": "status_current_limit_enabled",
+        }
+        flag = flags.get(kind)
+        if flag is None:
+            return
+        for pack in (self.data or {}).get("warning", []):
+            if pack.get("pack_id") == pack_id:
+                pack.setdefault("instruction_state", {})[flag] = bool(value)
 
     async def _async_update_data(self):
         """Fetch data from BMS."""

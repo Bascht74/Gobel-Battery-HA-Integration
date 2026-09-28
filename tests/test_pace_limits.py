@@ -79,8 +79,10 @@ def test_read_limits_sends_both_commands_and_parses_answers():
     assert limits == {
         "view_charge_current_limit": 80,
         "view_charge_current_alarm": 50,
+        "view_charge_oc_delay": 1,
         "view_discharge_current_limit": 100,
         "view_discharge_current_alarm": 60,
+        "view_discharge_oc_delay": 0,
     }
     assert len(comm.sent) == 2
     assert b"D9" in comm.sent[0]

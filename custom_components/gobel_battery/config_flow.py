@@ -18,6 +18,7 @@ from .const import (
     CONF_POLL_INTERVAL,
     CONF_JK_DISPLAY_INDEX_START,
     CONF_MAX_PARALLEL,
+    CONF_EXPERT_CONFIG,
     CONF_DEVICE_NAME,
     BMS_TYPES,
     CONNECTION_TYPES,
@@ -226,6 +227,12 @@ class GobelBatteryOptionsFlow(config_entries.OptionsFlow):
         current = {**entry.data, **entry.options}
 
         if user_input is not None:
+            turning_on = bool(user_input.get(CONF_EXPERT_CONFIG)) and not current.get(
+                CONF_EXPERT_CONFIG
+            )
+            if turning_on:
+                self._pending_options = user_input
+                return await self.async_step_expert_warning()
             return self.async_create_entry(title="", data=user_input)
 
         schema = vol.Schema(
@@ -244,6 +251,30 @@ class GobelBatteryOptionsFlow(config_entries.OptionsFlow):
                         CONF_JK_DISPLAY_INDEX_START, DEFAULT_JK_DISPLAY_INDEX_START
                     ),
                 ): vol.In(["00", "01"]),
+                vol.Optional(
+                    CONF_EXPERT_CONFIG,
+                    default=bool(current.get(CONF_EXPERT_CONFIG, False)),
+                ): bool,
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors={})
+
+    async def async_step_expert_warning(self, user_input=None):
+        """Require an explicit confirmation before settings become writable."""
+        if user_input is not None:
+            if not user_input.get("confirm_expert"):
+                return self.async_show_form(
+                    step_id="expert_warning",
+                    data_schema=self._expert_warning_schema(),
+                    errors={"base": "expert_not_confirmed"},
+                )
+            return self.async_create_entry(title="", data=self._pending_options)
+        return self.async_show_form(
+            step_id="expert_warning",
+            data_schema=self._expert_warning_schema(),
+            errors={},
+        )
+
+    @staticmethod
+    def _expert_warning_schema():
+        return vol.Schema({vol.Required("confirm_expert", default=False): bool})

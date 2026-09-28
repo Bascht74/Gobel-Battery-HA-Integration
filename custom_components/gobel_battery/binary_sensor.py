@@ -99,6 +99,10 @@ async def async_setup_entry(
                 
             for sub_dict, sensors in BINARY_SENSORS_METADATA.items():
                 for key, (name, device_class, category) in sensors.items():
+                    if coordinator.can_write_config and (
+                        category == EntityCategory.CONFIG or key == "status_current_limit_enabled"
+                    ):
+                        continue
                     new_entities.append(
                         GobelBatteryBinarySensor(
                             coordinator, pack_id, sub_dict, key, name, device_class, category

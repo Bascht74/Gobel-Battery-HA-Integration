@@ -43,16 +43,25 @@
       },
       "init": {
         "title": "Gobel Battery options",
-        "description": "These values are applied immediately. To change IP address, serial port or BMS type, use Reconfigure on the integration.",
+        "description": "Expert mode makes Pace and TDT settings writable. Wrong current limits or MOSFET switches can disconnect the battery or remove its protection. Turn the option off again after the change. The controls disappear and the read-only sensors return. JK and passive Pace WiFi stay read-only.",
         "data": {
           "poll_interval": "Poll interval (seconds)",
           "max_parallel_allowed": "Max parallel packs",
-          "jk_display_index_start": "JK pack index start"
+          "jk_display_index_start": "JK pack index start",
+          "expert_writable_config": "Expert mode: writable BMS configuration"
+        }
+      },
+      "expert_warning": {
+        "title": "Expert mode",
+        "description": "The BMS configuration becomes writable. A wrong charge limit, discharge limit or MOSFET switch can stop charging, stop discharging, or leave the battery without its configured protection. Continue only if that risk is understood. The mode can be switched off afterwards.",
+        "data": {
+          "confirm_expert": "I understand the risk and want to change BMS settings"
         }
       }
     },
     "error": {
-      "already_configured": "This connection is already configured."
+      "already_configured": "This connection is already configured.",
+      "expert_not_confirmed": "Confirm the warning before enabling expert mode."
     },
     "abort": {
       "already_configured": "This connection is already configured.",

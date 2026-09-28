@@ -53,6 +53,7 @@ def parse_pace_overcurrent_response(response, signed=False):
         return None
     alarm = _amperage(int.from_bytes(payload[1:3], "big"), signed)
     protection = _amperage(int.from_bytes(payload[3:5], "big"), signed)
+    delay = payload[5] if len(payload) > 5 else 10
     limit = protection if protection > 0 else alarm
     if limit <= 0:
         return None
@@ -61,6 +62,7 @@ def parse_pace_overcurrent_response(response, signed=False):
         "alarm_a": alarm,
         "protection_a": protection,
         "limit_a": limit,
+        "delay_steps": delay,
     }
 
 
@@ -74,9 +76,11 @@ def read_pace_current_limits(bms, pack_number=None):
     if charge:
         limits["view_charge_current_limit"] = charge["limit_a"]
         limits["view_charge_current_alarm"] = charge["alarm_a"]
+        limits["view_charge_oc_delay"] = charge["delay_steps"]
     if discharge:
         limits["view_discharge_current_limit"] = discharge["limit_a"]
         limits["view_discharge_current_alarm"] = discharge["alarm_a"]
+        limits["view_discharge_oc_delay"] = discharge["delay_steps"]
     return limits
 
 
