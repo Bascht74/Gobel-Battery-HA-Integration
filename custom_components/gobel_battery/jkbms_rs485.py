@@ -949,6 +949,8 @@ class JKBMS485:
                     temps.append(round(val, 1))
             pack_data['temperatures'] = temps
             pack_data['view_num_temps'] = len(temps)
+            if dynamic.get('temp_mos') is not None:
+                pack_data['view_mos_temperature'] = round(dynamic['temp_mos'], 1)
 
             # Current, Voltage, Power
             pack_data['view_current'] = dynamic.get('current_a', 0.0)

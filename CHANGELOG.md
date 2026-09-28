@@ -4,6 +4,15 @@ description:
 
 # Changelog
 
+## [2.2.1] - 2026-09-29
+### Fixed
+-   Pace discharge current limit. Real PBmsTools and esphome-pace-bms frames return the discharge threshold as a negative two's-complement word (110 A is `FF92`). Treating it as an unsigned word produced a value above 65000 A. Charge limits stay unsigned amps. The protection threshold is the limit; the alarm threshold is an entity attribute.
+
+### Added
+-   Design capacity, highest and lowest cell voltage, cell delta and the cell numbers of those extremes. These values were already in the analog frame. JK also gets a named MOS temperature.
+
+---------------
+
 ## [2.2.0] - 2026-09-29
 ### Changed
 -   Cell voltages are published in V with three decimal places. Power is in W. Energy is in kWh.

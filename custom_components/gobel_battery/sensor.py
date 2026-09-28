@@ -83,6 +83,67 @@ SENSOR_METADATA = {
         "icon": "mdi:battery-sync",
         "category": EntityCategory.DIAGNOSTIC,
     },
+    "design_capacity": {
+        "name": "Design Capacity",
+        "unit": "Ah",
+        "device_class": None,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:battery-high",
+        "category": EntityCategory.DIAGNOSTIC,
+        "precision": 2,
+    },
+    "cell_voltage_max": {
+        "name": "Highest Cell Voltage",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:align-vertical-top",
+        "category": EntityCategory.DIAGNOSTIC,
+        "precision": 3,
+    },
+    "cell_voltage_min": {
+        "name": "Lowest Cell Voltage",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:align-vertical-bottom",
+        "category": EntityCategory.DIAGNOSTIC,
+        "precision": 3,
+    },
+    "cell_voltage_diff": {
+        "name": "Cell Voltage Delta",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:format-align-middle",
+        "category": EntityCategory.DIAGNOSTIC,
+        "precision": 3,
+    },
+    "cell_voltage_max_index": {
+        "name": "Highest Cell",
+        "unit": None,
+        "device_class": None,
+        "state_class": None,
+        "icon": "mdi:numeric",
+        "category": EntityCategory.DIAGNOSTIC,
+    },
+    "cell_voltage_min_index": {
+        "name": "Lowest Cell",
+        "unit": None,
+        "device_class": None,
+        "state_class": None,
+        "icon": "mdi:numeric",
+        "category": EntityCategory.DIAGNOSTIC,
+    },
+    "mos_temperature": {
+        "name": "MOS Temperature",
+        "unit": "°C",
+        "device_class": SensorDeviceClass.TEMPERATURE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:thermometer",
+        "category": None,
+        "precision": 1,
+    },
     "balance_current": {
         "name": "Balance Current",
         "unit": "A",
@@ -262,6 +323,10 @@ async def async_setup_entry(
             for metric, meta in SENSOR_METADATA.items():
                 # Only JK BMS supports balance current telemetry
                 if metric == "balance_current" and coordinator.bms_type != BMS_TYPE_JK_PB:
+                    continue
+                if metric == "mos_temperature" and coordinator.bms_type != BMS_TYPE_JK_PB:
+                    continue
+                if metric == "design_capacity" and coordinator.bms_type == BMS_TYPE_JK_PB:
                     continue
                     
                 new_entities.append(
@@ -493,6 +558,20 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
             return pack_data.get("view_full_capacity")
         elif self._metric == "cycle_number":
             return pack_data.get("view_cycle_number")
+        elif self._metric == "design_capacity":
+            return pack_data.get("view_design_capacity")
+        elif self._metric == "cell_voltage_max":
+            return volts_from_millivolts(pack_data.get("cell_voltage_max"))
+        elif self._metric == "cell_voltage_min":
+            return volts_from_millivolts(pack_data.get("cell_voltage_min"))
+        elif self._metric == "cell_voltage_diff":
+            return volts_from_millivolts(pack_data.get("cell_voltage_diff"))
+        elif self._metric == "cell_voltage_max_index":
+            return pack_data.get("cell_voltage_max_index")
+        elif self._metric == "cell_voltage_min_index":
+            return pack_data.get("cell_voltage_min_index")
+        elif self._metric == "mos_temperature":
+            return pack_data.get("view_mos_temperature")
         elif self._metric == "balance_current":
             return pack_data.get("view_balance_current")
         elif self._metric == "energy_charged":
@@ -501,6 +580,27 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
             return pack_data.get("view_energy_discharged")
 
         return None
+
+    @property
+    def extra_state_attributes(self):
+        """Alarm threshold that belongs to a configured current limit."""
+        alarm_keys = {
+            "charge_current_limit": "view_charge_current_alarm",
+            "discharge_current_limit": "view_discharge_current_alarm",
+        }
+        alarm_key = alarm_keys.get(self._metric)
+        if alarm_key is None:
+            return None
+        data = self.coordinator.data
+        if not data:
+            return None
+        pack_data = next(
+            (p for p in data.get("analog", []) if p.get("pack_id") == self.pack_id),
+            None,
+        )
+        if not pack_data or pack_data.get(alarm_key) is None:
+            return None
+        return {"alarm_threshold_a": pack_data.get(alarm_key)}
 
 class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
     """Sensor representing voltage of a single cell inside a battery pack."""

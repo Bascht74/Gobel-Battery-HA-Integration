@@ -29,21 +29,28 @@ class _Comm:
         return self.responses.pop(0)
 
 
-def test_charge_frame_uses_protection_amps_as_limit():
-    # enable, alarm 80 A, protection 100 A, delay 10
-    parsed = parse_pace_overcurrent_response(_frame(bytes([1, 0x00, 80, 0x00, 100, 10])))
-    assert parsed["limit_a"] == 100
-    assert parsed["alarm_a"] == 80
-    assert parsed["enabled"] is True
+def test_charge_frame_matches_pbms_tools_example():
+    # ~25004600400C010068006E0A... is alarm 104 A, protection 110 A.
+    parsed = parse_pace_overcurrent_response("~25004600400C010068006E0AFB1D\r", signed=False)
+    assert parsed["alarm_a"] == 104
+    assert parsed["protection_a"] == 110
+    assert parsed["limit_a"] == 110
 
 
-def test_discharge_frame_ignores_recovery_bytes():
-    # enable, alarm 90 A, protection 120 A, recovery 80 A, delay 5
+def test_discharge_frame_is_negative_twos_complement():
+    # PBmsTools returns 105 A as FF97 and 110 A as FF92.
+    parsed = parse_pace_overcurrent_response("~25004600400C01FF97FF920AFAD3\r", signed=True)
+    assert parsed["alarm_a"] == 105
+    assert parsed["protection_a"] == 110
+    assert parsed["limit_a"] == 110
+
+
+def test_positive_discharge_encoding_is_also_accepted():
     parsed = parse_pace_overcurrent_response(
-        _frame(bytes([1, 0x00, 90, 0x00, 120, 0x00, 80, 5]))
+        _frame(bytes([1, 0x00, 90, 0x00, 120, 0x00, 80, 5])),
+        signed=True,
     )
     assert parsed["limit_a"] == 120
-    assert parsed["protection_a"] == 120
 
 
 def test_zero_limit_is_rejected():
@@ -71,7 +78,9 @@ def test_read_limits_sends_both_commands_and_parses_answers():
     limits = read_pace_current_limits(bms, 1)
     assert limits == {
         "view_charge_current_limit": 80,
+        "view_charge_current_alarm": 50,
         "view_discharge_current_limit": 100,
+        "view_discharge_current_alarm": 60,
     }
     assert len(comm.sent) == 2
     assert b"D9" in comm.sent[0]
