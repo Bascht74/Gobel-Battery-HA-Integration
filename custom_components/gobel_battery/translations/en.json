@@ -1,0 +1,62 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gobel Battery",
+        "description": "Choose the BMS and how Home Assistant should connect. You can change this later via Reconfigure.",
+        "data": {
+          "device_name": "Device name",
+          "bms_type": "BMS type",
+          "connection_type": "Connection",
+          "battery_port": "Battery port",
+          "poll_interval": "Poll interval (seconds)",
+          "max_parallel_allowed": "Max parallel packs",
+          "jk_display_index_start": "JK pack index start"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Gobel Battery",
+        "description": "Update the connection or BMS settings. Home Assistant reloads the device afterwards.",
+        "data": {
+          "device_name": "Device name",
+          "bms_type": "BMS type",
+          "connection_type": "Connection",
+          "battery_port": "Battery port",
+          "poll_interval": "Poll interval (seconds)",
+          "max_parallel_allowed": "Max parallel packs",
+          "jk_display_index_start": "JK pack index start"
+        }
+      },
+      "network": {
+        "title": "Network connection",
+        "data": {
+          "ip_address": "IP address",
+          "ip_port": "TCP port"
+        }
+      },
+      "serial": {
+        "title": "Serial connection",
+        "data": {
+          "usb_port": "Serial device",
+          "baud_rate": "Baud rate"
+        }
+      },
+      "init": {
+        "title": "Gobel Battery options",
+        "description": "These values are applied immediately. To change IP address, serial port or BMS type, use Reconfigure on the integration.",
+        "data": {
+          "poll_interval": "Poll interval (seconds)",
+          "max_parallel_allowed": "Max parallel packs",
+          "jk_display_index_start": "JK pack index start"
+        }
+      }
+    },
+    "error": {
+      "already_configured": "This connection is already configured."
+    },
+    "abort": {
+      "already_configured": "This connection is already configured.",
+      "reconfigure_successful": "Configuration updated. The device will reload."
+    }
+  }
+}

@@ -49,7 +49,7 @@ Im Gegensatz zur vorherigen Add-on-Version **benötigt diese Integration keinen 
 1. Stellen Sie sicher, dass [HACS (Home Assistant Community Store)](https://hacs.xyz/) installiert ist.
 2. Gehen Sie in Home Assistant auf **HACS -> Integrationen**.
 3. Klicken Sie auf die drei Punkte in der oberen rechten Ecke und wählen Sie **Benutzerdefinierte Repositories**.
-4. Fügen Sie die URL dieses Repositories ein: `https://github.com/fancyui/Gobel-Battery-HA-Integration`
+4. Fügen Sie die URL dieses Repositories ein: `https://github.com/Bascht74/Gobel-Battery-HA-Integration`
 5. Wählen Sie **Integration** als Kategorie aus und klicken Sie auf **Hinzufügen**.
 6. Suchen Sie nach der Integration **Gobel Battery Monitor** in HACS und klicken Sie auf **Herunterladen**.
 7. Starten Sie Home Assistant neu.
@@ -67,3 +67,9 @@ Im Gegensatz zur vorherigen Add-on-Version **benötigt diese Integration keinen 
 3. Suchen Sie nach **Gobel Battery Monitor** und klicken Sie darauf.
 4. Folgen Sie den Schritten auf dem Bildschirm, um Ihren BMS-Typ und Ihre Verbindungsmethode auszuwählen, und geben Sie die Verbindungsparameter ein.
 5. Wenn Sie mehrere Batteriebänke mit unterschiedlichen IPs/Ports haben, klicken Sie einfach erneut auf **Integration hinzufügen**, um weitere Instanzen einzurichten.
+
+Eine bestehende Installation lässt sich unter **Einstellungen -> Geräte & Dienste** über **Neu konfigurieren** ändern (IP, Port, BMS-Typ, serieller Anschluss). **Konfigurieren** ändert Abfrageintervall, parallele Packs und den JK-Pack-Index. Danach wird das Gerät neu geladen.
+
+SOC, Spannung, Strom, Leistung und Energie bleiben auf der Geräteseite und schreiben Langzeitstatistiken. BMS-Grenzwerte stehen unter **Konfiguration**, Zellspannungen, Warnungen und Balancing unter **Diagnose**.
+
+Dieses Repository ist ein Fork von [fancyui/Gobel-Battery-HA-Integration](https://github.com/fancyui/Gobel-Battery-HA-Integration).

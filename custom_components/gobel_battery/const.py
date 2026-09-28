@@ -2,6 +2,7 @@
 
 DOMAIN = "gobel_battery"
 
+CONF_DEVICE_NAME = "device_name"
 CONF_BMS_TYPE = "bms_type"
 CONF_CONNECTION_TYPE = "connection_type"
 CONF_BATTERY_PORT = "battery_port"
@@ -32,6 +33,7 @@ PORT_RS485 = "rs485"
 
 BATTERY_PORTS = [PORT_RS232, PORT_RS485]
 
+DEFAULT_DEVICE_NAME = "Gobel Battery"
 DEFAULT_POLL_INTERVAL = 5
 DEFAULT_MAX_PARALLEL = 16
 DEFAULT_BAUD_RATE = 115200

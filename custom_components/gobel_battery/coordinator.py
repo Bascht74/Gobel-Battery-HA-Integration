@@ -1,6 +1,7 @@
 """DataUpdateCoordinator for the Gobel Battery Monitor integration."""
 import logging
 import asyncio
+import time
 from datetime import timedelta
 import async_timeout
 
@@ -59,18 +60,19 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, entry) -> None:
         """Initialize the coordinator."""
         self.entry = entry
-        self.device_name = entry.data.get("device_name", "Gobel Battery")
-        self.bms_type = entry.data.get(CONF_BMS_TYPE)
-        self.connection_type = entry.data.get(CONF_CONNECTION_TYPE)
-        self.battery_port = entry.data.get(CONF_BATTERY_PORT)
-        self.ip_address = entry.data.get(CONF_IP_ADDRESS)
-        self.ip_port = entry.data.get(CONF_IP_PORT)
-        self.usb_port = entry.data.get(CONF_USB_PORT)
-        self.baud_rate = entry.data.get(CONF_BAUD_RATE)
-        self.max_parallel = entry.data.get(CONF_MAX_PARALLEL, 16)
-        self.jk_display_index_start = entry.data.get(CONF_JK_DISPLAY_INDEX_START, "01")
-        
-        poll_interval = entry.data.get(CONF_POLL_INTERVAL, 5)
+        merged = {**entry.data, **entry.options}
+        self.device_name = merged.get("device_name", "Gobel Battery")
+        self.bms_type = merged.get(CONF_BMS_TYPE)
+        self.connection_type = merged.get(CONF_CONNECTION_TYPE)
+        self.battery_port = merged.get(CONF_BATTERY_PORT)
+        self.ip_address = merged.get(CONF_IP_ADDRESS)
+        self.ip_port = merged.get(CONF_IP_PORT)
+        self.usb_port = merged.get(CONF_USB_PORT)
+        self.baud_rate = merged.get(CONF_BAUD_RATE)
+        self.max_parallel = merged.get(CONF_MAX_PARALLEL, 16)
+        self.jk_display_index_start = merged.get(CONF_JK_DISPLAY_INDEX_START, "01")
+
+        poll_interval = merged.get(CONF_POLL_INTERVAL, 5)
         super().__init__(
             hass,
             _LOGGER,
@@ -85,6 +87,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self.pack_cache = {}
         self.pack_failures = {}
         self.max_failures = 3
+        self._energy = {}
+        self._energy_ts = None
 
     def _setup_bms_sync(self):
         """Synchronous setup of the BMS communication and driver."""
@@ -260,15 +264,46 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                     if failures == self.max_failures + 1:
                         _LOGGER.warning("Pack %s data unavailable after %s consecutive failures", p_id, failures)
 
+        self._apply_energy_totals(final_analog_data)
+
         return {
             "analog": final_analog_data,
             "warning": final_warning_data,
         }
 
+    def _apply_energy_totals(self, packs):
+        """Integrate signed pack power into session energy counters (Wh).
+
+        The counters reset when the integration reloads. Sensor state class
+        total_increasing makes Home Assistant keep long-term statistics across
+        that reset.
+        """
+        now = time.monotonic()
+        prev = self._energy_ts
+        self._energy_ts = now
+        usable = prev is not None and 0 < (now - prev) <= 300
+        elapsed_h = ((now - prev) / 3600.0) if usable else 0.0
+
+        for pack in packs:
+            pack_id = pack.get("pack_id", 0)
+            slot = self._energy.setdefault(pack_id, {"charged": 0.0, "discharged": 0.0})
+            try:
+                power_kw = float(pack.get("view_power") or 0.0)
+            except (TypeError, ValueError):
+                power_kw = 0.0
+            if usable:
+                watt_hours = abs(power_kw) * elapsed_h * 1000.0
+                if power_kw >= 0:
+                    slot["charged"] += watt_hours
+                else:
+                    slot["discharged"] += watt_hours
+            pack["view_energy_charged"] = round(slot["charged"], 3)
+            pack["view_energy_discharged"] = round(slot["discharged"], 3)
+
     async def _async_update_data(self):
         """Fetch data from BMS."""
         # First fetch needs more time for pack discovery (up to 15s wait + processing)
-        timeout_seconds = 30 if not getattr(self, '_first_fetch_done', False) else 15
+        timeout_seconds = 45 if not getattr(self, '_first_fetch_done', False) else 15
         async with async_timeout.timeout(timeout_seconds):
             try:
                 data = await self.hass.async_add_executor_job(self._fetch_data_sync)

@@ -4,49 +4,72 @@ from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySen
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# Metadata defining the sub-dictionary, key, entity name suffix, and device class
+# Metadata: sub-dictionary, key, name, device class, entity category.
+# Protection and fault bits stay on the main device page (no category) because
+# they use device class PROBLEM. Detailed warnings and status flags are diagnostic.
 BINARY_SENSORS_METADATA = {
     "protect_state_1": {
-        "protect_short_circuit": ("Short Circuit Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_discharge_current": ("Discharge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_charge_current": ("Charge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_low_total_voltage": ("Total Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_total_voltage": ("Total Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_low_cell_voltage": ("Cell Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_cell_voltage": ("Cell Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM),
+        "protect_short_circuit": ("Short Circuit Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_discharge_current": ("Discharge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_charge_current": ("Charge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_low_total_voltage": ("Total Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_total_voltage": ("Total Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_low_cell_voltage": ("Cell Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_cell_voltage": ("Cell Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
     },
     "protect_state_2": {
-        "protect_low_charge_temp": ("Charge Low Temp Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_charge_temp": ("Charge High Temp Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_MOS_temp": ("MOS High Temp Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_discharge_temp": ("Discharge High Temp Protection", BinarySensorDeviceClass.PROBLEM),
-        "status_fully_charged": ("Fully Charged Status", None),
-        "protect_low_env_temp": ("Low Env Temp Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_high_env_temp": ("High Env Temp Protection", BinarySensorDeviceClass.PROBLEM),
-        "protect_low_discharge_temp": ("Discharge Low Temp Protection", BinarySensorDeviceClass.PROBLEM),
+        "protect_low_charge_temp": ("Charge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_charge_temp": ("Charge High Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_MOS_temp": ("MOS High Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_discharge_temp": ("Discharge High Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "status_fully_charged": ("Fully Charged Status", None, EntityCategory.DIAGNOSTIC),
+        "protect_low_env_temp": ("Low Env Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_high_env_temp": ("High Env Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_low_discharge_temp": ("Discharge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
     },
     "fault_state": {
-        "fault_sampling": ("Sampling Fault", BinarySensorDeviceClass.PROBLEM),
-        "fault_cell": ("Cell Count Mismatch/Fault", BinarySensorDeviceClass.PROBLEM),
-        "fault_NTC": ("Temperature Sensor Fault", BinarySensorDeviceClass.PROBLEM),
-        "fault_discharge_MOS": ("Discharge MOS Fault", BinarySensorDeviceClass.PROBLEM),
-        "fault_charge_MOS": ("Charge MOS Fault", BinarySensorDeviceClass.PROBLEM),
+        "fault_sampling": ("Sampling Fault", BinarySensorDeviceClass.PROBLEM, None),
+        "fault_cell": ("Cell Count Mismatch/Fault", BinarySensorDeviceClass.PROBLEM, None),
+        "fault_NTC": ("Temperature Sensor Fault", BinarySensorDeviceClass.PROBLEM, None),
+        "fault_discharge_MOS": ("Discharge MOS Fault", BinarySensorDeviceClass.PROBLEM, None),
+        "fault_charge_MOS": ("Charge MOS Fault", BinarySensorDeviceClass.PROBLEM, None),
     },
     "instruction_state": {
-        "status_heating": ("Heating Switch Active", BinarySensorDeviceClass.HEAT),
-        "status_charger_avaliable": ("Charger Available", BinarySensorDeviceClass.PLUG),
-        "status_reverse_connected": ("Reverse Connected Alert", BinarySensorDeviceClass.PROBLEM),
-        "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER),
-        "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER),
-        "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER),
-    }
+        "status_heating": ("Heating Switch Active", BinarySensorDeviceClass.HEAT, EntityCategory.DIAGNOSTIC),
+        "status_charger_avaliable": ("Charger Available", BinarySensorDeviceClass.PLUG, EntityCategory.DIAGNOSTIC),
+        "status_reverse_connected": ("Reverse Connected Alert", BinarySensorDeviceClass.PROBLEM, None),
+        "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
+        "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
+        "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.DIAGNOSTIC),
+    },
+    "warn_state_1": {
+        "warn_high_discharge_current": ("Discharge Overcurrent Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_charge_current": ("Charge Overcurrent Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_low_total_voltage": ("Total Under-Voltage Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_total_voltage": ("Total Over-Voltage Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_low_cell_voltage": ("Cell Under-Voltage Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_cell_voltage": ("Cell Over-Voltage Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+    },
+    "warn_state_2": {
+        "warn_low_SOC": ("Low SOC Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_MOS_temp": ("MOS High Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_low_env_temp": ("Low Env Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_env_temp": ("High Env Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_low_discharge_temp": ("Discharge Low Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_low_charge_temp": ("Charge Low Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_discharge_temp": ("Discharge High Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "warn_high_charge_temp": ("Charge High Temp Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+    },
 }
+
+_NORMAL_WARNING = {"normal", "unknown", "", None}
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -75,12 +98,41 @@ async def async_setup_entry(
                 continue
                 
             for sub_dict, sensors in BINARY_SENSORS_METADATA.items():
-                for key, (name, device_class) in sensors.items():
+                for key, (name, device_class, category) in sensors.items():
                     new_entities.append(
                         GobelBatteryBinarySensor(
-                            coordinator, pack_id, sub_dict, key, name, device_class
+                            coordinator, pack_id, sub_dict, key, name, device_class, category
                         )
                     )
+
+            warning_pack = next((p for p in warning_packs if p.get("pack_id") == pack_id), None)
+            cell_warnings = (warning_pack or {}).get("cell_voltage_warnings") or []
+            temp_warnings = (warning_pack or {}).get("temp_sensor_warnings") or []
+            num_cells = len(cell_warnings) or 16
+            num_temps = len(temp_warnings) or 4
+
+            for cell_idx in range(1, num_cells + 1):
+                new_entities.append(
+                    GobelBatteryIndexedWarningSensor(
+                        coordinator, pack_id, "cell_voltage_warnings", cell_idx, "Cell", "Voltage Warning"
+                    )
+                )
+            for temp_idx in range(1, num_temps + 1):
+                new_entities.append(
+                    GobelBatteryIndexedWarningSensor(
+                        coordinator, pack_id, "temp_sensor_warnings", temp_idx, "Temperature", "Warning"
+                    )
+                )
+
+            for key, name in (
+                ("balancing_status_passive_1", "Passive Balance 1 Active"),
+                ("balancing_status_passive_2", "Passive Balance 2 Active"),
+                ("balancing_status_active_1", "Active Balance 1 Active"),
+                ("balancing_status_active_2", "Active Balance 2 Active"),
+            ):
+                new_entities.append(
+                    GobelBatteryBalanceSensor(coordinator, pack_id, key, name)
+                )
             registered_packs.add(pack_id)
             
         if new_entities:
@@ -97,7 +149,7 @@ async def async_setup_entry(
 class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
     """Binary sensor representing a BMS alarm, warning or status state."""
 
-    def __init__(self, coordinator, pack_id, sub_dict, key, name, device_class):
+    def __init__(self, coordinator, pack_id, sub_dict, key, name, device_class, category):
         """Initialize binary sensor."""
         super().__init__(coordinator)
         self.pack_id = pack_id
@@ -108,6 +160,7 @@ class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} {name}"
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{sub_dict}_{key}"
         self._attr_device_class = device_class
+        self._attr_entity_category = category
 
     @property
     def device_info(self):
@@ -128,7 +181,11 @@ class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
         if not data:
             return False
         warning_packs = data.get("warning", [])
-        return any(p.get("pack_id") == self.pack_id for p in warning_packs)
+        pack_warnings = next((p for p in warning_packs if p.get("pack_id") == self.pack_id), None)
+        if not pack_warnings:
+            return False
+        sub_data = pack_warnings.get(self._sub_dict)
+        return isinstance(sub_data, dict) and self._key in sub_data
 
     @property
     def is_on(self):
@@ -137,13 +194,123 @@ class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
         if not data:
             return None
         warning_packs = data.get("warning", [])
-        
+
         pack_warnings = next((p for p in warning_packs if p.get("pack_id") == self.pack_id), None)
         if not pack_warnings:
             return None
 
-        sub_data = pack_warnings.get(self._sub_dict, {})
-        
-        # Return boolean value of warning/protection key
-        val = sub_data.get(self._key, False)
-        return bool(val)
+        sub_data = pack_warnings.get(self._sub_dict)
+        if not isinstance(sub_data, dict) or self._key not in sub_data:
+            return None
+        return bool(sub_data.get(self._key))
+
+
+class GobelBatteryIndexedWarningSensor(CoordinatorEntity, BinarySensorEntity):
+    """Per-cell voltage or per-probe temperature warning from the Pace/TDT frame."""
+
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator, pack_id, list_key, index, label, suffix):
+        super().__init__(coordinator)
+        self.pack_id = pack_id
+        self._list_key = list_key
+        self._index = index
+        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
+        self._attr_name = (
+            f"{coordinator.device_name} Pack {display_pack:02d} {label} {index:02d} {suffix}"
+        )
+        self._attr_unique_id = (
+            f"{coordinator.entry.entry_id}_pack_{pack_id}_{list_key}_{index}"
+        )
+
+    @property
+    def device_info(self):
+        display_pack = self.pack_id + (0 if self.coordinator.jk_display_index_start == "00" else 1)
+        return {
+            "identifiers": {(DOMAIN, f"{self.coordinator.entry.entry_id}_pack_{self.pack_id}")},
+            "name": f"{self.coordinator.device_name} Pack {display_pack:02d}",
+            "via_device": (DOMAIN, f"{self.coordinator.entry.entry_id}_total"),
+        }
+
+    def _pack_warnings(self):
+        data = self.coordinator.data
+        if not data:
+            return None
+        return next(
+            (p for p in data.get("warning", []) if p.get("pack_id") == self.pack_id),
+            None,
+        )
+
+    @property
+    def available(self) -> bool:
+        if not super().available:
+            return False
+        pack = self._pack_warnings()
+        if not pack:
+            return False
+        values = pack.get(self._list_key) or []
+        return self._index - 1 < len(values)
+
+    @property
+    def is_on(self):
+        pack = self._pack_warnings()
+        if not pack:
+            return None
+        values = pack.get(self._list_key) or []
+        if self._index - 1 >= len(values):
+            return None
+        value = values[self._index - 1]
+        if isinstance(value, str):
+            return value.strip().lower() not in _NORMAL_WARNING
+        return bool(value)
+
+
+class GobelBatteryBalanceSensor(CoordinatorEntity, BinarySensorEntity):
+    """Active when a Pace/TDT balance bitmask or active-balance cell index is non-zero."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator, pack_id, key, name):
+        super().__init__(coordinator)
+        self.pack_id = pack_id
+        self._key = key
+        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
+        self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} {name}"
+        self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{key}"
+        self._attr_icon = "mdi:scale-balance"
+
+    @property
+    def device_info(self):
+        display_pack = self.pack_id + (0 if self.coordinator.jk_display_index_start == "00" else 1)
+        return {
+            "identifiers": {(DOMAIN, f"{self.coordinator.entry.entry_id}_pack_{self.pack_id}")},
+            "name": f"{self.coordinator.device_name} Pack {display_pack:02d}",
+            "via_device": (DOMAIN, f"{self.coordinator.entry.entry_id}_total"),
+        }
+
+    def _pack_warnings(self):
+        data = self.coordinator.data
+        if not data:
+            return None
+        return next(
+            (p for p in data.get("warning", []) if p.get("pack_id") == self.pack_id),
+            None,
+        )
+
+    @property
+    def available(self) -> bool:
+        if not super().available:
+            return False
+        pack = self._pack_warnings()
+        return bool(pack) and self._key in pack
+
+    @property
+    def is_on(self):
+        pack = self._pack_warnings()
+        if not pack or self._key not in pack:
+            return None
+        try:
+            return int(pack.get(self._key) or 0) != 0
+        except (TypeError, ValueError):
+            return None

@@ -4,76 +4,185 @@ from homeassistant.components.sensor import SensorEntity, SensorStateClass, Sens
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, BMS_TYPE_JK_PB
+from .const import DOMAIN, BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI
 
 _LOGGER = logging.getLogger(__name__)
 
-# Predefined metadata for overall and pack sensors
+# Predefined metadata for overall and pack sensors.
+# entity_category None keeps the value on the device page.
+# CONFIG = BMS setpoints, DIAGNOSTIC = detail that is not needed for daily use.
+# state_class is what enables long-term statistics. ENERGY + total_increasing
+# is what the Energy dashboard can use.
 SENSOR_METADATA = {
     "voltage": {
         "name": "Voltage",
         "unit": "V",
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:sine-wave"
+        "icon": "mdi:sine-wave",
+        "category": None,
     },
     "current": {
         "name": "Current",
         "unit": "A",
         "device_class": SensorDeviceClass.CURRENT,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:current-dc"
+        "icon": "mdi:current-dc",
+        "category": None,
     },
     "power": {
         "name": "Power",
         "unit": "kW",
         "device_class": SensorDeviceClass.POWER,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:battery-charging"
+        "icon": "mdi:battery-charging",
+        "category": None,
     },
     "soc": {
         "name": "SOC",
         "unit": "%",
         "device_class": SensorDeviceClass.BATTERY,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:battery-70"
+        "icon": "mdi:battery-70",
+        "category": None,
     },
     "soh": {
         "name": "SOH",
         "unit": "%",
         "device_class": None,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:battery-plus-variant"
+        "icon": "mdi:battery-plus-variant",
+        "category": EntityCategory.DIAGNOSTIC,
     },
     "remain_capacity": {
         "name": "Remaining Capacity",
         "unit": "Ah",
         "device_class": None,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:battery-clock"
+        "icon": "mdi:battery-clock",
+        "category": None,
     },
     "full_capacity": {
         "name": "Full Capacity",
         "unit": "Ah",
         "device_class": None,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:battery-high"
+        "icon": "mdi:battery-high",
+        "category": EntityCategory.DIAGNOSTIC,
     },
     "cycle_number": {
         "name": "Cycle Count",
         "unit": "cycles",
         "device_class": None,
-        "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:battery-sync"
+        "state_class": SensorStateClass.TOTAL_INCREASING,
+        "icon": "mdi:battery-sync",
+        "category": EntityCategory.DIAGNOSTIC,
     },
     "balance_current": {
         "name": "Balance Current",
         "unit": "A",
         "device_class": SensorDeviceClass.CURRENT,
         "state_class": SensorStateClass.MEASUREMENT,
-        "icon": "mdi:scale-balance"
+        "icon": "mdi:scale-balance",
+        "category": EntityCategory.DIAGNOSTIC,
+    },
+    "energy_charged": {
+        "name": "Energy Charged",
+        "unit": "Wh",
+        "device_class": SensorDeviceClass.ENERGY,
+        "state_class": SensorStateClass.TOTAL_INCREASING,
+        "icon": "mdi:battery-positive",
+        "category": None,
+    },
+    "energy_discharged": {
+        "name": "Energy Discharged",
+        "unit": "Wh",
+        "device_class": SensorDeviceClass.ENERGY,
+        "state_class": SensorStateClass.TOTAL_INCREASING,
+        "icon": "mdi:battery-negative",
+        "category": None,
+    },
+}
+
+# JK setup frame: these are configured limits, not live measurements.
+JK_CONFIG_SENSORS = {
+    "charge_current_limit": {
+        "name": "Charge Current Limit",
+        "key": "view_cur_bat_c_oc",
+        "unit": "A",
+        "device_class": SensorDeviceClass.CURRENT,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:current-dc",
+        "category": EntityCategory.CONFIG,
+    },
+    "discharge_current_limit": {
+        "name": "Discharge Current Limit",
+        "key": "view_cur_bat_dc_oc",
+        "unit": "A",
+        "device_class": SensorDeviceClass.CURRENT,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:current-dc",
+        "category": EntityCategory.CONFIG,
+    },
+    "cell_ovp": {
+        "name": "Cell Overvoltage Protection",
+        "key": "view_vol_cell_ovp",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:battery-alert",
+        "category": EntityCategory.CONFIG,
+    },
+    "cell_uvp": {
+        "name": "Cell Undervoltage Protection",
+        "key": "view_vol_cell_uvp",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:battery-alert",
+        "category": EntityCategory.CONFIG,
+    },
+    "float_charge_voltage": {
+        "name": "Float Charge Voltage",
+        "key": "view_vol_float_charge",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:battery-charging",
+        "category": EntityCategory.CONFIG,
+    },
+    "max_charge_voltage": {
+        "name": "Inverter Max Charge Voltage",
+        "key": "view_vol_inverter_max_charge",
+        "unit": "V",
+        "device_class": SensorDeviceClass.VOLTAGE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:battery-charging-high",
+        "category": EntityCategory.CONFIG,
+    },
+}
+
+PACE_COUNTER_SENSORS = {
+    "cumulative_charge_ah": {
+        "name": "Cumulative Charge",
+        "key": "view_cumulative_charge_ah",
+        "unit": "Ah",
+        "device_class": None,
+        "state_class": SensorStateClass.TOTAL_INCREASING,
+        "icon": "mdi:battery-plus",
+        "category": EntityCategory.DIAGNOSTIC,
+    },
+    "cumulative_discharge_ah": {
+        "name": "Cumulative Discharge",
+        "key": "view_cumulative_discharge_ah",
+        "unit": "Ah",
+        "device_class": None,
+        "state_class": SensorStateClass.TOTAL_INCREASING,
+        "icon": "mdi:battery-minus",
+        "category": EntityCategory.DIAGNOSTIC,
     },
 }
 
@@ -86,21 +195,23 @@ async def async_setup_entry(
 
     # 1. Register Overall Battery Bank Sensors
     overall_sensors = [
-        # key, name, unit, device_class, state_class, icon
-        ("packs_count", "Packs Count", "packs", None, SensorStateClass.MEASUREMENT, "mdi:database"),
-        ("total_full_capacity", "Total Full Capacity", "Ah", None, SensorStateClass.MEASUREMENT, "mdi:battery-high"),
-        ("total_remain_capacity", "Total Remaining Capacity", "Ah", None, SensorStateClass.MEASUREMENT, "mdi:battery-clock"),
-        ("total_current", "Total Current", "A", SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT, "mdi:current-dc"),
-        ("total_soc", "Total SOC", "%", SensorDeviceClass.BATTERY, SensorStateClass.MEASUREMENT, "mdi:battery-70"),
-        ("total_voltage", "Total Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:sine-wave"),
-        ("total_power", "Total Power", "kW", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, "mdi:battery-charging"),
-        ("total_cell_voltage_max", "Max Cell Voltage", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-top"),
-        ("total_cell_voltage_min", "Min Cell Voltage", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-bottom"),
-        ("total_cell_voltage_diff", "Cell Voltage Delta", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:format-align-middle"),
+        # key, name, unit, device_class, state_class, icon, category
+        ("packs_count", "Packs Count", "packs", None, SensorStateClass.MEASUREMENT, "mdi:database", EntityCategory.DIAGNOSTIC),
+        ("total_full_capacity", "Total Full Capacity", "Ah", None, SensorStateClass.MEASUREMENT, "mdi:battery-high", EntityCategory.DIAGNOSTIC),
+        ("total_remain_capacity", "Total Remaining Capacity", "Ah", None, SensorStateClass.MEASUREMENT, "mdi:battery-clock", None),
+        ("total_current", "Total Current", "A", SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT, "mdi:current-dc", None),
+        ("total_soc", "Total SOC", "%", SensorDeviceClass.BATTERY, SensorStateClass.MEASUREMENT, "mdi:battery-70", None),
+        ("total_voltage", "Total Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:sine-wave", None),
+        ("total_power", "Total Power", "kW", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, "mdi:battery-charging", None),
+        ("total_energy_charged", "Total Energy Charged", "Wh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-positive", None),
+        ("total_energy_discharged", "Total Energy Discharged", "Wh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-negative", None),
+        ("total_cell_voltage_max", "Max Cell Voltage", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-top", EntityCategory.DIAGNOSTIC),
+        ("total_cell_voltage_min", "Min Cell Voltage", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-bottom", EntityCategory.DIAGNOSTIC),
+        ("total_cell_voltage_diff", "Cell Voltage Delta", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:format-align-middle", EntityCategory.DIAGNOSTIC),
     ]
 
-    for key, name, unit, dev_class, state_class, icon in overall_sensors:
-        initial_entities.append(GobelBatteryOverallSensor(coordinator, key, name, unit, dev_class, state_class, icon))
+    for key, name, unit, dev_class, state_class, icon, category in overall_sensors:
+        initial_entities.append(GobelBatteryOverallSensor(coordinator, key, name, unit, dev_class, state_class, icon, category))
 
     # Track registered pack IDs
     registered_packs = set()
@@ -147,6 +258,28 @@ async def async_setup_entry(
                         meta["device_class"],
                         meta["state_class"],
                         meta["icon"],
+                        meta["category"],
+                    )
+                )
+
+            extra = {}
+            if coordinator.bms_type == BMS_TYPE_JK_PB:
+                extra.update(JK_CONFIG_SENSORS)
+            if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
+                extra.update(PACE_COUNTER_SENSORS)
+            for metric, meta in extra.items():
+                new_entities.append(
+                    GobelBatteryPackSensor(
+                        coordinator,
+                        pack_id,
+                        metric,
+                        meta["name"],
+                        meta["unit"],
+                        meta["device_class"],
+                        meta["state_class"],
+                        meta["icon"],
+                        meta["category"],
+                        source_key=meta["key"],
                     )
                 )
 
@@ -179,7 +312,7 @@ async def async_setup_entry(
 class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
     """Sensor representing aggregate battery bank metrics."""
 
-    def __init__(self, coordinator, key, name, unit, device_class, state_class, icon):
+    def __init__(self, coordinator, key, name, unit, device_class, state_class, icon, category):
         """Initialize overall sensor."""
         super().__init__(coordinator)
         self._key = key
@@ -189,6 +322,7 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = device_class
         self._attr_state_class = state_class
         self._attr_icon = icon
+        self._attr_entity_category = category
 
     @property
     def device_info(self):
@@ -238,6 +372,10 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
             return round(sum(d.get("view_voltage", 0) for d in analog_packs) / total_packs_num, 2)
         elif self._key == "total_power":
             return round(sum(d.get("view_power", 0) for d in analog_packs), 2)
+        elif self._key == "total_energy_charged":
+            return round(sum(d.get("view_energy_charged", 0) for d in analog_packs), 3)
+        elif self._key == "total_energy_discharged":
+            return round(sum(d.get("view_energy_discharged", 0) for d in analog_packs), 3)
         
         # Cell Voltages aggregate
         all_cell_voltages = [v for d in analog_packs for v in d.get("cell_voltages", [])]
@@ -256,11 +394,12 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
 class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
     """Sensor representing a specific battery pack metric."""
 
-    def __init__(self, coordinator, pack_id, metric, name, unit, device_class, state_class, icon):
+    def __init__(self, coordinator, pack_id, metric, name, unit, device_class, state_class, icon, category, source_key=None):
         """Initialize pack sensor."""
         super().__init__(coordinator)
         self.pack_id = pack_id
         self._metric = metric
+        self._source_key = source_key
         display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
         
         self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} {name}"
@@ -269,6 +408,7 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = device_class
         self._attr_state_class = state_class
         self._attr_icon = icon
+        self._attr_entity_category = category
 
     @property
     def device_info(self):
@@ -291,7 +431,12 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         if not data:
             return False
         analog_packs = data.get("analog", [])
-        return any(p.get("pack_id") == self.pack_id for p in analog_packs)
+        pack_data = next((p for p in analog_packs if p.get("pack_id") == self.pack_id), None)
+        if pack_data is None:
+            return False
+        if self._source_key and self._source_key not in pack_data:
+            return False
+        return True
 
     @property
     def native_value(self):
@@ -306,6 +451,9 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         if not pack_data:
             return None
         
+        if self._source_key:
+            return pack_data.get(self._source_key)
+
         # Map metric keys
         if self._metric == "voltage":
             return pack_data.get("view_voltage")
@@ -325,6 +473,10 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
             return pack_data.get("view_cycle_number")
         elif self._metric == "balance_current":
             return pack_data.get("view_balance_current")
+        elif self._metric == "energy_charged":
+            return pack_data.get("view_energy_charged")
+        elif self._metric == "energy_discharged":
+            return pack_data.get("view_energy_discharged")
 
         return None
 
@@ -344,6 +496,7 @@ class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_icon = "mdi:sine-wave"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def device_info(self):
@@ -400,6 +553,7 @@ class GobelBatteryTemperatureSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_icon = "mdi:thermometer"
+        self._attr_entity_category = None
 
     @property
     def device_info(self):

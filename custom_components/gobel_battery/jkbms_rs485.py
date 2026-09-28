@@ -351,9 +351,12 @@ class JKBMS485:
             result['power_kw'] = raw_p / 1000000.0  # mW → kW
 
         # ---- Current: int32le at offset 158 (mA) ----
+        # Power in the frame is unsigned. Mirror the current sign so discharge is negative.
         if 162 <= len(data):
             raw_c = struct.unpack_from('<i', data, 158)[0]
             result['current_a'] = raw_c / 1000.0  # mA → A
+            if 'power_kw' in result and result['current_a'] < 0:
+                result['power_kw'] = -abs(result['power_kw'])
 
         # ---- Battery temp sensors: int16le at 162, 164, 254, 256, 258 (/10 = °C) ----
         temps = {
@@ -829,7 +832,7 @@ class JKBMS485:
             last_pack_count = 0
             stable_since = None
 
-            while time.time() - start_wait < 15.0:
+            while time.time() - start_wait < 20.0:
                 if not self.dynamic_cache:
                     time.sleep(0.2)
                     continue
@@ -843,7 +846,7 @@ class JKBMS485:
                     self.logger.info(
                         f"Discovery: found {current_pack_count} pack(s), waiting for more..."
                     )
-                elif stable_since and time.time() - stable_since >= 3.0:
+                elif stable_since and time.time() - stable_since >= 4.0:
                     # Pack count stable for 3s — discovery complete
                     self.logger.info(
                         f"Discovery complete: {current_pack_count} pack(s) "
@@ -950,7 +953,11 @@ class JKBMS485:
             # Current, Voltage, Power
             pack_data['view_current'] = dynamic.get('current_a', 0.0)
             pack_data['view_voltage'] = dynamic.get('voltage_v', 0.0)
-            pack_data['view_power'] = dynamic.get('power_kw', 0.0)
+            power_kw = dynamic.get('power_kw', 0.0)
+            current_a = dynamic.get('current_a', 0.0)
+            if current_a < 0:
+                power_kw = -abs(power_kw)
+            pack_data['view_power'] = power_kw
 
             # Balance current
             if 'balance_current_a' in dynamic:

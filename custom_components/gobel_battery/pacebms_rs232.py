@@ -756,34 +756,54 @@ class PACEBMS232:
                 offset += 2
                 u_offset += 2
 
-            # 4. SOC (1 byte)
+            # 4. SOC (1 byte). Slave frames sometimes put a non-SOC byte here (>100).
             if found_u - u_offset >= 1:
                 pack_soc = int(fields[offset], 16)
-                pack_data['view_SOC'] = round(float(pack_soc), 1)
                 offset += 1
                 u_offset += 1
+                full_cap = pack_data.get('view_full_capacity', 0) or 0
+                if pack_soc > 100 and full_cap > 0:
+                    pack_data['view_SOC'] = round(pack_remain_capacity / full_cap * 100, 1)
+                    self.logger.info(
+                        "SOC byte %s is above 100, using remain/full capacity ratio %.1f",
+                        pack_soc,
+                        pack_data['view_SOC'],
+                    )
+                else:
+                    pack_data['view_SOC'] = round(float(pack_soc), 1)
             else:
                 if pack_data.get('view_full_capacity', 0) > 0:
                     pack_data['view_SOC'] = round(pack_remain_capacity / pack_data['view_full_capacity'] * 100, 1)
                 else:
                     pack_data['view_SOC'] = 0.0
 
-            # 5. Cumulative Charge Capacity (4 bytes)
+            # 5. Cumulative Charge Capacity (4 bytes, unit 1 Ah)
             if found_u - u_offset >= 4:
+                pack_data['view_cumulative_charge_ah'] = int(
+                    fields[offset] + fields[offset + 1] + fields[offset + 2] + fields[offset + 3], 16
+                )
                 offset += 4
                 u_offset += 4
 
-            # 6. Cumulative Discharge Capacity (4 bytes)
+            # 6. Cumulative Discharge Capacity (4 bytes, unit 1 Ah)
             if found_u - u_offset >= 4:
+                pack_data['view_cumulative_discharge_ah'] = int(
+                    fields[offset] + fields[offset + 1] + fields[offset + 2] + fields[offset + 3], 16
+                )
                 offset += 4
                 u_offset += 4
 
-            # 7. SOH (1 byte)
+            # 7. SOH (1 byte). 0 on slaves that do not populate the field.
             if found_u - u_offset >= 1:
                 pack_soh = int(fields[offset], 16)
-                pack_data['view_SOH'] = round(float(pack_soh), 1)
                 offset += 1
                 u_offset += 1
+                design_cap = pack_data.get('view_design_capacity', 0) or 0
+                full_cap = pack_data.get('view_full_capacity', 0) or 0
+                if (pack_soh == 0 or pack_soh > 100) and design_cap > 0 and full_cap > 0:
+                    pack_data['view_SOH'] = round(full_cap / design_cap * 100, 1)
+                else:
+                    pack_data['view_SOH'] = round(float(pack_soh), 1)
             else:
                 if pack_data.get('view_design_capacity', 0) > 0:
                     pack_data['view_SOH'] = round(pack_data['view_full_capacity'] / pack_data['view_design_capacity'] * 100, 0)

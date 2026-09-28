@@ -1,0 +1,62 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gobel Battery",
+        "description": "BMS und Verbindung wählen. Die Einstellungen lassen sich später über Neu konfigurieren ändern.",
+        "data": {
+          "device_name": "Gerätename",
+          "bms_type": "BMS-Typ",
+          "connection_type": "Verbindung",
+          "battery_port": "Batterie-Port",
+          "poll_interval": "Abfrageintervall (Sekunden)",
+          "max_parallel_allowed": "Max. parallele Packs",
+          "jk_display_index_start": "JK-Pack-Indexstart"
+        }
+      },
+      "reconfigure": {
+        "title": "Gobel Battery neu konfigurieren",
+        "description": "Verbindung oder BMS-Einstellungen ändern. Home Assistant lädt das Gerät danach neu.",
+        "data": {
+          "device_name": "Gerätename",
+          "bms_type": "BMS-Typ",
+          "connection_type": "Verbindung",
+          "battery_port": "Batterie-Port",
+          "poll_interval": "Abfrageintervall (Sekunden)",
+          "max_parallel_allowed": "Max. parallele Packs",
+          "jk_display_index_start": "JK-Pack-Indexstart"
+        }
+      },
+      "network": {
+        "title": "Netzwerkverbindung",
+        "data": {
+          "ip_address": "IP-Adresse",
+          "ip_port": "TCP-Port"
+        }
+      },
+      "serial": {
+        "title": "Serielle Verbindung",
+        "data": {
+          "usb_port": "Serielles Gerät",
+          "baud_rate": "Baudrate"
+        }
+      },
+      "init": {
+        "title": "Gobel-Battery-Optionen",
+        "description": "Diese Werte werden sofort übernommen. IP-Adresse, serieller Port oder BMS-Typ werden über Neu konfigurieren geändert.",
+        "data": {
+          "poll_interval": "Abfrageintervall (Sekunden)",
+          "max_parallel_allowed": "Max. parallele Packs",
+          "jk_display_index_start": "JK-Pack-Indexstart"
+        }
+      }
+    },
+    "error": {
+      "already_configured": "Diese Verbindung ist bereits eingerichtet."
+    },
+    "abort": {
+      "already_configured": "Diese Verbindung ist bereits eingerichtet.",
+      "reconfigure_successful": "Konfiguration aktualisiert. Das Gerät wird neu geladen."
+    }
+  }
+}

@@ -301,25 +301,37 @@ class PACEBMSWIFI:
             offset += 2
             pack_data['view_design_capacity'] = pack_design_capacity
 
-            # SOC percent (1 byte)
+            # SOC percent (1 byte). Ignore values above 100 and use capacity instead.
             if offset < len(fields):
                 soc_percent = int(fields[offset], 16)
                 offset += 1
-                pack_data['view_SOC'] = round(float(soc_percent), 1)
+                if soc_percent > 100 and pack_full_capacity > 0:
+                    pack_data['view_SOC'] = round(pack_remain_capacity / pack_full_capacity * 100.0, 1)
+                else:
+                    pack_data['view_SOC'] = round(float(soc_percent), 1)
 
-            # Skip Accumulated Charge Capacity (4 bytes)
+            # Accumulated Charge Capacity (4 bytes, unit 1 Ah)
             if offset + 3 < len(fields):
+                pack_data['view_cumulative_charge_ah'] = int(
+                    fields[offset] + fields[offset + 1] + fields[offset + 2] + fields[offset + 3], 16
+                )
                 offset += 4
 
-            # Skip Accumulated Discharge Capacity (4 bytes)
+            # Accumulated Discharge Capacity (4 bytes, unit 1 Ah)
             if offset + 3 < len(fields):
+                pack_data['view_cumulative_discharge_ah'] = int(
+                    fields[offset] + fields[offset + 1] + fields[offset + 2] + fields[offset + 3], 16
+                )
                 offset += 4
 
             # SOH (1 byte)
             if offset < len(fields):
                 soh_percent = int(fields[offset], 16)
                 offset += 1
-                pack_data['view_SOH'] = round(float(soh_percent), 1)
+                if (soh_percent == 0 or soh_percent > 100) and pack_design_capacity > 0 and pack_full_capacity > 0:
+                    pack_data['view_SOH'] = round(pack_full_capacity / pack_design_capacity * 100.0, 1)
+                else:
+                    pack_data['view_SOH'] = round(float(soh_percent), 1)
             else:
                 pack_data['view_SOH'] = round(pack_full_capacity / pack_design_capacity * 100.0, 0) if pack_design_capacity > 0 else 100.0
 

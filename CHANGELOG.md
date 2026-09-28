@@ -4,7 +4,28 @@ description:
 
 # Changelog
 
+## [2.1.0] - 2026-09-28
+### Added
+-   [Config] Reconfigure flow so host, port, serial device, BMS type and poll interval can be changed without deleting the integration. A Configure menu edits poll interval, parallel-pack limit and the JK display index.
+-   [Statistics] Energy charged / energy discharged sensors (`Wh`, `total_increasing`) so long-term statistics and the Energy dashboard work. Cycle count is `total_increasing`.
+-   [Entities] Primary readings stay on the device page. BMS limits are `config`. Cell voltages, SOH, cycles, warnings and balance flags are `diagnostic`.
+-   [JKBMS] Charge current limit and discharge current limit (and related voltage setpoints) from the setup frame, shown under Configuration.
+-   [PACE] Per-cell voltage warnings, temperature warnings, pack warning bits and balance-active sensors that the old add-on exposed.
+-   [PACE] Cumulative charge/discharge counters from the analog frame (diagnostic, long-term statistics).
+
+### Fixed
+-   [JKBMS] Power follows the sign of the current, so discharge is negative (issue #29).
+-   [PACE] Slave packs that report SOC above 100 (or SOH 0) fall back to remain/full and full/design (issue #28).
+-   [JKBMS] Pack discovery waits a little longer so slower 4-pack broadcasts are less likely to be cut off (issue #11). This does not fix a bus that never broadcasts the missing packs.
+
+### Not changed
+-   Upstream pull requests are the author's own merges. Nothing external was left to port.
+-   Pace CCL/DCL (issue #30) are not in the analog frame. JK limits are exposed; Pace still needs commands D9H/DBH, which are not polled yet.
+
+---------------
+
 ## [2.0.12] - 2026-07-25
+
 ### Fixed
 -   [JKBMS] Fixed setup frame voltage register parsing for `VolInverterMaxCharge` (Inverter Max Charge Voltage) at offset 38 and `VolFloatCharge` (Float Charge Voltage) at offset 42 (previously misidentified as battery undervoltage/overvoltage protection).
 

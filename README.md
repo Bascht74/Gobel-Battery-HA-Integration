@@ -53,7 +53,7 @@ Unlike the previous Add-on version, this integration **does not require an MQTT 
 1. Ensure [HACS (Home Assistant Community Store)](https://hacs.xyz/) is installed.
 2. Go to **HACS -> Integrations** in Home Assistant.
 3. Click the three dots in the top-right corner and select **Custom repositories**.
-4. Paste the URL of this repository: `https://github.com/fancyui/Gobel-Battery-HA-Integration`
+4. Paste the URL of this repository: `https://github.com/Bascht74/Gobel-Battery-HA-Integration`
 5. Select **Integration** as the Category and click **Add**.
 6. Find the **Gobel Battery Monitor** integration in HACS and click **Download**.
 7. Restart Home Assistant.
@@ -71,3 +71,9 @@ Unlike the previous Add-on version, this integration **does not require an MQTT 
 3. Search for **Gobel Battery Monitor** and click to set it up.
 4. Follow the configuration steps on-screen to choose your BMS type, connection method (Network vs. Serial), and input connection parameters.
 5. If you have multiple battery banks with different IPs/ports, simply click **Add Integration** again to configure additional instances.
+
+To change an existing device, open it under **Settings -> Devices & Services** and choose **Reconfigure** (IP, port, BMS type, serial device). **Configure** changes the poll interval, the parallel-pack limit and the JK pack index. Home Assistant reloads the device after either change.
+
+Daily sensors (SOC, voltage, current, power, energy) stay on the device page and record long-term statistics. BMS limits are under **Configuration**. Cell voltages, warnings and balance flags are under **Diagnostic**.
+
+This repository is a maintained fork of [fancyui/Gobel-Battery-HA-Integration](https://github.com/fancyui/Gobel-Battery-HA-Integration).
