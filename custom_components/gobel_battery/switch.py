@@ -35,7 +35,7 @@ async def async_setup_entry(
         ]
         entities = []
         for pack_id in pack_ids:
-            if pack_id in registered:
+            if pack_id in registered or not coordinator.owns_configuration(pack_id):
                 continue
             registered.add(pack_id)
             for key, translation_key, section, icon in SWITCHES:

@@ -431,6 +431,11 @@ async def async_setup_entry(
             if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 extra.update(PACE_COUNTER_SENSORS)
             for metric, meta in extra.items():
+                if (
+                    meta.get("category") == EntityCategory.CONFIG
+                    and not coordinator.owns_configuration(pack_id)
+                ):
+                    continue
                 if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG and not meta.get("read_only"):
                     continue
                 new_entities.append(

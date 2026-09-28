@@ -48,6 +48,13 @@ def parse_internal_version(payload):
     return found
 
 
+def pack_owns_configuration(battery_port, pack_id):
+    """RS485 can address every pack. RS232 only reaches the master."""
+    if battery_port == "rs485":
+        return True
+    return pack_id in (None, 0)
+
+
 def read_identity(bms, pack_number=None):
     """Read the three identity commands. Missing answers are skipped."""
     found = {}

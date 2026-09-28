@@ -40,7 +40,7 @@ from .pace_config import (
     read_group,
     write_configuration_field,
 )
-from .pace_identity import read_identity
+from .pace_identity import pack_owns_configuration, read_identity
 from .pace_write import write_buzzer, write_clock, write_led, write_limiter, write_limiter_gear, write_mosfet
 from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
 from .pacebms_rs232 import PACEBMS232
@@ -195,6 +195,10 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         """True when the user enabled writable BMS configuration."""
         return bool(self.entry.options.get(CONF_EXPERT_CONFIG, False))
 
+    def owns_configuration(self, pack_id):
+        """True when a write to this pack reaches its own BMS."""
+        return pack_owns_configuration(self.battery_port, pack_id)
+
     @property
     def can_write_config(self):
         """Expert mode only replaces sensors when this protocol can be written."""
@@ -343,6 +347,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                 slot["ts"] = now
 
         for pack in packs:
+            if not self.owns_configuration(pack.get("pack_id", 0)):
+                continue
             cache_key = str(pack.get("pack_id", 0)) if per_pack else "all"
             values = self._config_cache.get(cache_key, {}).get("values")
             if values:
@@ -361,6 +367,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         per_pack = self.battery_port == "rs485"
         for pack in packs:
             pack_id = pack.get("pack_id", 0)
+            if not self.owns_configuration(pack_id):
+                continue
             slot = self._identity.setdefault(pack_id, {"ts": 0})
             if slot.get("software_version") and now - slot["ts"] < 3600:
                 self._copy_identity(pack, slot)
@@ -383,6 +391,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
 
     def version_fields(self, pack_id=None):
         """Home Assistant device-registry fields for one pack, or the bank."""
+        if pack_id not in (None,) and not self.owns_configuration(pack_id):
+            return {"sw_version": None, "hw_version": None, "serial_number": None}
         slot = {}
         if pack_id is not None:
             slot = self._identity.get(pack_id, {})
