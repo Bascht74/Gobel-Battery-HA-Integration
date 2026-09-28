@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI
 from .measurements import volts_from_millivolts, watts_from_kilowatts
-from .pace_config import FIELDS
+from .pace_config import FIELDS, READ_ONLY
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,6 +34,24 @@ def _pace_configuration_sensors():
             "precision": field["precision"],
         }
         for field in FIELDS
+    }
+
+
+def _pace_readonly_sensors():
+    """Values that stay sensors even in expert mode. They are never written."""
+    return {
+        field["key"]: {
+            "name": field["name"],
+            "key": f"view_{field['key']}",
+            "unit": field["unit"],
+            "device_class": None,
+            "state_class": None,
+            "icon": field["icon"],
+            "category": EntityCategory.CONFIG,
+            "precision": field["precision"],
+            "read_only": True,
+        }
+        for field in READ_ONLY
     }
 
 # Predefined metadata for overall and pack sensors.
@@ -408,11 +426,12 @@ async def async_setup_entry(
                 extra.update(CURRENT_LIMIT_SENSORS)
             else:
                 extra.update(_pace_configuration_sensors())
+                extra.update(_pace_readonly_sensors())
                 extra["limiter_gear"] = PACE_CONFIG_SENSORS["limiter_gear"]
             if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 extra.update(PACE_COUNTER_SENSORS)
             for metric, meta in extra.items():
-                if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG:
+                if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG and not meta.get("read_only"):
                     continue
                 new_entities.append(
                     GobelBatteryPackSensor(

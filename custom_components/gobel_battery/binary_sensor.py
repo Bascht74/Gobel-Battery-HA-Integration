@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import BMS_TYPE_JK_PB, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +48,10 @@ BINARY_SENSORS_METADATA = {
         "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
         "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
         "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
+    },
+    "control_state": {
+        "buzzer_warn_function": ("Buzzer Enabled", None, EntityCategory.CONFIG),
+        "led_warn_function": ("LED Alarm Enabled", None, EntityCategory.CONFIG),
     },
     "warn_state_1": {
         "warn_high_discharge_current": ("Discharge Overcurrent Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
@@ -98,9 +102,13 @@ async def async_setup_entry(
                 continue
                 
             for sub_dict, sensors in BINARY_SENSORS_METADATA.items():
+                if sub_dict == "control_state" and coordinator.bms_type == BMS_TYPE_JK_PB:
+                    continue
                 for key, (name, device_class, category) in sensors.items():
-                    if coordinator.can_write_config and (
-                        category == EntityCategory.CONFIG or key == "status_current_limit_enabled"
+                    if coordinator.can_write_config and key in (
+                        "status_charge_enabled",
+                        "status_discharge_enabled",
+                        "status_current_limit_enabled",
                     ):
                         continue
                     new_entities.append(

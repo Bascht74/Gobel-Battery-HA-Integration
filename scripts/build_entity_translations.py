@@ -274,6 +274,8 @@ BINARY = {
         "status_discharge_enabled": "Discharge Enabled Status",
         "status_charge_enabled": "Charge Enabled Status",
         "status_current_limit_enabled": "Current Limiter Active",
+        "buzzer_warn_function": "Buzzer Enabled",
+        "led_warn_function": "LED Alarm Enabled",
         "warn_high_discharge_current": "Discharge Overcurrent Warning",
         "warn_high_charge_current": "Charge Overcurrent Warning",
         "warn_low_total_voltage": "Total Under-Voltage Warning",
@@ -322,6 +324,8 @@ BINARY = {
         "status_discharge_enabled": "Entladen freigegeben",
         "status_charge_enabled": "Laden freigegeben",
         "status_current_limit_enabled": "Strombegrenzer aktiv",
+        "buzzer_warn_function": "Summer aktiv",
+        "led_warn_function": "LED-Alarm aktiv",
         "warn_high_discharge_current": "Entladeüberstromwarnung",
         "warn_high_charge_current": "Ladeüberstromwarnung",
         "warn_low_total_voltage": "Gesamt-Unterspannungswarnung",
@@ -370,6 +374,8 @@ BINARY = {
         "status_discharge_enabled": "放电已启用",
         "status_charge_enabled": "充电已启用",
         "status_current_limit_enabled": "限流已启用",
+        "buzzer_warn_function": "蜂鸣器已启用",
+        "led_warn_function": "LED告警已启用",
         "warn_high_discharge_current": "放电过流告警",
         "warn_high_charge_current": "充电过流告警",
         "warn_low_total_voltage": "总压过低告警",
@@ -418,6 +424,8 @@ BINARY = {
         "status_discharge_enabled": "Descarga habilitada",
         "status_charge_enabled": "Carga habilitada",
         "status_current_limit_enabled": "Limitador de corriente activo",
+        "buzzer_warn_function": "Zumbador activado",
+        "led_warn_function": "Alarma LED activada",
         "warn_high_discharge_current": "Aviso de sobrecorriente de descarga",
         "warn_high_charge_current": "Aviso de sobrecorriente de carga",
         "warn_low_total_voltage": "Aviso de subtensión total",
@@ -466,6 +474,8 @@ BINARY = {
         "status_discharge_enabled": "Décharge activée",
         "status_charge_enabled": "Charge activée",
         "status_current_limit_enabled": "Limiteur de courant actif",
+        "buzzer_warn_function": "Buzzer activé",
+        "led_warn_function": "Alarme LED activée",
         "warn_high_discharge_current": "Avertissement surintensité de décharge",
         "warn_high_charge_current": "Avertissement surintensité de charge",
         "warn_low_total_voltage": "Avertissement sous-tension totale",
@@ -516,8 +526,10 @@ def names(mapping):
 
 def entity_block(lang):
     extra = json.loads((ROOT.parents[1] / "scripts" / "config_labels.json").read_text())
+    readonly = json.loads((ROOT.parents[1] / "scripts" / "readonly_labels.json").read_text())
     labels = dict(PACK[lang])
     labels.update(extra[lang])
+    labels.update(readonly[lang])
     sensors = names(labels)
     sensors.update(names(TOTAL[lang]))
     number_keys = list(NUMBER_KEYS) + [key for key in extra["en"] if key not in NUMBER_KEYS]

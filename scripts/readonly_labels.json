@@ -1,0 +1,47 @@
+{
+  "en": {
+    "calibrated_remaining_capacity": "Calibrated Remaining Capacity",
+    "calibrated_actual_capacity": "Calibrated Actual Capacity",
+    "calibrated_design_capacity": "Calibrated Design Capacity",
+    "bms_clock": "BMS Clock",
+    "can_protocol": "CAN Protocol",
+    "rs485_protocol": "RS485 Protocol",
+    "protocol_mode": "Protocol Mode"
+  },
+  "de": {
+    "calibrated_remaining_capacity": "Kalibrierte Restkapazität",
+    "calibrated_actual_capacity": "Kalibrierte Ist-Kapazität",
+    "calibrated_design_capacity": "Kalibrierte Nennkapazität",
+    "bms_clock": "BMS-Uhr",
+    "can_protocol": "CAN-Protokoll",
+    "rs485_protocol": "RS485-Protokoll",
+    "protocol_mode": "Protokollmodus"
+  },
+  "zh-Hans": {
+    "calibrated_remaining_capacity": "校准剩余容量",
+    "calibrated_actual_capacity": "校准实际容量",
+    "calibrated_design_capacity": "校准设计容量",
+    "bms_clock": "BMS时钟",
+    "can_protocol": "CAN协议",
+    "rs485_protocol": "RS485协议",
+    "protocol_mode": "协议模式"
+  },
+  "es": {
+    "calibrated_remaining_capacity": "Capacidad restante calibrada",
+    "calibrated_actual_capacity": "Capacidad real calibrada",
+    "calibrated_design_capacity": "Capacidad de diseño calibrada",
+    "bms_clock": "Reloj del BMS",
+    "can_protocol": "Protocolo CAN",
+    "rs485_protocol": "Protocolo RS485",
+    "protocol_mode": "Modo de protocolo"
+  },
+  "fr": {
+    "calibrated_remaining_capacity": "Capacité restante calibrée",
+    "calibrated_actual_capacity": "Capacité réelle calibrée",
+    "calibrated_design_capacity": "Capacité nominale calibrée",
+    "bms_clock": "Horloge BMS",
+    "can_protocol": "Protocole CAN",
+    "rs485_protocol": "Protocole RS485",
+    "protocol_mode": "Mode de protocole"
+  }
+}

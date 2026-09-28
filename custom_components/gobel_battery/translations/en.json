@@ -304,6 +304,27 @@
       "limiter_start_current": {
         "name": "Charge Limiter Start Current"
       },
+      "calibrated_remaining_capacity": {
+        "name": "Calibrated Remaining Capacity"
+      },
+      "calibrated_actual_capacity": {
+        "name": "Calibrated Actual Capacity"
+      },
+      "calibrated_design_capacity": {
+        "name": "Calibrated Design Capacity"
+      },
+      "bms_clock": {
+        "name": "BMS Clock"
+      },
+      "can_protocol": {
+        "name": "CAN Protocol"
+      },
+      "rs485_protocol": {
+        "name": "RS485 Protocol"
+      },
+      "protocol_mode": {
+        "name": "Protocol Mode"
+      },
       "packs_count": {
         "name": "{device} Packs Count"
       },
@@ -419,6 +440,12 @@
       },
       "status_current_limit_enabled": {
         "name": "Current Limiter Active"
+      },
+      "buzzer_warn_function": {
+        "name": "Buzzer Enabled"
+      },
+      "led_warn_function": {
+        "name": "LED Alarm Enabled"
       },
       "warn_high_discharge_current": {
         "name": "Discharge Overcurrent Warning"

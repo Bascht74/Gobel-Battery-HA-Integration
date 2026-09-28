@@ -340,6 +340,27 @@
       "limiter_start_current": {
         "name": "Startstrom des Ladestrombegrenzers"
       },
+      "calibrated_remaining_capacity": {
+        "name": "Kalibrierte Restkapazität"
+      },
+      "calibrated_actual_capacity": {
+        "name": "Kalibrierte Ist-Kapazität"
+      },
+      "calibrated_design_capacity": {
+        "name": "Kalibrierte Nennkapazität"
+      },
+      "bms_clock": {
+        "name": "BMS-Uhr"
+      },
+      "can_protocol": {
+        "name": "CAN-Protokoll"
+      },
+      "rs485_protocol": {
+        "name": "RS485-Protokoll"
+      },
+      "protocol_mode": {
+        "name": "Protokollmodus"
+      },
       "packs_count": {
         "name": "{device} Packanzahl"
       },
@@ -455,6 +476,12 @@
       },
       "status_current_limit_enabled": {
         "name": "Strombegrenzer aktiv"
+      },
+      "buzzer_warn_function": {
+        "name": "Summer aktiv"
+      },
+      "led_warn_function": {
+        "name": "LED-Alarm aktiv"
       },
       "warn_high_discharge_current": {
         "name": "Entladeüberstromwarnung"

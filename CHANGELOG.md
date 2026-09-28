@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.2] - 2026-09-29
+### Added
+-   Read-only Pace sensors for calibrated capacity, the BMS clock, CAN and RS485 protocol, plus buzzer and LED status. Expert mode does not turn these into controls.
+
+---------------
+
 ## [2.4.1] - 2026-09-29
 ### Added
 -   Network setup probes a Pace battery. A command reply is saved as active Pace. A pushed stream is saved as receive-only Pace. The BMS type names say which is which.

@@ -110,6 +110,16 @@ FIELDS = (
     {"key": "limiter_start_current", "name": "Charge Limiter Start Current", "group": "limiter_start", "unit": "A", "min": 5, "max": 150, "step": 1, "precision": 0, "device_class": "current", "icon": "mdi:current-dc"},
 )
 
+READ_ONLY = (
+    {"key": "calibrated_remaining_capacity", "name": "Calibrated Remaining Capacity", "unit": "Ah", "device_class": None, "icon": "mdi:battery-heart", "precision": 2},
+    {"key": "calibrated_actual_capacity", "name": "Calibrated Actual Capacity", "unit": "Ah", "device_class": None, "icon": "mdi:battery-heart", "precision": 2},
+    {"key": "calibrated_design_capacity", "name": "Calibrated Design Capacity", "unit": "Ah", "device_class": None, "icon": "mdi:battery-heart", "precision": 2},
+    {"key": "bms_clock", "name": "BMS Clock", "unit": None, "device_class": None, "icon": "mdi:clock-outline", "precision": None},
+    {"key": "can_protocol", "name": "CAN Protocol", "unit": None, "device_class": None, "icon": "mdi:lan", "precision": None},
+    {"key": "rs485_protocol", "name": "RS485 Protocol", "unit": None, "device_class": None, "icon": "mdi:lan", "precision": None},
+    {"key": "protocol_mode", "name": "Protocol Mode", "unit": None, "device_class": None, "icon": "mdi:lan", "precision": None},
+)
+
 FIELD_BY_KEY = {field["key"]: field for field in FIELDS}
 
 # decode(payload) -> values, encode(payload, values) mutates a bytearray.
@@ -219,6 +229,97 @@ def _encode_limiter(payload, values):
     payload[0:2] = int(round(values["limiter_start_current"])).to_bytes(2, "big")
 
 
+def _ah(payload, offset):
+    return round(int.from_bytes(payload[offset:offset + 2], "big") / 100.0, 2)
+
+
+def _decode_capacity(payload):
+    return {
+        "calibrated_remaining_capacity": _ah(payload, 0),
+        "calibrated_actual_capacity": _ah(payload, 2),
+        "calibrated_design_capacity": _ah(payload, 4),
+    }
+
+
+def _decode_clock(payload):
+    year = 2000 + payload[0]
+    stamp = f"{year:04d}-{payload[1]:02d}-{payload[2]:02d} {payload[3]:02d}:{payload[4]:02d}:{payload[5]:02d}"
+    return {"bms_clock": stamp}
+
+
+CAN_PROTOCOLS = {
+    0xFF: "Off",
+    0x00: "PACE",
+    0x01: "Pylon",
+    0x02: "Growatt",
+    0x03: "Victron",
+    0x04: "Schneider",
+    0x05: "LuxPower",
+    0x06: "SoroTec",
+    0x07: "SMA",
+    0x08: "GoodWe",
+    0x09: "Studer",
+    0x0A: "Sofar",
+    0x0B: "Must",
+    0x0C: "Solis",
+    0x0D: "DIDU",
+    0x0E: "Senergy",
+    0x0F: "TBB",
+    0x10: "Pylon V202",
+    0x11: "Growatt V109",
+    0x12: "Must V202",
+    0x13: "Afore",
+    0x14: "INVT",
+    0x15: "FUJI",
+    0x16: "Sofar V21003",
+}
+
+RS485_PROTOCOLS = {
+    0xFF: "Off",
+    0x00: "Pace Modbus",
+    0x01: "Pylon",
+    0x02: "Growatt",
+    0x03: "Voltronic",
+    0x04: "Schneider",
+    0x05: "PHOCOS",
+    0x06: "LuxPower",
+    0x07: "Solar",
+    0x08: "Lithium",
+    0x09: "EP",
+    0x0A: "RTU04",
+    0x0B: "LuxPower V01",
+    0x0C: "LuxPower V03",
+    0x0D: "SRNE",
+    0x0E: "LEOCH",
+    0x0F: "Pylon F",
+    0x10: "Afore",
+    0x11: "UPS AGXN",
+    0x12: "Orex Sunpolo",
+    0x13: "XIONGTAO",
+    0x14: "RONGKE",
+    0x15: "XINRUI",
+    0x16: "ELTEK",
+    0x17: "GT",
+    0x18: "Leoch V106",
+}
+
+
+def _protocol_name(table, code):
+    return table.get(code, f"Unknown {code}")
+
+
+def _decode_protocols(payload):
+    return {
+        "can_protocol": _protocol_name(CAN_PROTOCOLS, payload[0]),
+        "rs485_protocol": _protocol_name(RS485_PROTOCOLS, payload[1]),
+        "protocol_mode": {0x00: "Auto", 0x01: "Manual", 0xFF: "Off"}.get(payload[2], f"Unknown {payload[2]}"),
+    }
+
+
+def _keep(payload, values):
+    return None
+
+
 _OVER = (
     "charge_ot_alarm",
     "charge_ot_protect",
@@ -261,6 +362,9 @@ GROUPS = (
     {"name": "mosfet", "read": "E1", "write": "E0", "write_length": 7, **dict(zip(("decode", "encode"), _temp_group(("mosfet_ot_alarm", "mosfet_ot_protect", "mosfet_ot_release"), 1)))},
     {"name": "environment", "read": "E7", "write": "E6", "write_length": 13, **dict(zip(("decode", "encode"), _temp_group(_ENV, 1)))},
     {"name": "limiter_start", "read": "ED", "write": "EE", "write_length": 2, "decode": _decode_limiter, "encode": _encode_limiter},
+    {"name": "capacity", "read": "A6", "write": None, "write_length": 6, "decode": _decode_capacity, "encode": _keep},
+    {"name": "clock", "read": "B1", "write": None, "write_length": 6, "decode": _decode_clock, "encode": _keep},
+    {"name": "protocols", "read": "EB", "write": None, "write_length": 3, "decode": _decode_protocols, "encode": _keep},
 )
 
 GROUP_BY_NAME = {group["name"]: group for group in GROUPS}

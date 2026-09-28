@@ -121,6 +121,25 @@ EXAMPLES = {
         "~250046EEC0040064FCA4\r",
         {"view_limiter_start_current": 100},
     ),
+    "capacity": (
+        "~25004600400C183C286A2710FB0E\r",
+        None,
+        {
+            "view_calibrated_remaining_capacity": 62.04,
+            "view_calibrated_actual_capacity": 103.46,
+            "view_calibrated_design_capacity": 100.0,
+        },
+    ),
+    "clock": (
+        "~25004600400C180815051D1FFB10\r",
+        None,
+        {"view_bms_clock": "2024-08-21 05:29:31"},
+    ),
+    "protocols": (
+        "~25004600A006131400FC6F\r",
+        None,
+        {"view_can_protocol": "Afore", "view_rs485_protocol": "RONGKE", "view_protocol_mode": "Auto"},
+    ),
 }
 
 
@@ -130,6 +149,8 @@ def test_examples_decode_and_write_back_like_pbms_tools():
         read_frame, write_example, expected = EXAMPLES[group["name"]]
         payload = info_payload(read_frame)
         assert decode_group(group, payload) == expected
+        if group["write"] is None:
+            continue
         written = encode_group(group, payload, expected)
         frame = write_frame(bms, group, written)
         if group["name"] == "pack_ov":

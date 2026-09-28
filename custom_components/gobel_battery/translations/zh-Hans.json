@@ -244,6 +244,27 @@
       "limiter_start_current": {
         "name": "充电限流启动电流"
       },
+      "calibrated_remaining_capacity": {
+        "name": "校准剩余容量"
+      },
+      "calibrated_actual_capacity": {
+        "name": "校准实际容量"
+      },
+      "calibrated_design_capacity": {
+        "name": "校准设计容量"
+      },
+      "bms_clock": {
+        "name": "BMS时钟"
+      },
+      "can_protocol": {
+        "name": "CAN协议"
+      },
+      "rs485_protocol": {
+        "name": "RS485协议"
+      },
+      "protocol_mode": {
+        "name": "协议模式"
+      },
       "packs_count": {
         "name": "{device} 电池包数量"
       },
@@ -359,6 +380,12 @@
       },
       "status_current_limit_enabled": {
         "name": "限流已启用"
+      },
+      "buzzer_warn_function": {
+        "name": "蜂鸣器已启用"
+      },
+      "led_warn_function": {
+        "name": "LED告警已启用"
       },
       "warn_high_discharge_current": {
         "name": "放电过流告警"

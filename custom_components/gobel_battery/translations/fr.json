@@ -244,6 +244,27 @@
       "limiter_start_current": {
         "name": "Courant de démarrage du limiteur"
       },
+      "calibrated_remaining_capacity": {
+        "name": "Capacité restante calibrée"
+      },
+      "calibrated_actual_capacity": {
+        "name": "Capacité réelle calibrée"
+      },
+      "calibrated_design_capacity": {
+        "name": "Capacité nominale calibrée"
+      },
+      "bms_clock": {
+        "name": "Horloge BMS"
+      },
+      "can_protocol": {
+        "name": "Protocole CAN"
+      },
+      "rs485_protocol": {
+        "name": "Protocole RS485"
+      },
+      "protocol_mode": {
+        "name": "Mode de protocole"
+      },
       "packs_count": {
         "name": "{device} Nombre de packs"
       },
@@ -359,6 +380,12 @@
       },
       "status_current_limit_enabled": {
         "name": "Limiteur de courant actif"
+      },
+      "buzzer_warn_function": {
+        "name": "Buzzer activé"
+      },
+      "led_warn_function": {
+        "name": "Alarme LED activée"
       },
       "warn_high_discharge_current": {
         "name": "Avertissement surintensité de décharge"
