@@ -10,9 +10,9 @@ from .const import DOMAIN
 from .expert_entity import GobelExpertEntity
 
 SWITCHES = (
-    ("charge_switch", "Charge Enabled", "status_charge_enabled", "mdi:battery-charging"),
-    ("discharge_switch", "Discharge Enabled", "status_discharge_enabled", "mdi:battery-arrow-down"),
-    ("limiter_switch", "Charge Current Limiter", "status_current_limit_enabled", "mdi:speedometer"),
+    ("charge_switch", "status_charge_enabled", "mdi:battery-charging"),
+    ("discharge_switch", "status_discharge_enabled", "mdi:battery-arrow-down"),
+    ("limiter_switch", "status_current_limit_enabled", "mdi:speedometer"),
 )
 
 
@@ -36,8 +36,8 @@ async def async_setup_entry(
             if pack_id in registered:
                 continue
             registered.add(pack_id)
-            for key, name, flag, icon in SWITCHES:
-                entities.append(GobelExpertSwitch(coordinator, pack_id, key, name, flag, icon))
+            for key, translation_key, icon in SWITCHES:
+                entities.append(GobelExpertSwitch(coordinator, pack_id, key, translation_key, icon))
         if entities:
             async_add_entities(entities)
 
@@ -48,9 +48,9 @@ async def async_setup_entry(
 class GobelExpertSwitch(GobelExpertEntity, SwitchEntity):
     """MOSFET or charge-limiter switch."""
 
-    def __init__(self, coordinator, pack_id, key, name, flag, icon):
-        super().__init__(coordinator, pack_id, key, name)
-        self._flag = flag
+    def __init__(self, coordinator, pack_id, key, translation_key, icon):
+        super().__init__(coordinator, pack_id, key, translation_key)
+        self._flag = translation_key
         self._attr_icon = icon
 
     @property

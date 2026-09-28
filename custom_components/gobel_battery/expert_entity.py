@@ -11,12 +11,12 @@ class GobelExpertEntity(CoordinatorEntity):
 
     _attr_entity_category = EntityCategory.CONFIG
 
-    def __init__(self, coordinator, pack_id, key, name):
+    def __init__(self, coordinator, pack_id, key, translation_key):
         super().__init__(coordinator)
         self.pack_id = pack_id
         self._key = key
-        display = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-        self._attr_name = f"{coordinator.device_name} Pack {display:02d} {name}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_expert_{key}"
 
     @property

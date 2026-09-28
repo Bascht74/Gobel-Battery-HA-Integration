@@ -198,6 +198,38 @@ CURRENT_LIMIT_SENSORS = {
     },
 }
 
+PACE_CONFIG_SENSORS = {
+    "charge_current_alarm": {
+        "name": "Charge Current Alarm",
+        "key": "view_charge_current_alarm",
+        "unit": "A",
+        "device_class": SensorDeviceClass.CURRENT,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:current-dc",
+        "category": EntityCategory.CONFIG,
+        "precision": 1,
+    },
+    "discharge_current_alarm": {
+        "name": "Discharge Current Alarm",
+        "key": "view_discharge_current_alarm",
+        "unit": "A",
+        "device_class": SensorDeviceClass.CURRENT,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "icon": "mdi:current-dc",
+        "category": EntityCategory.CONFIG,
+        "precision": 1,
+    },
+    "limiter_gear": {
+        "name": "Charge Limiter Gear",
+        "key": None,
+        "unit": None,
+        "device_class": None,
+        "state_class": None,
+        "icon": "mdi:speedometer",
+        "category": EntityCategory.CONFIG,
+    },
+}
+
 # JK setup frame: these are configured limits, not live measurements.
 JK_CONFIG_SENSORS = {
     "cell_ovp": {
@@ -349,6 +381,8 @@ async def async_setup_entry(
                 extra.update(JK_CONFIG_SENSORS)
             if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 extra.update(PACE_COUNTER_SENSORS)
+            if coordinator.bms_type not in (BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV_WIFI):
+                extra.update(PACE_CONFIG_SENSORS)
             for metric, meta in extra.items():
                 if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG:
                     continue
@@ -401,7 +435,9 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
         """Initialize overall sensor."""
         super().__init__(coordinator)
         self._key = key
-        self._attr_name = f"{coordinator.device_name} {name}"
+        self._attr_has_entity_name = False
+        self._attr_translation_key = key
+        self._attr_translation_placeholders = {"device": coordinator.device_name}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_total_{key}"
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
@@ -487,9 +523,8 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         self.pack_id = pack_id
         self._metric = metric
         self._source_key = source_key
-        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-        
-        self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} {name}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = metric
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{metric}"
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
@@ -539,7 +574,10 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         pack_data = next((p for p in analog_packs if p.get("pack_id") == self.pack_id), None)
         if not pack_data:
             return None
-        
+
+        if self._metric == "limiter_gear":
+            return self.coordinator._limiter_gear.get(self.pack_id)
+
         if self._source_key:
             return pack_data.get(self._source_key)
 
@@ -612,9 +650,9 @@ class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.pack_id = pack_id
         self.cell_index = cell_index
-        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-
-        self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} Cell {cell_index:02d} Voltage"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "cell_voltage"
+        self._attr_translation_placeholders = {"index": f"{cell_index:02d}"}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_cell_{cell_index}_voltage"
         self._attr_native_unit_of_measurement = "V"
         self._attr_device_class = SensorDeviceClass.VOLTAGE
@@ -670,9 +708,9 @@ class GobelBatteryTemperatureSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.pack_id = pack_id
         self.temp_index = temp_index
-        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-
-        self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} Temperature {temp_index:02d}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "temperature"
+        self._attr_translation_placeholders = {"index": f"{temp_index:02d}"}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_temp_{temp_index}"
         self._attr_native_unit_of_measurement = "°C"
         self._attr_device_class = SensorDeviceClass.TEMPERATURE

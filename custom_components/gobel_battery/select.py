@@ -45,7 +45,7 @@ class GobelLimiterGearSelect(GobelExpertEntity, SelectEntity):
     _attr_icon = "mdi:speedometer"
 
     def __init__(self, coordinator, pack_id):
-        super().__init__(coordinator, pack_id, "limiter_gear", "Charge Limiter Gear")
+        super().__init__(coordinator, pack_id, "limiter_gear", "limiter_gear")
 
     @property
     def current_option(self):

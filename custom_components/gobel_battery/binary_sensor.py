@@ -47,7 +47,7 @@ BINARY_SENSORS_METADATA = {
         "status_reverse_connected": ("Reverse Connected Alert", BinarySensorDeviceClass.PROBLEM, None),
         "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
         "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
-        "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.DIAGNOSTIC),
+        "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
     },
     "warn_state_1": {
         "warn_high_discharge_current": ("Discharge Overcurrent Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
@@ -159,9 +159,8 @@ class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self.pack_id = pack_id
         self._sub_dict = sub_dict
         self._key = key
-        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-
-        self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} {name}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{sub_dict}_{key}"
         self._attr_device_class = device_class
         self._attr_entity_category = category
@@ -220,10 +219,11 @@ class GobelBatteryIndexedWarningSensor(CoordinatorEntity, BinarySensorEntity):
         self.pack_id = pack_id
         self._list_key = list_key
         self._index = index
-        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-        self._attr_name = (
-            f"{coordinator.device_name} Pack {display_pack:02d} {label} {index:02d} {suffix}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = (
+            "cell_voltage_warning" if list_key == "cell_voltage_warnings" else "temperature_warning"
         )
+        self._attr_translation_placeholders = {"index": f"{index:02d}"}
         self._attr_unique_id = (
             f"{coordinator.entry.entry_id}_pack_{pack_id}_{list_key}_{index}"
         )
@@ -279,8 +279,8 @@ class GobelBatteryBalanceSensor(CoordinatorEntity, BinarySensorEntity):
         super().__init__(coordinator)
         self.pack_id = pack_id
         self._key = key
-        display_pack = pack_id + (0 if coordinator.jk_display_index_start == "00" else 1)
-        self._attr_name = f"{coordinator.device_name} Pack {display_pack:02d} {name}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = key
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{key}"
         self._attr_icon = "mdi:scale-balance"
 

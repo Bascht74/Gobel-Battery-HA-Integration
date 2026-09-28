@@ -11,10 +11,10 @@ from .const import DOMAIN
 from .expert_entity import GobelExpertEntity
 
 NUMBERS = (
-    ("charge_current_alarm", "Charge Current Alarm", "view_charge_current_alarm"),
-    ("charge_current_limit", "Charge Current Limit", "view_charge_current_limit"),
-    ("discharge_current_alarm", "Discharge Current Alarm", "view_discharge_current_alarm"),
-    ("discharge_current_limit", "Discharge Current Limit", "view_discharge_current_limit"),
+    ("charge_current_alarm", "view_charge_current_alarm"),
+    ("charge_current_limit", "view_charge_current_limit"),
+    ("discharge_current_alarm", "view_discharge_current_alarm"),
+    ("discharge_current_limit", "view_discharge_current_limit"),
 )
 
 
@@ -38,8 +38,8 @@ async def async_setup_entry(
             if pack_id in registered:
                 continue
             registered.add(pack_id)
-            for key, name, source in NUMBERS:
-                entities.append(GobelExpertNumber(coordinator, pack_id, key, name, source))
+            for key, source in NUMBERS:
+                entities.append(GobelExpertNumber(coordinator, pack_id, key, source))
         if entities:
             async_add_entities(entities)
 
@@ -57,8 +57,8 @@ class GobelExpertNumber(GobelExpertEntity, NumberEntity):
     _attr_mode = NumberMode.BOX
     _attr_icon = "mdi:current-dc"
 
-    def __init__(self, coordinator, pack_id, key, name, source):
-        super().__init__(coordinator, pack_id, key, name)
+    def __init__(self, coordinator, pack_id, key, source):
+        super().__init__(coordinator, pack_id, key, key)
         self._source = source
 
     @property

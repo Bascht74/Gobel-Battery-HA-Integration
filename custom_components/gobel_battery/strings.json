@@ -67,5 +67,312 @@
       "already_configured": "This connection is already configured.",
       "reconfigure_successful": "Configuration updated. The device will reload."
     }
+  },
+  "entity": {
+    "sensor": {
+      "voltage": {
+        "name": "Voltage"
+      },
+      "current": {
+        "name": "Current"
+      },
+      "power": {
+        "name": "Power"
+      },
+      "soc": {
+        "name": "SOC"
+      },
+      "soh": {
+        "name": "SOH"
+      },
+      "remain_capacity": {
+        "name": "Remaining Capacity"
+      },
+      "full_capacity": {
+        "name": "Full Capacity"
+      },
+      "cycle_number": {
+        "name": "Cycle Count"
+      },
+      "design_capacity": {
+        "name": "Design Capacity"
+      },
+      "cell_voltage_max": {
+        "name": "Highest Cell Voltage"
+      },
+      "cell_voltage_min": {
+        "name": "Lowest Cell Voltage"
+      },
+      "cell_voltage_diff": {
+        "name": "Cell Voltage Delta"
+      },
+      "cell_voltage_max_index": {
+        "name": "Highest Cell"
+      },
+      "cell_voltage_min_index": {
+        "name": "Lowest Cell"
+      },
+      "mos_temperature": {
+        "name": "MOS Temperature"
+      },
+      "balance_current": {
+        "name": "Balance Current"
+      },
+      "energy_charged": {
+        "name": "Energy Charged"
+      },
+      "energy_discharged": {
+        "name": "Energy Discharged"
+      },
+      "charge_current_limit": {
+        "name": "Charge Current Limit"
+      },
+      "discharge_current_limit": {
+        "name": "Discharge Current Limit"
+      },
+      "charge_current_alarm": {
+        "name": "Charge Current Alarm"
+      },
+      "discharge_current_alarm": {
+        "name": "Discharge Current Alarm"
+      },
+      "limiter_gear": {
+        "name": "Charge Limiter Gear"
+      },
+      "cell_ovp": {
+        "name": "Cell Overvoltage Protection"
+      },
+      "cell_uvp": {
+        "name": "Cell Undervoltage Protection"
+      },
+      "float_charge_voltage": {
+        "name": "Float Charge Voltage"
+      },
+      "max_charge_voltage": {
+        "name": "Inverter Max Charge Voltage"
+      },
+      "cumulative_charge_ah": {
+        "name": "Cumulative Charge"
+      },
+      "cumulative_discharge_ah": {
+        "name": "Cumulative Discharge"
+      },
+      "cell_voltage": {
+        "name": "Cell {index} Voltage"
+      },
+      "temperature": {
+        "name": "Temperature {index}"
+      },
+      "packs_count": {
+        "name": "{device} Packs Count"
+      },
+      "total_full_capacity": {
+        "name": "{device} Total Full Capacity"
+      },
+      "total_remain_capacity": {
+        "name": "{device} Total Remaining Capacity"
+      },
+      "total_current": {
+        "name": "{device} Total Current"
+      },
+      "total_soc": {
+        "name": "{device} Total SOC"
+      },
+      "total_voltage": {
+        "name": "{device} Total Voltage"
+      },
+      "total_power": {
+        "name": "{device} Total Power"
+      },
+      "total_energy_charged": {
+        "name": "{device} Total Energy Charged"
+      },
+      "total_energy_discharged": {
+        "name": "{device} Total Energy Discharged"
+      },
+      "total_cell_voltage_max": {
+        "name": "{device} Max Cell Voltage"
+      },
+      "total_cell_voltage_min": {
+        "name": "{device} Min Cell Voltage"
+      },
+      "total_cell_voltage_diff": {
+        "name": "{device} Cell Voltage Delta"
+      }
+    },
+    "binary_sensor": {
+      "protect_short_circuit": {
+        "name": "Short Circuit Protection"
+      },
+      "protect_high_discharge_current": {
+        "name": "Discharge Overcurrent Protection"
+      },
+      "protect_high_charge_current": {
+        "name": "Charge Overcurrent Protection"
+      },
+      "protect_low_total_voltage": {
+        "name": "Total Under-Voltage Protection"
+      },
+      "protect_high_total_voltage": {
+        "name": "Total Over-Voltage Protection"
+      },
+      "protect_low_cell_voltage": {
+        "name": "Cell Under-Voltage Protection"
+      },
+      "protect_high_cell_voltage": {
+        "name": "Cell Over-Voltage Protection"
+      },
+      "protect_low_charge_temp": {
+        "name": "Charge Low Temp Protection"
+      },
+      "protect_high_charge_temp": {
+        "name": "Charge High Temp Protection"
+      },
+      "protect_high_MOS_temp": {
+        "name": "MOS High Temp Protection"
+      },
+      "protect_high_discharge_temp": {
+        "name": "Discharge High Temp Protection"
+      },
+      "status_fully_charged": {
+        "name": "Fully Charged Status"
+      },
+      "protect_low_env_temp": {
+        "name": "Low Env Temp Protection"
+      },
+      "protect_high_env_temp": {
+        "name": "High Env Temp Protection"
+      },
+      "protect_low_discharge_temp": {
+        "name": "Discharge Low Temp Protection"
+      },
+      "fault_sampling": {
+        "name": "Sampling Fault"
+      },
+      "fault_cell": {
+        "name": "Cell Count Mismatch/Fault"
+      },
+      "fault_NTC": {
+        "name": "Temperature Sensor Fault"
+      },
+      "fault_discharge_MOS": {
+        "name": "Discharge MOS Fault"
+      },
+      "fault_charge_MOS": {
+        "name": "Charge MOS Fault"
+      },
+      "status_heating": {
+        "name": "Heating Switch Active"
+      },
+      "status_charger_avaliable": {
+        "name": "Charger Available"
+      },
+      "status_reverse_connected": {
+        "name": "Reverse Connected Alert"
+      },
+      "status_discharge_enabled": {
+        "name": "Discharge Enabled Status"
+      },
+      "status_charge_enabled": {
+        "name": "Charge Enabled Status"
+      },
+      "status_current_limit_enabled": {
+        "name": "Current Limiter Active"
+      },
+      "warn_high_discharge_current": {
+        "name": "Discharge Overcurrent Warning"
+      },
+      "warn_high_charge_current": {
+        "name": "Charge Overcurrent Warning"
+      },
+      "warn_low_total_voltage": {
+        "name": "Total Under-Voltage Warning"
+      },
+      "warn_high_total_voltage": {
+        "name": "Total Over-Voltage Warning"
+      },
+      "warn_low_cell_voltage": {
+        "name": "Cell Under-Voltage Warning"
+      },
+      "warn_high_cell_voltage": {
+        "name": "Cell Over-Voltage Warning"
+      },
+      "warn_low_SOC": {
+        "name": "Low SOC Warning"
+      },
+      "warn_high_MOS_temp": {
+        "name": "MOS High Temp Warning"
+      },
+      "warn_low_env_temp": {
+        "name": "Low Env Temp Warning"
+      },
+      "warn_high_env_temp": {
+        "name": "High Env Temp Warning"
+      },
+      "warn_low_discharge_temp": {
+        "name": "Discharge Low Temp Warning"
+      },
+      "warn_low_charge_temp": {
+        "name": "Charge Low Temp Warning"
+      },
+      "warn_high_discharge_temp": {
+        "name": "Discharge High Temp Warning"
+      },
+      "warn_high_charge_temp": {
+        "name": "Charge High Temp Warning"
+      },
+      "cell_voltage_warning": {
+        "name": "Cell {index} Voltage Warning"
+      },
+      "temperature_warning": {
+        "name": "Temperature {index} Warning"
+      },
+      "balancing_status_passive_1": {
+        "name": "Passive Balance 1 Active"
+      },
+      "balancing_status_passive_2": {
+        "name": "Passive Balance 2 Active"
+      },
+      "balancing_status_active_1": {
+        "name": "Active Balance 1 Active"
+      },
+      "balancing_status_active_2": {
+        "name": "Active Balance 2 Active"
+      }
+    },
+    "number": {
+      "charge_current_alarm": {
+        "name": "Charge Current Alarm"
+      },
+      "charge_current_limit": {
+        "name": "Charge Current Limit"
+      },
+      "discharge_current_alarm": {
+        "name": "Discharge Current Alarm"
+      },
+      "discharge_current_limit": {
+        "name": "Discharge Current Limit"
+      }
+    },
+    "switch": {
+      "status_charge_enabled": {
+        "name": "Charge Enabled Status"
+      },
+      "status_discharge_enabled": {
+        "name": "Discharge Enabled Status"
+      },
+      "status_current_limit_enabled": {
+        "name": "Current Limiter Active"
+      }
+    },
+    "select": {
+      "limiter_gear": {
+        "name": "Charge Limiter Gear",
+        "state": {
+          "high": "High",
+          "low": "Low"
+        }
+      }
+    }
   }
 }

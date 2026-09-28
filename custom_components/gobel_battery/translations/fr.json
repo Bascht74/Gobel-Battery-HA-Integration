@@ -1,0 +1,309 @@
+{
+  "entity": {
+    "sensor": {
+      "voltage": {
+        "name": "Tension"
+      },
+      "current": {
+        "name": "Courant"
+      },
+      "power": {
+        "name": "Puissance"
+      },
+      "soc": {
+        "name": "SOC"
+      },
+      "soh": {
+        "name": "SOH"
+      },
+      "remain_capacity": {
+        "name": "Capacité restante"
+      },
+      "full_capacity": {
+        "name": "Capacité pleine"
+      },
+      "cycle_number": {
+        "name": "Nombre de cycles"
+      },
+      "design_capacity": {
+        "name": "Capacité nominale"
+      },
+      "cell_voltage_max": {
+        "name": "Tension de cellule la plus haute"
+      },
+      "cell_voltage_min": {
+        "name": "Tension de cellule la plus basse"
+      },
+      "cell_voltage_diff": {
+        "name": "Écart de tension des cellules"
+      },
+      "cell_voltage_max_index": {
+        "name": "Cellule la plus haute"
+      },
+      "cell_voltage_min_index": {
+        "name": "Cellule la plus basse"
+      },
+      "mos_temperature": {
+        "name": "Température MOSFET"
+      },
+      "balance_current": {
+        "name": "Courant d'équilibrage"
+      },
+      "energy_charged": {
+        "name": "Énergie chargée"
+      },
+      "energy_discharged": {
+        "name": "Énergie déchargée"
+      },
+      "charge_current_limit": {
+        "name": "Limite de courant de charge"
+      },
+      "discharge_current_limit": {
+        "name": "Limite de courant de décharge"
+      },
+      "charge_current_alarm": {
+        "name": "Alarme de courant de charge"
+      },
+      "discharge_current_alarm": {
+        "name": "Alarme de courant de décharge"
+      },
+      "limiter_gear": {
+        "name": "Vitesse du limiteur de charge"
+      },
+      "cell_ovp": {
+        "name": "Protection surtension cellule"
+      },
+      "cell_uvp": {
+        "name": "Protection sous-tension cellule"
+      },
+      "float_charge_voltage": {
+        "name": "Tension de floating"
+      },
+      "max_charge_voltage": {
+        "name": "Tension de charge maximale"
+      },
+      "cumulative_charge_ah": {
+        "name": "Charge cumulée"
+      },
+      "cumulative_discharge_ah": {
+        "name": "Décharge cumulée"
+      },
+      "cell_voltage": {
+        "name": "Cellule {index} tension"
+      },
+      "temperature": {
+        "name": "Température {index}"
+      },
+      "packs_count": {
+        "name": "{device} Nombre de packs"
+      },
+      "total_full_capacity": {
+        "name": "{device} Capacité pleine totale"
+      },
+      "total_remain_capacity": {
+        "name": "{device} Capacité restante totale"
+      },
+      "total_current": {
+        "name": "{device} Courant total"
+      },
+      "total_soc": {
+        "name": "{device} SOC total"
+      },
+      "total_voltage": {
+        "name": "{device} Tension totale"
+      },
+      "total_power": {
+        "name": "{device} Puissance totale"
+      },
+      "total_energy_charged": {
+        "name": "{device} Énergie chargée totale"
+      },
+      "total_energy_discharged": {
+        "name": "{device} Énergie déchargée totale"
+      },
+      "total_cell_voltage_max": {
+        "name": "{device} Tension de cellule maximale"
+      },
+      "total_cell_voltage_min": {
+        "name": "{device} Tension de cellule minimale"
+      },
+      "total_cell_voltage_diff": {
+        "name": "{device} Écart de tension des cellules"
+      }
+    },
+    "binary_sensor": {
+      "protect_short_circuit": {
+        "name": "Protection court-circuit"
+      },
+      "protect_high_discharge_current": {
+        "name": "Protection surintensité de décharge"
+      },
+      "protect_high_charge_current": {
+        "name": "Protection surintensité de charge"
+      },
+      "protect_low_total_voltage": {
+        "name": "Protection sous-tension totale"
+      },
+      "protect_high_total_voltage": {
+        "name": "Protection surtension totale"
+      },
+      "protect_low_cell_voltage": {
+        "name": "Protection sous-tension cellule"
+      },
+      "protect_high_cell_voltage": {
+        "name": "Protection surtension cellule"
+      },
+      "protect_low_charge_temp": {
+        "name": "Protection basse température de charge"
+      },
+      "protect_high_charge_temp": {
+        "name": "Protection haute température de charge"
+      },
+      "protect_high_MOS_temp": {
+        "name": "Protection haute température MOSFET"
+      },
+      "protect_high_discharge_temp": {
+        "name": "Protection haute température de décharge"
+      },
+      "status_fully_charged": {
+        "name": "Complètement chargée"
+      },
+      "protect_low_env_temp": {
+        "name": "Protection basse température ambiante"
+      },
+      "protect_high_env_temp": {
+        "name": "Protection haute température ambiante"
+      },
+      "protect_low_discharge_temp": {
+        "name": "Protection basse température de décharge"
+      },
+      "fault_sampling": {
+        "name": "Défaut de mesure"
+      },
+      "fault_cell": {
+        "name": "Défaut du nombre de cellules"
+      },
+      "fault_NTC": {
+        "name": "Défaut de sonde de température"
+      },
+      "fault_discharge_MOS": {
+        "name": "Défaut MOSFET de décharge"
+      },
+      "fault_charge_MOS": {
+        "name": "Défaut MOSFET de charge"
+      },
+      "status_heating": {
+        "name": "Chauffage actif"
+      },
+      "status_charger_avaliable": {
+        "name": "Chargeur disponible"
+      },
+      "status_reverse_connected": {
+        "name": "Alerte d'inversion de polarité"
+      },
+      "status_discharge_enabled": {
+        "name": "Décharge activée"
+      },
+      "status_charge_enabled": {
+        "name": "Charge activée"
+      },
+      "status_current_limit_enabled": {
+        "name": "Limiteur de courant actif"
+      },
+      "warn_high_discharge_current": {
+        "name": "Avertissement surintensité de décharge"
+      },
+      "warn_high_charge_current": {
+        "name": "Avertissement surintensité de charge"
+      },
+      "warn_low_total_voltage": {
+        "name": "Avertissement sous-tension totale"
+      },
+      "warn_high_total_voltage": {
+        "name": "Avertissement surtension totale"
+      },
+      "warn_low_cell_voltage": {
+        "name": "Avertissement sous-tension cellule"
+      },
+      "warn_high_cell_voltage": {
+        "name": "Avertissement surtension cellule"
+      },
+      "warn_low_SOC": {
+        "name": "Avertissement SOC bas"
+      },
+      "warn_high_MOS_temp": {
+        "name": "Avertissement haute température MOSFET"
+      },
+      "warn_low_env_temp": {
+        "name": "Avertissement basse température ambiante"
+      },
+      "warn_high_env_temp": {
+        "name": "Avertissement haute température ambiante"
+      },
+      "warn_low_discharge_temp": {
+        "name": "Avertissement basse température de décharge"
+      },
+      "warn_low_charge_temp": {
+        "name": "Avertissement basse température de charge"
+      },
+      "warn_high_discharge_temp": {
+        "name": "Avertissement haute température de décharge"
+      },
+      "warn_high_charge_temp": {
+        "name": "Avertissement haute température de charge"
+      },
+      "cell_voltage_warning": {
+        "name": "Cellule {index} avertissement de tension"
+      },
+      "temperature_warning": {
+        "name": "Température {index} avertissement"
+      },
+      "balancing_status_passive_1": {
+        "name": "Équilibrage passif 1 actif"
+      },
+      "balancing_status_passive_2": {
+        "name": "Équilibrage passif 2 actif"
+      },
+      "balancing_status_active_1": {
+        "name": "Équilibrage actif 1 actif"
+      },
+      "balancing_status_active_2": {
+        "name": "Équilibrage actif 2 actif"
+      }
+    },
+    "number": {
+      "charge_current_alarm": {
+        "name": "Alarme de courant de charge"
+      },
+      "charge_current_limit": {
+        "name": "Limite de courant de charge"
+      },
+      "discharge_current_alarm": {
+        "name": "Alarme de courant de décharge"
+      },
+      "discharge_current_limit": {
+        "name": "Limite de courant de décharge"
+      }
+    },
+    "switch": {
+      "status_charge_enabled": {
+        "name": "Charge activée"
+      },
+      "status_discharge_enabled": {
+        "name": "Décharge activée"
+      },
+      "status_current_limit_enabled": {
+        "name": "Limiteur de courant actif"
+      }
+    },
+    "select": {
+      "limiter_gear": {
+        "name": "Vitesse du limiteur de charge",
+        "state": {
+          "high": "Haut",
+          "low": "Bas"
+        }
+      }
+    }
+  }
+}

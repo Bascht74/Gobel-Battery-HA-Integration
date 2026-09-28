@@ -4,6 +4,13 @@ description:
 
 # Changelog
 
+## [2.3.1] - 2026-09-29
+### Changed
+-   Read-only configuration sensors and the expert-mode number, switch and select controls use the same names and stay in the Configuration category. The current limiter is configuration as well.
+-   Entity names are translated for English, German, Simplified Chinese, Spanish and French.
+
+---------------
+
 ## [2.3.0] - 2026-09-29
 ### Added
 -   Expert mode in the integration options. It is off by default and asks for confirmation before it is enabled. While it is on, Pace and TDT configuration is writable: charge and discharge alarm/limit as number boxes, charge MOSFET, discharge MOSFET and the current limiter as switches, and the limiter gear as a select. The matching read-only sensors are removed. Turning the option off restores the sensors. JK and passive Pace WiFi stay read-only. Written current limits are positive amps.

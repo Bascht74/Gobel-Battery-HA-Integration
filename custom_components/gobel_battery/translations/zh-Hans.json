@@ -1,0 +1,309 @@
+{
+  "entity": {
+    "sensor": {
+      "voltage": {
+        "name": "电压"
+      },
+      "current": {
+        "name": "电流"
+      },
+      "power": {
+        "name": "功率"
+      },
+      "soc": {
+        "name": "SOC"
+      },
+      "soh": {
+        "name": "SOH"
+      },
+      "remain_capacity": {
+        "name": "剩余容量"
+      },
+      "full_capacity": {
+        "name": "满充容量"
+      },
+      "cycle_number": {
+        "name": "循环次数"
+      },
+      "design_capacity": {
+        "name": "设计容量"
+      },
+      "cell_voltage_max": {
+        "name": "最高单体电压"
+      },
+      "cell_voltage_min": {
+        "name": "最低单体电压"
+      },
+      "cell_voltage_diff": {
+        "name": "单体压差"
+      },
+      "cell_voltage_max_index": {
+        "name": "最高单体"
+      },
+      "cell_voltage_min_index": {
+        "name": "最低单体"
+      },
+      "mos_temperature": {
+        "name": "MOS温度"
+      },
+      "balance_current": {
+        "name": "均衡电流"
+      },
+      "energy_charged": {
+        "name": "充电能量"
+      },
+      "energy_discharged": {
+        "name": "放电能量"
+      },
+      "charge_current_limit": {
+        "name": "充电电流限制"
+      },
+      "discharge_current_limit": {
+        "name": "放电电流限制"
+      },
+      "charge_current_alarm": {
+        "name": "充电电流告警"
+      },
+      "discharge_current_alarm": {
+        "name": "放电电流告警"
+      },
+      "limiter_gear": {
+        "name": "充电限流档位"
+      },
+      "cell_ovp": {
+        "name": "单体过压保护"
+      },
+      "cell_uvp": {
+        "name": "单体欠压保护"
+      },
+      "float_charge_voltage": {
+        "name": "浮充电压"
+      },
+      "max_charge_voltage": {
+        "name": "最大充电电压"
+      },
+      "cumulative_charge_ah": {
+        "name": "累计充电容量"
+      },
+      "cumulative_discharge_ah": {
+        "name": "累计放电容量"
+      },
+      "cell_voltage": {
+        "name": "单体 {index} 电压"
+      },
+      "temperature": {
+        "name": "温度 {index}"
+      },
+      "packs_count": {
+        "name": "{device} 电池包数量"
+      },
+      "total_full_capacity": {
+        "name": "{device} 总满充容量"
+      },
+      "total_remain_capacity": {
+        "name": "{device} 总剩余容量"
+      },
+      "total_current": {
+        "name": "{device} 总电流"
+      },
+      "total_soc": {
+        "name": "{device} 总SOC"
+      },
+      "total_voltage": {
+        "name": "{device} 总电压"
+      },
+      "total_power": {
+        "name": "{device} 总功率"
+      },
+      "total_energy_charged": {
+        "name": "{device} 总充电能量"
+      },
+      "total_energy_discharged": {
+        "name": "{device} 总放电能量"
+      },
+      "total_cell_voltage_max": {
+        "name": "{device} 最高单体电压"
+      },
+      "total_cell_voltage_min": {
+        "name": "{device} 最低单体电压"
+      },
+      "total_cell_voltage_diff": {
+        "name": "{device} 单体压差"
+      }
+    },
+    "binary_sensor": {
+      "protect_short_circuit": {
+        "name": "短路保护"
+      },
+      "protect_high_discharge_current": {
+        "name": "放电过流保护"
+      },
+      "protect_high_charge_current": {
+        "name": "充电过流保护"
+      },
+      "protect_low_total_voltage": {
+        "name": "总压过低保护"
+      },
+      "protect_high_total_voltage": {
+        "name": "总压过高保护"
+      },
+      "protect_low_cell_voltage": {
+        "name": "单体欠压保护"
+      },
+      "protect_high_cell_voltage": {
+        "name": "单体过压保护"
+      },
+      "protect_low_charge_temp": {
+        "name": "充电低温保护"
+      },
+      "protect_high_charge_temp": {
+        "name": "充电高温保护"
+      },
+      "protect_high_MOS_temp": {
+        "name": "MOS高温保护"
+      },
+      "protect_high_discharge_temp": {
+        "name": "放电高温保护"
+      },
+      "status_fully_charged": {
+        "name": "已充满"
+      },
+      "protect_low_env_temp": {
+        "name": "环境低温保护"
+      },
+      "protect_high_env_temp": {
+        "name": "环境高温保护"
+      },
+      "protect_low_discharge_temp": {
+        "name": "放电低温保护"
+      },
+      "fault_sampling": {
+        "name": "采样故障"
+      },
+      "fault_cell": {
+        "name": "单体数量故障"
+      },
+      "fault_NTC": {
+        "name": "温度传感器故障"
+      },
+      "fault_discharge_MOS": {
+        "name": "放电MOS故障"
+      },
+      "fault_charge_MOS": {
+        "name": "充电MOS故障"
+      },
+      "status_heating": {
+        "name": "加热开启"
+      },
+      "status_charger_avaliable": {
+        "name": "充电器可用"
+      },
+      "status_reverse_connected": {
+        "name": "反接告警"
+      },
+      "status_discharge_enabled": {
+        "name": "放电已启用"
+      },
+      "status_charge_enabled": {
+        "name": "充电已启用"
+      },
+      "status_current_limit_enabled": {
+        "name": "限流已启用"
+      },
+      "warn_high_discharge_current": {
+        "name": "放电过流告警"
+      },
+      "warn_high_charge_current": {
+        "name": "充电过流告警"
+      },
+      "warn_low_total_voltage": {
+        "name": "总压过低告警"
+      },
+      "warn_high_total_voltage": {
+        "name": "总压过高告警"
+      },
+      "warn_low_cell_voltage": {
+        "name": "单体欠压告警"
+      },
+      "warn_high_cell_voltage": {
+        "name": "单体过压告警"
+      },
+      "warn_low_SOC": {
+        "name": "SOC过低告警"
+      },
+      "warn_high_MOS_temp": {
+        "name": "MOS高温告警"
+      },
+      "warn_low_env_temp": {
+        "name": "环境低温告警"
+      },
+      "warn_high_env_temp": {
+        "name": "环境高温告警"
+      },
+      "warn_low_discharge_temp": {
+        "name": "放电低温告警"
+      },
+      "warn_low_charge_temp": {
+        "name": "充电低温告警"
+      },
+      "warn_high_discharge_temp": {
+        "name": "放电高温告警"
+      },
+      "warn_high_charge_temp": {
+        "name": "充电高温告警"
+      },
+      "cell_voltage_warning": {
+        "name": "单体 {index} 电压告警"
+      },
+      "temperature_warning": {
+        "name": "温度 {index} 告警"
+      },
+      "balancing_status_passive_1": {
+        "name": "被动均衡 1 开启"
+      },
+      "balancing_status_passive_2": {
+        "name": "被动均衡 2 开启"
+      },
+      "balancing_status_active_1": {
+        "name": "主动均衡 1 开启"
+      },
+      "balancing_status_active_2": {
+        "name": "主动均衡 2 开启"
+      }
+    },
+    "number": {
+      "charge_current_alarm": {
+        "name": "充电电流告警"
+      },
+      "charge_current_limit": {
+        "name": "充电电流限制"
+      },
+      "discharge_current_alarm": {
+        "name": "放电电流告警"
+      },
+      "discharge_current_limit": {
+        "name": "放电电流限制"
+      }
+    },
+    "switch": {
+      "status_charge_enabled": {
+        "name": "充电已启用"
+      },
+      "status_discharge_enabled": {
+        "name": "放电已启用"
+      },
+      "status_current_limit_enabled": {
+        "name": "限流已启用"
+      }
+    },
+    "select": {
+      "limiter_gear": {
+        "name": "充电限流档位",
+        "state": {
+          "high": "高",
+          "low": "低"
+        }
+      }
+    }
+  }
+}

@@ -67,5 +67,312 @@
       "already_configured": "Diese Verbindung ist bereits eingerichtet.",
       "reconfigure_successful": "Konfiguration aktualisiert. Das Gerät wird neu geladen."
     }
+  },
+  "entity": {
+    "sensor": {
+      "voltage": {
+        "name": "Spannung"
+      },
+      "current": {
+        "name": "Strom"
+      },
+      "power": {
+        "name": "Leistung"
+      },
+      "soc": {
+        "name": "SOC"
+      },
+      "soh": {
+        "name": "SOH"
+      },
+      "remain_capacity": {
+        "name": "Restkapazität"
+      },
+      "full_capacity": {
+        "name": "Volle Kapazität"
+      },
+      "cycle_number": {
+        "name": "Zyklenzahl"
+      },
+      "design_capacity": {
+        "name": "Designkapazität"
+      },
+      "cell_voltage_max": {
+        "name": "Höchste Zellspannung"
+      },
+      "cell_voltage_min": {
+        "name": "Niedrigste Zellspannung"
+      },
+      "cell_voltage_diff": {
+        "name": "Zellspannungsdifferenz"
+      },
+      "cell_voltage_max_index": {
+        "name": "Höchste Zelle"
+      },
+      "cell_voltage_min_index": {
+        "name": "Niedrigste Zelle"
+      },
+      "mos_temperature": {
+        "name": "MOSFET-Temperatur"
+      },
+      "balance_current": {
+        "name": "Balancierstrom"
+      },
+      "energy_charged": {
+        "name": "Geladene Energie"
+      },
+      "energy_discharged": {
+        "name": "Entladene Energie"
+      },
+      "charge_current_limit": {
+        "name": "Ladestromgrenze"
+      },
+      "discharge_current_limit": {
+        "name": "Entladestromgrenze"
+      },
+      "charge_current_alarm": {
+        "name": "Ladestromalarm"
+      },
+      "discharge_current_alarm": {
+        "name": "Entladestromalarm"
+      },
+      "limiter_gear": {
+        "name": "Ladestrombegrenzer-Stufe"
+      },
+      "cell_ovp": {
+        "name": "Zell-Überspannungsschutz"
+      },
+      "cell_uvp": {
+        "name": "Zell-Unterspannungsschutz"
+      },
+      "float_charge_voltage": {
+        "name": "Erhaltungsladespannung"
+      },
+      "max_charge_voltage": {
+        "name": "Maximale Ladespannung"
+      },
+      "cumulative_charge_ah": {
+        "name": "Kumulierte Ladung"
+      },
+      "cumulative_discharge_ah": {
+        "name": "Kumulierte Entladung"
+      },
+      "cell_voltage": {
+        "name": "Zelle {index} Spannung"
+      },
+      "temperature": {
+        "name": "Temperatur {index}"
+      },
+      "packs_count": {
+        "name": "{device} Packanzahl"
+      },
+      "total_full_capacity": {
+        "name": "{device} Volle Kapazität gesamt"
+      },
+      "total_remain_capacity": {
+        "name": "{device} Restkapazität gesamt"
+      },
+      "total_current": {
+        "name": "{device} Strom gesamt"
+      },
+      "total_soc": {
+        "name": "{device} SOC gesamt"
+      },
+      "total_voltage": {
+        "name": "{device} Spannung gesamt"
+      },
+      "total_power": {
+        "name": "{device} Leistung gesamt"
+      },
+      "total_energy_charged": {
+        "name": "{device} Geladene Energie gesamt"
+      },
+      "total_energy_discharged": {
+        "name": "{device} Entladene Energie gesamt"
+      },
+      "total_cell_voltage_max": {
+        "name": "{device} Höchste Zellspannung"
+      },
+      "total_cell_voltage_min": {
+        "name": "{device} Niedrigste Zellspannung"
+      },
+      "total_cell_voltage_diff": {
+        "name": "{device} Zellspannungsdifferenz"
+      }
+    },
+    "binary_sensor": {
+      "protect_short_circuit": {
+        "name": "Kurzschlussschutz"
+      },
+      "protect_high_discharge_current": {
+        "name": "Entladeüberstromschutz"
+      },
+      "protect_high_charge_current": {
+        "name": "Ladeüberstromschutz"
+      },
+      "protect_low_total_voltage": {
+        "name": "Gesamt-Unterspannungsschutz"
+      },
+      "protect_high_total_voltage": {
+        "name": "Gesamt-Überspannungsschutz"
+      },
+      "protect_low_cell_voltage": {
+        "name": "Zell-Unterspannungsschutz"
+      },
+      "protect_high_cell_voltage": {
+        "name": "Zell-Überspannungsschutz"
+      },
+      "protect_low_charge_temp": {
+        "name": "Laden Untertemperaturschutz"
+      },
+      "protect_high_charge_temp": {
+        "name": "Laden Übertemperaturschutz"
+      },
+      "protect_high_MOS_temp": {
+        "name": "MOSFET-Übertemperaturschutz"
+      },
+      "protect_high_discharge_temp": {
+        "name": "Entladen Übertemperaturschutz"
+      },
+      "status_fully_charged": {
+        "name": "Vollständig geladen"
+      },
+      "protect_low_env_temp": {
+        "name": "Umgebung Untertemperaturschutz"
+      },
+      "protect_high_env_temp": {
+        "name": "Umgebung Übertemperaturschutz"
+      },
+      "protect_low_discharge_temp": {
+        "name": "Entladen Untertemperaturschutz"
+      },
+      "fault_sampling": {
+        "name": "Messfehler"
+      },
+      "fault_cell": {
+        "name": "Zellenanzahlfehler"
+      },
+      "fault_NTC": {
+        "name": "Temperatursensorfehler"
+      },
+      "fault_discharge_MOS": {
+        "name": "Entlade-MOSFET-Fehler"
+      },
+      "fault_charge_MOS": {
+        "name": "Lade-MOSFET-Fehler"
+      },
+      "status_heating": {
+        "name": "Heizung aktiv"
+      },
+      "status_charger_avaliable": {
+        "name": "Ladegerät verfügbar"
+      },
+      "status_reverse_connected": {
+        "name": "Verpolung"
+      },
+      "status_discharge_enabled": {
+        "name": "Entladen freigegeben"
+      },
+      "status_charge_enabled": {
+        "name": "Laden freigegeben"
+      },
+      "status_current_limit_enabled": {
+        "name": "Strombegrenzer aktiv"
+      },
+      "warn_high_discharge_current": {
+        "name": "Entladeüberstromwarnung"
+      },
+      "warn_high_charge_current": {
+        "name": "Ladeüberstromwarnung"
+      },
+      "warn_low_total_voltage": {
+        "name": "Gesamt-Unterspannungswarnung"
+      },
+      "warn_high_total_voltage": {
+        "name": "Gesamt-Überspannungswarnung"
+      },
+      "warn_low_cell_voltage": {
+        "name": "Zell-Unterspannungswarnung"
+      },
+      "warn_high_cell_voltage": {
+        "name": "Zell-Überspannungswarnung"
+      },
+      "warn_low_SOC": {
+        "name": "Niedriger SOC Warnung"
+      },
+      "warn_high_MOS_temp": {
+        "name": "MOSFET-Übertemperaturwarnung"
+      },
+      "warn_low_env_temp": {
+        "name": "Umgebung Untertemperaturwarnung"
+      },
+      "warn_high_env_temp": {
+        "name": "Umgebung Übertemperaturwarnung"
+      },
+      "warn_low_discharge_temp": {
+        "name": "Entladen Untertemperaturwarnung"
+      },
+      "warn_low_charge_temp": {
+        "name": "Laden Untertemperaturwarnung"
+      },
+      "warn_high_discharge_temp": {
+        "name": "Entladen Übertemperaturwarnung"
+      },
+      "warn_high_charge_temp": {
+        "name": "Laden Übertemperaturwarnung"
+      },
+      "cell_voltage_warning": {
+        "name": "Zelle {index} Spannungswarnung"
+      },
+      "temperature_warning": {
+        "name": "Temperatur {index} Warnung"
+      },
+      "balancing_status_passive_1": {
+        "name": "Passives Balancing 1 aktiv"
+      },
+      "balancing_status_passive_2": {
+        "name": "Passives Balancing 2 aktiv"
+      },
+      "balancing_status_active_1": {
+        "name": "Aktives Balancing 1 aktiv"
+      },
+      "balancing_status_active_2": {
+        "name": "Aktives Balancing 2 aktiv"
+      }
+    },
+    "number": {
+      "charge_current_alarm": {
+        "name": "Ladestromalarm"
+      },
+      "charge_current_limit": {
+        "name": "Ladestromgrenze"
+      },
+      "discharge_current_alarm": {
+        "name": "Entladestromalarm"
+      },
+      "discharge_current_limit": {
+        "name": "Entladestromgrenze"
+      }
+    },
+    "switch": {
+      "status_charge_enabled": {
+        "name": "Laden freigegeben"
+      },
+      "status_discharge_enabled": {
+        "name": "Entladen freigegeben"
+      },
+      "status_current_limit_enabled": {
+        "name": "Strombegrenzer aktiv"
+      }
+    },
+    "select": {
+      "limiter_gear": {
+        "name": "Ladestrombegrenzer-Stufe",
+        "state": {
+          "high": "Hoch",
+          "low": "Niedrig"
+        }
+      }
+    }
   }
 }
