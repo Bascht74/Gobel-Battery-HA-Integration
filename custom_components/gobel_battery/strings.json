@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Gobel Battery",
-        "description": "Choose the BMS and how Home Assistant should connect. Pace over a Wi-Fi or Ethernet dongle is the active Pace entry. The setup checks the answer and corrects this if the battery only pushes data.",
+        "description": "Choose the BMS and how Home Assistant reaches it. An external Wi-Fi dongle such as the Gobel-PWB1 is Pace BMS, not the internal Wi-Fi entry. The setup checks the answer and switches only if the battery pushes data by itself.",
         "data": {
           "device_name": "Device name",
           "bms_type": "BMS type",
@@ -43,7 +43,7 @@
       },
       "init": {
         "title": "Gobel Battery options",
-        "description": "Expert mode makes Pace and TDT settings writable. Wrong current limits or MOSFET switches can disconnect the battery or remove its protection. Turn the option off again after the change. The controls disappear and the read-only sensors return. JK and passive Pace WiFi stay read-only.",
+        "description": "Expert mode makes Pace and TDT settings writable. Wrong current limits or MOSFET switches can disconnect the battery or remove its protection. Turn the option off again after the change. The controls disappear and the read-only sensors return. JK and Pace BMS, internal Wi-Fi stay read-only.",
         "data": {
           "poll_interval": "Poll interval (seconds)",
           "max_parallel_allowed": "Max parallel packs",
@@ -60,7 +60,7 @@
       },
       "probe": {
         "title": "Pace connection check",
-        "description": "Detected: {result}. active saves Pace with commands, so limits and switches can be written. passive saves the receive-only Pace mode, and configuration stays read-only. silent or unreachable keeps the type you selected because the battery did not answer."
+        "description": "Detected: {result}. Pace BMS can write limits and switches. Internal Wi-Fi stays display only. If nothing answered, the type you selected is kept."
       }
     },
     "error": {
@@ -75,16 +75,16 @@
   "selector": {
     "bms_type": {
       "options": {
-        "PACE_LV": "Pace, with commands (RS232, RS485 or TCP dongle)",
-        "PACE_LV_WIFI": "Pace, receive only (battery pushes data by itself)",
+        "PACE_LV": "Pace BMS",
+        "PACE_LV_WIFI": "Pace BMS, internal Wi-Fi",
         "JK_PB": "JK BMS",
         "TDT": "TDT BMS"
       }
     },
     "connection_type": {
       "options": {
-        "ethernet": "Network, Ethernet dongle",
-        "wifi": "Network, Wi-Fi dongle",
+        "ethernet": "Network, cable",
+        "wifi": "Network, Wi-Fi",
         "serial": "USB serial"
       }
     },

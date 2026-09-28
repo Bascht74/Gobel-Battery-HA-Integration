@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Gobel Battery",
-        "description": "BMS und Verbindung wählen. Ein Pace am WLAN- oder Ethernet-Dongle ist der aktive Pace-Eintrag. Die Einrichtung prüft die Antwort und korrigiert das, wenn der Akku nur von selbst sendet.",
+        "description": "BMS und Verbindung wählen. Ein externer WLAN-Dongle wie der Gobel-PWB1 ist Pace BMS, nicht der Eintrag für internes WLAN. Die Einrichtung prüft die Antwort und wechselt nur, wenn der Akku von selbst sendet.",
         "data": {
           "device_name": "Gerätename",
           "bms_type": "BMS-Typ",
@@ -43,7 +43,7 @@
       },
       "init": {
         "title": "Gobel-Battery-Optionen",
-        "description": "Der Expertenmodus macht die Pace- und TDT-Konfiguration beschreibbar. Falsche Stromgrenzen oder MOSFET-Schalter können den Akku trennen oder seinen Schutz aufheben. Nach der Änderung den Modus wieder ausschalten. Dann verschwinden die Steuerelemente und die Nur-Lese-Sensoren kommen zurück. JK und passives Pace-WLAN bleiben nur lesbar.",
+        "description": "Der Expertenmodus macht die Pace- und TDT-Konfiguration beschreibbar. Falsche Stromgrenzen oder MOSFET-Schalter können den Akku trennen oder seinen Schutz aufheben. Nach der Änderung den Modus wieder ausschalten. Dann verschwinden die Steuerelemente und die Nur-Lese-Sensoren kommen zurück. JK und Pace BMS, internes WLAN bleiben nur lesbar.",
         "data": {
           "poll_interval": "Abfrageintervall (Sekunden)",
           "max_parallel_allowed": "Max. parallele Packs",
@@ -60,7 +60,7 @@
       },
       "probe": {
         "title": "Pace-Verbindungsprüfung",
-        "description": "Erkannt: {result}. active speichert Pace mit Befehlen, Grenzen und Schalter sind dann schreibbar. passive speichert den Nur-Empfangs-Modus, die Konfiguration bleibt nur lesbar. silent oder unreachable behält die gewählte Art, weil der Akku nicht geantwortet hat."
+        "description": "Erkannt: {result}. Pace BMS kann Grenzen und Schalter schreiben. Internes WLAN bleibt nur Anzeige. Kam keine Antwort, bleibt deine Auswahl."
       }
     },
     "error": {
@@ -75,16 +75,16 @@
   "selector": {
     "bms_type": {
       "options": {
-        "PACE_LV": "Pace, mit Befehlen (RS232, RS485 oder TCP-Dongle)",
-        "PACE_LV_WIFI": "Pace, nur Empfang (der Akku sendet von selbst)",
+        "PACE_LV": "Pace BMS",
+        "PACE_LV_WIFI": "Pace BMS, internes WLAN",
         "JK_PB": "JK-BMS",
         "TDT": "TDT-BMS"
       }
     },
     "connection_type": {
       "options": {
-        "ethernet": "Netzwerk, Ethernet-Dongle",
-        "wifi": "Netzwerk, WLAN-Dongle",
+        "ethernet": "Netzwerk, Kabel",
+        "wifi": "Netzwerk, WLAN",
         "serial": "USB seriell"
       }
     },

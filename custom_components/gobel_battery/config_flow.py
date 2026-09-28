@@ -175,8 +175,18 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="probe",
             data_schema=vol.Schema({}),
-            description_placeholders={"result": self._probe_result},
+            description_placeholders={"result": self._probe_label()},
         )
+
+    def _probe_label(self):
+        german = str(getattr(self.hass.config, "language", "")).startswith("de")
+        labels = {
+            ACTIVE: "Pace BMS",
+            PASSIVE: "Pace BMS, internes WLAN" if german else "Pace BMS, internal Wi-Fi",
+            "silent": "keine Antwort" if german else "no answer",
+            "unreachable": "keine Verbindung" if german else "no connection",
+        }
+        return labels.get(self._probe_result, self._probe_result)
 
     async def _create_from_data(self, user_data):
         unique_id = f"{user_data[CONF_IP_ADDRESS]}_{user_data[CONF_IP_PORT]}"

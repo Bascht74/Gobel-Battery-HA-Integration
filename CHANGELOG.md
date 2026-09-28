@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.3] - 2026-09-29
+### Changed
+-   The Pace choices are now named Pace BMS and Pace BMS, internal Wi-Fi.
+
+---------------
+
 ## [2.4.2] - 2026-09-29
 ### Added
 -   Read-only Pace sensors for calibrated capacity, the BMS clock, CAN and RS485 protocol, plus buzzer and LED status. Expert mode does not turn these into controls.
