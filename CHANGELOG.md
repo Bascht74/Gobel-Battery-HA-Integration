@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.16] - 2026-09-29
+### Changed
+-   A setting or status bit is created only after the BMS has answered with that value. A later answer, for example after a firmware update, adds the entity without reloading the integration.
+
+---------------
+
 ## [2.4.15] - 2026-09-29
 ### Fixed
 -   Configuration replies are no longer dropped when the dongle pushes a measurement frame first. The protection limits stay unavailable until that reply arrives.

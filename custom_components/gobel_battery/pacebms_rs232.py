@@ -1,5 +1,6 @@
 import struct
 import logging
+import time
 
 try:
     from .measurements import present_temperatures, resolve_soc, resolve_soh
@@ -1488,21 +1489,22 @@ class PACEBMS232:
             # Send request to BMS
             self.logger.debug(f"Trying to send analog request")
             self.bms_comm.flush()
-            self.logger.debug(f"Raw Send: {request.decode('ascii', errors='ignore').strip()} (Hex: {request.hex().upper()})")
             if not self.bms_comm.send_data(request):
                 return None
-            self.logger.debug(f"analog request sent")
-    
-            # Receive response from BMS
-            self.logger.debug(f"Trying to receive analog data")
-            response = self.bms_comm.receive_data()
-            self.logger.debug(f"Raw Recv: {response} (Hex: {response.encode('ascii', errors='ignore').hex().upper() if response is not None else ''})")
-            self.logger.debug(f"analog data recieved: {response}")
-            if response is None:
-                return None
-            
-            # Process and validate response
-            return self.process_incoming_response(response, 'analog')
+            deadline = time.monotonic() + 1.2
+            while time.monotonic() < deadline:
+                remaining = max(0.05, deadline - time.monotonic())
+                response = self.bms_comm.receive_data(timeout=min(0.4, remaining))
+                if not response:
+                    continue
+                parsed = self.process_incoming_response(response, "analog")
+                if parsed:
+                    return parsed
+            if self.cached_analog_data is not None:
+                data = self.cached_analog_data
+                self.cached_analog_data = None
+                return data
+            return None
     
         except Exception as e:
             self.logger.error(f"An error occurred in get_analog_data: {e}")
@@ -1527,21 +1529,22 @@ class PACEBMS232:
             # Send request to BMS
             self.logger.debug(f"Trying to send warning request")
             self.bms_comm.flush()
-            self.logger.debug(f"Raw Send: {request.decode('ascii', errors='ignore').strip()} (Hex: {request.hex().upper()})")
             if not self.bms_comm.send_data(request):
                 return None
-            self.logger.debug(f"warning request sent")
-            
-            # Receive response from BMS
-            self.logger.debug(f"Trying to receive warning data")
-            response = self.bms_comm.receive_data()
-            self.logger.debug(f"Raw Recv: {response} (Hex: {response.encode('ascii', errors='ignore').hex().upper() if response is not None else ''})")
-            self.logger.debug(f"warning data recieved: {response}")
-            if response is None:
-                return None
-            
-            # Process and validate response
-            return self.process_incoming_response(response, 'warning')
+            deadline = time.monotonic() + 1.2
+            while time.monotonic() < deadline:
+                remaining = max(0.05, deadline - time.monotonic())
+                response = self.bms_comm.receive_data(timeout=min(0.4, remaining))
+                if not response:
+                    continue
+                parsed = self.process_incoming_response(response, "warning")
+                if parsed:
+                    return parsed
+            if self.cached_warning_data is not None:
+                data = self.cached_warning_data
+                self.cached_warning_data = None
+                return data
+            return None
     
         except Exception as e:
             self.logger.error(f"An error occurred in get_warning_data: {e}")

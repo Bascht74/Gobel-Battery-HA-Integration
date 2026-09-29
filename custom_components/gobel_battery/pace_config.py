@@ -423,15 +423,21 @@ def read_group(bms, group, pack_number=None):
         if not bms.bms_comm.send_data(frame):
             return None
         # The dongle also pushes analog frames. Those are not the reply.
-        deadline = time.monotonic() + 1.5
+        deadline = time.monotonic() + 0.8
         while time.monotonic() < deadline:
             remaining = max(0.05, deadline - time.monotonic())
-            received = bms.bms_comm.receive_data(timeout=min(0.45, remaining))
+            received = bms.bms_comm.receive_data(timeout=min(0.35, remaining))
             if not received:
                 continue
             payload = info_payload(received)
             if payload:
                 return payload
+            identify = getattr(bms, "identify_packet_type", None)
+            packet = identify(received) if identify else None
+            if packet == "analog" and hasattr(bms, "parse_analog_data"):
+                bms.cached_analog_data = bms.parse_analog_data(received)
+            elif packet == "warning" and hasattr(bms, "parse_warning_data"):
+                bms.cached_warning_data = bms.parse_warning_data(received)
         return None
     except Exception as err:
         _LOGGER.debug("Pace config %s failed: %s", group["read"], err)

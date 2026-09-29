@@ -23,12 +23,12 @@ async def async_setup_entry(
     @callback
     def _add_packs():
         packs = (coordinator.data or {}).get("analog", [])
-        pack_ids = [0] if not packs and not registered else [
-            pack.get("pack_id", 0) for pack in packs if pack.get("pack_id", 0) not in registered
-        ]
         entities = []
-        for pack_id in pack_ids:
+        for pack in packs:
+            pack_id = pack.get("pack_id", 0)
             if pack_id in registered or not coordinator.owns_configuration(pack_id):
+                continue
+            if not pack.get("view_bms_clock"):
                 continue
             registered.add(pack_id)
             entities.append(GobelSetClockButton(coordinator, pack_id))

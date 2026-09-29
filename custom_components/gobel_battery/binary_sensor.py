@@ -84,30 +84,37 @@ async def async_setup_entry(
     """Set up the binary sensor platform from a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     
-    # Track registered pack IDs
-    registered_packs = set()
+    registered = set()
+
+    def _take(pack_id, marker):
+        key = (pack_id, marker)
+        if key in registered:
+            return False
+        registered.add(key)
+        return True
 
     @callback
     def async_add_pack_binary_sensors():
-        """Add binary sensors for newly discovered packs."""
+        """Add a status bit only after that byte was present in a reply."""
         data = coordinator.data
         warning_packs = data.get("warning", []) if data else []
-        
-        # Default to pack 0 if no packs are detected yet so entities are visible
-        if not warning_packs and not registered_packs:
-            pack_ids_to_add = [0]
-        else:
-            pack_ids_to_add = [p.get("pack_id", 0) for p in warning_packs if p.get("pack_id", 0) not in registered_packs]
+        if not warning_packs:
+            return
 
         new_entities = []
-        for pack_id in pack_ids_to_add:
-            if pack_id in registered_packs:
-                continue
-                
+        for warning_pack in warning_packs:
+            pack_id = warning_pack.get("pack_id", 0)
+            present_keys = set()
             for sub_dict, sensors in BINARY_SENSORS_METADATA.items():
                 if sub_dict == "control_state" and coordinator.bms_type == BMS_TYPE_JK_PB:
                     continue
+                sub_data = warning_pack.get(sub_dict)
+                if not isinstance(sub_data, dict):
+                    continue
                 for key, (name, device_class, category) in sensors.items():
+                    if key not in sub_data:
+                        continue
+                    present_keys.add((sub_dict, key))
                     if coordinator.can_write_config and key in (
                         "status_charge_enabled",
                         "status_discharge_enabled",
@@ -116,32 +123,39 @@ async def async_setup_entry(
                         "led_warn_function",
                     ):
                         continue
+                    if not _take(pack_id, f"{sub_dict}_{key}"):
+                        continue
                     new_entities.append(
                         GobelBatteryBinarySensor(
                             coordinator, pack_id, sub_dict, key, name, device_class, category
                         )
                     )
 
-            warning_pack = next((p for p in warning_packs if p.get("pack_id") == pack_id), None)
             analog = next(
                 (p for p in (coordinator.data or {}).get("analog", []) if p.get("pack_id") == pack_id),
                 None,
             )
-            cell_warnings = (warning_pack or {}).get("cell_voltage_warnings") or []
-            temp_warnings = (warning_pack or {}).get("temp_sensor_warnings") or []
+            cell_warnings = warning_pack.get("cell_voltage_warnings") or []
+            temp_warnings = warning_pack.get("temp_sensor_warnings") or []
             temps = (analog or {}).get("temperatures") or []
             fitted_temps = [index for index, reading in enumerate(temps, start=1) if reading is not None]
-            if not fitted_temps:
-                fitted_temps = list(range(1, len(temp_warnings) + 1))
+            if not fitted_temps and temp_warnings:
+                fitted_temps = [
+                    index for index, _reading in enumerate(temp_warnings, start=1)
+                ]
             num_cells = len((analog or {}).get("cell_voltages") or []) or len(cell_warnings)
 
             for cell_idx in range(1, num_cells + 1):
+                if not _take(pack_id, f"cell_warn_{cell_idx}"):
+                    continue
                 new_entities.append(
                     GobelBatteryIndexedWarningSensor(
                         coordinator, pack_id, "cell_voltage_warnings", cell_idx, "Cell", "Voltage Warning"
                     )
                 )
             for temp_idx in fitted_temps:
+                if not _take(pack_id, f"temp_warn_{temp_idx}"):
+                    continue
                 new_entities.append(
                     GobelBatteryIndexedWarningSensor(
                         coordinator, pack_id, "temp_sensor_warnings", temp_idx, "Temperature", "Warning"
@@ -154,17 +168,18 @@ async def async_setup_entry(
                 ("balancing_status_active_1", "Active Balance 1 Active"),
                 ("balancing_status_active_2", "Active Balance 2 Active"),
             ):
-                new_entities.append(
-                    GobelBatteryBalanceSensor(coordinator, pack_id, key, name)
-                )
-            registered_packs.add(pack_id)
+                if key not in warning_pack or not _take(pack_id, key):
+                    continue
+                new_entities.append(GobelBatteryBalanceSensor(coordinator, pack_id, key, name))
+
+            _drop_absent_status(hass, entry, pack_id, present_keys, registered)
             if temps:
                 _drop_missing_warnings(hass, entry, pack_id, "temp_sensor_warnings_", set(fitted_temps))
             if num_cells:
                 _drop_missing_warnings(
                     hass, entry, pack_id, "cell_voltage_warnings_", set(range(1, num_cells + 1))
                 )
-            
+
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
 
@@ -175,6 +190,26 @@ async def async_setup_entry(
     entry.async_on_unload(
         coordinator.async_add_listener(async_add_pack_binary_sensors)
     )
+
+
+def _drop_absent_status(hass, entry, pack_id, present, registered):
+    """Remove a status entity whose byte is not in the frames we received."""
+    present_markers = {f"{sub}_{key}" for sub, key in present}
+    known = {
+        f"{sub}_{key}"
+        for sub, sensors in BINARY_SENSORS_METADATA.items()
+        for key in sensors
+    }
+    registry = er.async_get(hass)
+    prefix = f"{entry.entry_id}_pack_{pack_id}_"
+    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        unique_id = entity.unique_id or ""
+        if not unique_id.startswith(prefix):
+            continue
+        marker = unique_id[len(prefix):]
+        if marker in known and marker not in present_markers:
+            registry.async_remove(entity.entity_id)
+            registered.discard((pack_id, marker))
 
 
 def _drop_missing_warnings(hass, entry, pack_id, marker, present):

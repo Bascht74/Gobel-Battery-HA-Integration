@@ -365,39 +365,37 @@ async def async_setup_entry(
             )
         )
 
-    # Track registered pack IDs
-    registered_packs = set()
+    # Metrics already handed to Home Assistant. A later answer can still add one.
+    registered = set()
+
+    def _take(pack_id, metric):
+        key = (pack_id, metric)
+        if key in registered:
+            return False
+        registered.add(key)
+        return True
 
     @callback
     def async_add_pack_sensors():
-        """Add sensors for newly discovered packs."""
+        """Add a sensor only after the BMS has answered with that value."""
         data = coordinator.data
         analog_packs = data.get("analog", []) if data else []
-        
-        # Default to pack 0 if no packs are detected yet so entities are visible
-        if not analog_packs and not registered_packs:
-            pack_ids_to_add = [0]
-        else:
-            pack_ids_to_add = [p.get("pack_id", 0) for p in analog_packs if p.get("pack_id", 0) not in registered_packs]
+        if not analog_packs:
+            return
 
         new_entities = []
-        for pack_id in pack_ids_to_add:
-            if pack_id in registered_packs:
-                continue
-                
-            pack_data = next((p for p in analog_packs if p.get("pack_id") == pack_id), None)
-            num_cells = len((pack_data or {}).get("cell_voltages") or [])
+        for pack_data in analog_packs:
+            pack_id = pack_data.get("pack_id", 0)
 
-            # Add predefined metrics (SOC, SOH, Voltage, Current, Cycle Count, etc.)
             for metric, meta in SENSOR_METADATA.items():
-                # Only JK BMS supports balance current telemetry
                 if metric == "balance_current" and coordinator.bms_type != BMS_TYPE_JK_PB:
                     continue
                 if metric == "mos_temperature" and coordinator.bms_type != BMS_TYPE_JK_PB:
                     continue
                 if metric == "design_capacity" and coordinator.bms_type == BMS_TYPE_JK_PB:
                     continue
-                    
+                if not _take(pack_id, metric):
+                    continue
                 new_entities.append(
                     GobelBatteryPackSensor(
                         coordinator,
@@ -417,11 +415,7 @@ async def async_setup_entry(
             if coordinator.bms_type == BMS_TYPE_JK_PB:
                 extra.update(CURRENT_LIMIT_SENSORS)
                 extra.update(JK_CONFIG_SENSORS)
-            elif coordinator.bms_type == BMS_TYPE_PACE_LV_WIFI:
-                # The battery pushes analog and status frames. It does not answer
-                # the configuration commands, so those sensors are not created.
-                pass
-            else:
+            elif coordinator.bms_type != BMS_TYPE_PACE_LV_WIFI:
                 extra.update(_pace_configuration_sensors())
                 extra.update(_pace_readonly_sensors())
                 extra["limiter_gear"] = PACE_CONFIG_SENSORS["limiter_gear"]
@@ -435,6 +429,14 @@ async def async_setup_entry(
                     continue
                 if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG and not meta.get("read_only"):
                     continue
+                source_key = meta.get("key")
+                if metric == "limiter_gear":
+                    if pack_id not in coordinator._limiter_gear:
+                        continue
+                elif source_key and pack_data.get(source_key) is None:
+                    continue
+                if not _take(pack_id, metric):
+                    continue
                 new_entities.append(
                     GobelBatteryPackSensor(
                         coordinator,
@@ -446,47 +448,42 @@ async def async_setup_entry(
                         meta["state_class"],
                         meta["icon"],
                         meta["category"],
-                        source_key=meta["key"],
+                        source_key=source_key,
                         precision=meta.get("precision"),
                     )
                 )
 
-            # Add cell voltage sensors (Cell 01 Voltage ... Cell N Voltage)
-            for cell_idx in range(1, num_cells + 1):
-                new_entities.append(
-                    GobelBatteryCellVoltageSensor(coordinator, pack_id, cell_idx)
-                )
-
-            # Add temperature sensors (Temperature 01 ... Temperature N)
-            temps = (pack_data or {}).get("temperatures") or []
-            for temp_idx, reading in enumerate(temps, start=1):
-                if reading is None:
+            for cell_idx, voltage in enumerate(pack_data.get("cell_voltages") or [], start=1):
+                if voltage is None or not _take(pack_id, f"cell_{cell_idx}"):
                     continue
-                new_entities.append(
-                    GobelBatteryTemperatureSensor(coordinator, pack_id, temp_idx)
-                )
-                
-            registered_packs.add(pack_id)
+                new_entities.append(GobelBatteryCellVoltageSensor(coordinator, pack_id, cell_idx))
 
-        for pack in analog_packs:
-            temps = pack.get("temperatures") or []
+            for temp_idx, reading in enumerate(pack_data.get("temperatures") or [], start=1):
+                if reading is None or not _take(pack_id, f"temp_{temp_idx}"):
+                    continue
+                new_entities.append(GobelBatteryTemperatureSensor(coordinator, pack_id, temp_idx))
+
+            temps = pack_data.get("temperatures") or []
             if temps:
                 _drop_missing_probes(
                     hass,
                     entry,
-                    pack.get("pack_id", 0),
+                    pack_id,
                     "temp_",
                     {index for index, reading in enumerate(temps, start=1) if reading is not None},
                 )
-            cells = pack.get("cell_voltages") or []
+            cells = pack_data.get("cell_voltages") or []
             if cells:
                 _drop_missing_probes(
                     hass,
                     entry,
-                    pack.get("pack_id", 0),
+                    pack_id,
                     "cell_",
                     set(range(1, len(cells) + 1)),
                 )
+
+        if coordinator.config_rounds:
+            _drop_unanswered_config(hass, entry, coordinator, registered)
 
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
@@ -495,6 +492,30 @@ async def async_setup_entry(
     async_add_entities(initial_entities, update_before_add=True)
     async_add_pack_sensors()
     entry.async_on_unload(coordinator.async_add_listener(async_add_pack_sensors))
+
+
+def _drop_unanswered_config(hass, entry, coordinator, registered):
+    """Remove a setting that a full read cycle never returned."""
+    answered = coordinator.config_answered
+    optional = {field["key"] for field in list(FIELDS) + list(READ_ONLY)}
+    optional.add("limiter_gear")
+    registry = er.async_get(hass)
+    prefix = f"{entry.entry_id}_pack_"
+    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        unique_id = entity.unique_id or ""
+        if not unique_id.startswith(prefix):
+            continue
+        rest = unique_id[len(prefix):]
+        pack, _, metric = rest.partition("_")
+        if metric not in optional:
+            continue
+        if metric == "limiter_gear" and pack.isdigit() and int(pack) in coordinator._limiter_gear:
+            continue
+        if f"view_{metric}" in answered:
+            continue
+        registry.async_remove(entity.entity_id)
+        if pack.isdigit():
+            registered.discard((int(pack), metric))
 
 
 def _drop_missing_probes(hass, entry, pack_id, marker, present):

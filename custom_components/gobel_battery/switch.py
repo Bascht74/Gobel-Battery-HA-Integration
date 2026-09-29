@@ -30,15 +30,19 @@ async def async_setup_entry(
     @callback
     def _add_packs():
         packs = (coordinator.data or {}).get("warning", [])
-        pack_ids = [0] if not packs and not registered else [
-            pack.get("pack_id", 0) for pack in packs if pack.get("pack_id", 0) not in registered
-        ]
         entities = []
-        for pack_id in pack_ids:
-            if pack_id in registered or not coordinator.owns_configuration(pack_id):
+        for pack in packs:
+            pack_id = pack.get("pack_id", 0)
+            if not coordinator.owns_configuration(pack_id):
                 continue
-            registered.add(pack_id)
             for key, translation_key, section, icon in SWITCHES:
+                section_data = pack.get(section)
+                if not isinstance(section_data, dict) or translation_key not in section_data:
+                    continue
+                marker = (pack_id, key)
+                if marker in registered:
+                    continue
+                registered.add(marker)
                 entities.append(
                     GobelExpertSwitch(coordinator, pack_id, key, translation_key, section, icon)
                 )

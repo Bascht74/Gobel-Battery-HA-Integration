@@ -112,6 +112,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._energy_ts = None
         self._limit_cache = {}
         self._config_cache = {}
+        self.config_answered = set()
+        self.config_rounds = 0
         self._identity = {}
         self._limiter_gear = {}
         self._last_reopen = 0
@@ -364,9 +366,11 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                 values, raw = {}, {}
             slot["values"].update(values)
             slot["raw"].update(raw)
+            self.config_answered.update(key for key, value in values.items() if value is not None)
             slot["cursor"] = (slot["cursor"] + 4) % len(GROUPS)
             if slot["cursor"] == 0:
                 slot["ts"] = now
+                self.config_rounds += 1
 
         for pack in packs:
             if not self.owns_configuration(pack.get("pack_id", 0)):
