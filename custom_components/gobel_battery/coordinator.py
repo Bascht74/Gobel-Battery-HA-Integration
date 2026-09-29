@@ -392,7 +392,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
     def version_fields(self, pack_id=None):
         """Home Assistant device-registry fields for one pack, or the bank."""
         if pack_id not in (None,) and not self.owns_configuration(pack_id):
-            return {"sw_version": None, "hw_version": None, "serial_number": None}
+            return {}
         slot = {}
         if pack_id is not None:
             slot = self._identity.get(pack_id, {})

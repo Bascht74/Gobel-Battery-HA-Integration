@@ -5,11 +5,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 import homeassistant.helpers.config_validation as cv
 
-from homeassistant.helpers import entity_registry as er
-
 from .const import DOMAIN
 from .coordinator import GobelBatteryUpdateCoordinator
-from .pace_config import FIELDS, READ_ONLY
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,29 +37,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     # Forward setup to the sensor and binary_sensor platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    _remove_copied_configuration(hass, entry, coordinator)
 
     return True
-
-
-def _remove_copied_configuration(hass, entry, coordinator):
-    """Drop settings that were copied from the master onto the other packs."""
-    if coordinator.battery_port == "rs485":
-        return
-    copied = {field["key"] for field in FIELDS}
-    copied.update(field["key"] for field in READ_ONLY)
-    copied.add("limiter_gear")
-    registry = er.async_get(hass)
-    prefix = f"{entry.entry_id}_pack_"
-    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
-        unique_id = entity.unique_id or ""
-        if not unique_id.startswith(prefix):
-            continue
-        pack_text, _, metric = unique_id[len(prefix):].partition("_")
-        if not pack_text.isdigit() or coordinator.owns_configuration(int(pack_text)):
-            continue
-        if "_expert_" in unique_id or metric in copied:
-            registry.async_remove(entity.entity_id)
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
