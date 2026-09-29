@@ -22,8 +22,10 @@ def test_power_is_converted_from_kilowatts_to_watts():
     assert watts_from_kilowatts(-0.5) == -500.0
 
 
-def test_missing_temperature_probe_is_not_kept():
-    assert present_temperatures([25.3, 24.1, 26.0, 25.0, -273.15]) == [25.3, 24.1, 26.0, 25.0]
+def test_unfitted_probe_keeps_the_other_slot_numbers():
+    slots = present_temperatures([25.3, 24.1, 26.0, 25.0, -273.15, 31.2])
+    assert slots == [25.3, 24.1, 26.0, 25.0, None, 31.2]
+    assert present_temperatures([21.0, 22.0, 23.0, 24.0, 25.0, 26.0])[4:] == [25.0, 26.0]
 
 
 def test_amp_hours_become_kwh_with_fixed_cell_voltage():

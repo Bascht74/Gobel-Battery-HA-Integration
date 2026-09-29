@@ -240,7 +240,7 @@ class PACEBMSWIFI:
                 temperatures.append(temp_c)
                 offset += 2
             pack_data['temperatures'] = present_temperatures(temperatures)
-            pack_data['view_num_temps'] = len(pack_data['temperatures'])
+            pack_data['view_num_temps'] = sum(value is not None for value in pack_data['temperatures'])
 
             # Pack current
             if offset + 1 >= len(fields):

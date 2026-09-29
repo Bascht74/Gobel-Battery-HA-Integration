@@ -266,7 +266,7 @@ class TDTBMS232:
             temperatures.append(temperature)
             offset += 2
         pack_data['temperatures'] = present_temperatures(temperatures)
-        pack_data['view_num_temps'] = len(pack_data['temperatures'])
+        pack_data['view_num_temps'] = sum(value is not None for value in pack_data['temperatures'])
 
         # Pack current
         pack_current = fields[offset] + fields[offset + 1]  # Combine two bytes for current

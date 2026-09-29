@@ -387,7 +387,6 @@ async def async_setup_entry(
                 
             pack_data = next((p for p in analog_packs if p.get("pack_id") == pack_id), None)
             num_cells = len((pack_data or {}).get("cell_voltages") or [])
-            num_temps = len((pack_data or {}).get("temperatures") or [])
 
             # Add predefined metrics (SOC, SOH, Voltage, Current, Cycle Count, etc.)
             for metric, meta in SENSOR_METADATA.items():
@@ -459,7 +458,10 @@ async def async_setup_entry(
                 )
 
             # Add temperature sensors (Temperature 01 ... Temperature N)
-            for temp_idx in range(1, num_temps + 1):
+            temps = (pack_data or {}).get("temperatures") or []
+            for temp_idx, reading in enumerate(temps, start=1):
+                if reading is None:
+                    continue
                 new_entities.append(
                     GobelBatteryTemperatureSensor(coordinator, pack_id, temp_idx)
                 )
@@ -467,20 +469,24 @@ async def async_setup_entry(
             registered_packs.add(pack_id)
 
         for pack in analog_packs:
-            _drop_missing_probes(
-                hass,
-                entry,
-                pack.get("pack_id", 0),
-                "temp_",
-                len(pack.get("temperatures") or []),
-            )
-            _drop_missing_probes(
-                hass,
-                entry,
-                pack.get("pack_id", 0),
-                "cell_",
-                len(pack.get("cell_voltages") or []),
-            )
+            temps = pack.get("temperatures") or []
+            if temps:
+                _drop_missing_probes(
+                    hass,
+                    entry,
+                    pack.get("pack_id", 0),
+                    "temp_",
+                    {index for index, reading in enumerate(temps, start=1) if reading is not None},
+                )
+            cells = pack.get("cell_voltages") or []
+            if cells:
+                _drop_missing_probes(
+                    hass,
+                    entry,
+                    pack.get("pack_id", 0),
+                    "cell_",
+                    set(range(1, len(cells) + 1)),
+                )
 
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
@@ -488,10 +494,13 @@ async def async_setup_entry(
     # Register initial overall sensors + any initially detected packs
     async_add_entities(initial_entities, update_before_add=True)
     async_add_pack_sensors()
+    entry.async_on_unload(coordinator.async_add_listener(async_add_pack_sensors))
 
 
-def _drop_missing_probes(hass, entry, pack_id, marker, count):
-    """Remove cell or temperature entities the BMS does not have."""
+def _drop_missing_probes(hass, entry, pack_id, marker, present):
+    """Remove a probe entity only when that slot has no sensor fitted."""
+    if not present:
+        return
     registry = er.async_get(hass)
     prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}"
     for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
@@ -499,13 +508,8 @@ def _drop_missing_probes(hass, entry, pack_id, marker, count):
         if not unique_id.startswith(prefix):
             continue
         number = unique_id[len(prefix):].split("_", 1)[0]
-        if number.isdigit() and int(number) > count:
+        if number.isdigit() and int(number) not in present:
             registry.async_remove(entity.entity_id)
-
-    # Listen for future updates
-    entry.async_on_unload(
-        coordinator.async_add_listener(async_add_pack_sensors)
-    )
 
 class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
     """Sensor representing aggregate battery bank metrics."""

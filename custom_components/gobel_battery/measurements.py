@@ -29,19 +29,20 @@ def kwh_from_amp_hours(amp_hours, cell_count, volts_per_cell=NOMINAL_LFP_CELL_VO
 
 
 def present_temperatures(values):
-    """Drop probes the BMS reports but that are not fitted.
+    """Keep each BMS slot. None means that socket has no probe fitted.
 
-    An empty socket is sent as 0 K, which is about -273 °C.
+    An empty socket is sent as 0 K, which is about -273 °C. A fitted probe
+    keeps its own number, even when a lower slot is empty.
     """
-    present = []
+    slots = []
     for value in values or []:
         try:
             celsius = float(value)
         except (TypeError, ValueError):
+            slots.append(None)
             continue
-        if -40 <= celsius <= 125:
-            present.append(round(celsius, 2))
-    return present
+        slots.append(round(celsius, 2) if -40.0 <= celsius <= 125.0 else None)
+    return slots
 
 
 def resolve_soc(raw_soc, remain_ah, full_ah):

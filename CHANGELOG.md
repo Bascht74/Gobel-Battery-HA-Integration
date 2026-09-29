@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.12] - 2026-09-29
+### Fixed
+-   An empty temperature socket is skipped, but a fitted probe keeps its own number.
+
+---------------
+
 ## [2.4.11] - 2026-09-29
 ### Changed
 -   Temperature sensors are created only for probes that report a real value. Empty sockets are not shown.

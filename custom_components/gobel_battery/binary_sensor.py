@@ -129,8 +129,11 @@ async def async_setup_entry(
             )
             cell_warnings = (warning_pack or {}).get("cell_voltage_warnings") or []
             temp_warnings = (warning_pack or {}).get("temp_sensor_warnings") or []
+            temps = (analog or {}).get("temperatures") or []
+            fitted_temps = [index for index, reading in enumerate(temps, start=1) if reading is not None]
+            if not fitted_temps:
+                fitted_temps = list(range(1, len(temp_warnings) + 1))
             num_cells = len((analog or {}).get("cell_voltages") or []) or len(cell_warnings)
-            num_temps = len((analog or {}).get("temperatures") or []) or len(temp_warnings)
 
             for cell_idx in range(1, num_cells + 1):
                 new_entities.append(
@@ -138,7 +141,7 @@ async def async_setup_entry(
                         coordinator, pack_id, "cell_voltage_warnings", cell_idx, "Cell", "Voltage Warning"
                     )
                 )
-            for temp_idx in range(1, num_temps + 1):
+            for temp_idx in fitted_temps:
                 new_entities.append(
                     GobelBatteryIndexedWarningSensor(
                         coordinator, pack_id, "temp_sensor_warnings", temp_idx, "Temperature", "Warning"
@@ -155,9 +158,12 @@ async def async_setup_entry(
                     GobelBatteryBalanceSensor(coordinator, pack_id, key, name)
                 )
             registered_packs.add(pack_id)
-            if analog is not None:
-                _drop_missing_warnings(hass, entry, pack_id, "temp_sensor_warnings_", num_temps)
-                _drop_missing_warnings(hass, entry, pack_id, "cell_voltage_warnings_", num_cells)
+            if temps:
+                _drop_missing_warnings(hass, entry, pack_id, "temp_sensor_warnings_", set(fitted_temps))
+            if num_cells:
+                _drop_missing_warnings(
+                    hass, entry, pack_id, "cell_voltage_warnings_", set(range(1, num_cells + 1))
+                )
             
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
@@ -171,8 +177,10 @@ async def async_setup_entry(
     )
 
 
-def _drop_missing_warnings(hass, entry, pack_id, marker, count):
-    """Remove per-cell or per-probe warnings the BMS does not have."""
+def _drop_missing_warnings(hass, entry, pack_id, marker, present):
+    """Remove a warning only when that slot has no probe or cell."""
+    if not present:
+        return
     registry = er.async_get(hass)
     prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}"
     for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
@@ -180,7 +188,7 @@ def _drop_missing_warnings(hass, entry, pack_id, marker, count):
         if not unique_id.startswith(prefix):
             continue
         number = unique_id[len(prefix):].split("_", 1)[0]
-        if number.isdigit() and int(number) > count:
+        if number.isdigit() and int(number) not in present:
             registry.async_remove(entity.entity_id)
 
 
