@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.17] - 2026-09-29
+### Changed
+-   Protection, faults, warnings, cell voltages and temperatures are diagnostic. The device page keeps SOC, voltage, current, power, remaining capacity and energy. Configuration stays the values that can be set.
+
+---------------
+
 ## [2.4.16] - 2026-09-29
 ### Changed
 -   A setting or status bit is created only after the BMS has answered with that value. A later answer, for example after a firmware update, adds the entity without reloading the integration.

@@ -70,6 +70,6 @@ Im Gegensatz zur vorherigen Add-on-Version **benötigt diese Integration keinen 
 
 Eine bestehende Installation lässt sich unter **Einstellungen -> Geräte & Dienste** über **Neu konfigurieren** ändern (IP, Port, BMS-Typ, serieller Anschluss). **Konfigurieren** ändert Abfrageintervall, parallele Packs und den JK-Pack-Index. Danach wird das Gerät neu geladen.
 
-SOC, Spannung, Strom, Leistung und Energie bleiben auf der Geräteseite und schreiben Langzeitstatistiken. Zellspannungen sind in Volt, Leistung in Watt, Energie in kWh. BMS-Grenzwerte, auch die Pace-Lade- und Entladestromgrenzen, stehen unter **Konfiguration**. Einzelne Zellspannungen, Warnungen und Balancing stehen unter **Diagnose**.
+SOC, Spannung, Strom, Leistung, Restkapazität und Energie bleiben auf der Geräteseite und schreiben Langzeitstatistiken. Zellspannungen sind in Volt, Leistung in Watt, Energie in kWh. BMS-Grenzwerte, MOSFET-Schalter, Strombegrenzer, Summer und LED-Alarm stehen unter **Konfiguration**. Zellspannungen, Temperaturen, Warnungen, Schutz und Fehler stehen unter **Diagnose**.
 
 Dieses Repository ist ein Fork von [fancyui/Gobel-Battery-HA-Integration](https://github.com/fancyui/Gobel-Battery-HA-Integration).

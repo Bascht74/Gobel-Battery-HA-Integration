@@ -13,41 +13,42 @@ from .const import BMS_TYPE_JK_PB, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 # Metadata: sub-dictionary, key, name, device class, entity category.
-# Protection and fault bits stay on the main device page (no category) because
-# they use device class PROBLEM. Detailed warnings and status flags are diagnostic.
+# Protection, faults and warnings are diagnostic. They report what the BMS
+# did, they are not the daily reading and they do not change a setting.
+# CONFIG is only a value the user can set: MOSFET, limiter, buzzer, LED.
 BINARY_SENSORS_METADATA = {
     "protect_state_1": {
-        "protect_short_circuit": ("Short Circuit Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_discharge_current": ("Discharge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_charge_current": ("Charge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_low_total_voltage": ("Total Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_total_voltage": ("Total Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_low_cell_voltage": ("Cell Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_cell_voltage": ("Cell Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_short_circuit": ("Short Circuit Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_discharge_current": ("Discharge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_charge_current": ("Charge Overcurrent Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_low_total_voltage": ("Total Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_total_voltage": ("Total Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_low_cell_voltage": ("Cell Under-Voltage Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_cell_voltage": ("Cell Over-Voltage Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
     },
     "protect_state_2": {
-        "protect_low_charge_temp": ("Charge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_charge_temp": ("Charge High Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_MOS_temp": ("MOS High Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_discharge_temp": ("Discharge High Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_low_charge_temp": ("Charge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_charge_temp": ("Charge High Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_MOS_temp": ("MOS High Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_discharge_temp": ("Discharge High Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
         "status_fully_charged": ("Fully Charged Status", None, EntityCategory.DIAGNOSTIC),
-        "protect_low_env_temp": ("Low Env Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_high_env_temp": ("High Env Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
-        "protect_low_discharge_temp": ("Discharge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, None),
+        "protect_low_env_temp": ("Low Env Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_high_env_temp": ("High Env Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "protect_low_discharge_temp": ("Discharge Low Temp Protection", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
     },
     "fault_state": {
-        "fault_heater": ("Heater Fault", BinarySensorDeviceClass.PROBLEM, None),
-        "fault_comm": ("Communication Fault", BinarySensorDeviceClass.PROBLEM, None),
-        "fault_sampling": ("Sampling Fault", BinarySensorDeviceClass.PROBLEM, None),
-        "fault_cell": ("Cell Count Mismatch/Fault", BinarySensorDeviceClass.PROBLEM, None),
-        "fault_NTC": ("Temperature Sensor Fault", BinarySensorDeviceClass.PROBLEM, None),
-        "fault_discharge_MOS": ("Discharge MOS Fault", BinarySensorDeviceClass.PROBLEM, None),
-        "fault_charge_MOS": ("Charge MOS Fault", BinarySensorDeviceClass.PROBLEM, None),
+        "fault_heater": ("Heater Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "fault_comm": ("Communication Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "fault_sampling": ("Sampling Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "fault_cell": ("Cell Count Mismatch/Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "fault_NTC": ("Temperature Sensor Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "fault_discharge_MOS": ("Discharge MOS Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+        "fault_charge_MOS": ("Charge MOS Fault", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
     },
     "instruction_state": {
         "status_heating": ("Heating Switch Active", BinarySensorDeviceClass.HEAT, EntityCategory.DIAGNOSTIC),
         "status_charger_avaliable": ("Charger Available", BinarySensorDeviceClass.PLUG, EntityCategory.DIAGNOSTIC),
-        "status_reverse_connected": ("Reverse Connected Alert", BinarySensorDeviceClass.PROBLEM, None),
+        "status_reverse_connected": ("Reverse Connected Alert", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
         "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
         "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
         "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),

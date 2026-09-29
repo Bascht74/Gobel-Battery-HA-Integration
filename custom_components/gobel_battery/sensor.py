@@ -184,7 +184,7 @@ SENSOR_METADATA = {
         "device_class": SensorDeviceClass.TEMPERATURE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:thermometer",
-        "category": None,
+        "category": EntityCategory.DIAGNOSTIC,
         "precision": 1,
     },
     "balance_current": {
@@ -804,7 +804,7 @@ class GobelBatteryTemperatureSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_icon = "mdi:thermometer"
-        self._attr_entity_category = None
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def device_info(self):
