@@ -28,6 +28,22 @@ def kwh_from_amp_hours(amp_hours, cell_count, volts_per_cell=NOMINAL_LFP_CELL_VO
     return round(float(amp_hours) * int(cell_count) * float(volts_per_cell) / 1000.0, 3)
 
 
+def present_temperatures(values):
+    """Drop probes the BMS reports but that are not fitted.
+
+    An empty socket is sent as 0 K, which is about -273 °C.
+    """
+    present = []
+    for value in values or []:
+        try:
+            celsius = float(value)
+        except (TypeError, ValueError):
+            continue
+        if -40 <= celsius <= 125:
+            present.append(round(celsius, 2))
+    return present
+
+
 def resolve_soc(raw_soc, remain_ah, full_ah):
     """Use remain/full when the SOC byte is missing or above 100 percent."""
     full_ah = float(full_ah or 0)

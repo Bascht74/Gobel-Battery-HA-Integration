@@ -2,9 +2,9 @@ import struct
 import logging
 
 try:
-    from .measurements import resolve_soc, resolve_soh
+    from .measurements import present_temperatures, resolve_soc, resolve_soh
 except ImportError:  # unit tests load this file outside the HA package
-    from measurements import resolve_soc, resolve_soh
+    from measurements import present_temperatures, resolve_soc, resolve_soh
 
 class PACEBMS232:
 
@@ -507,7 +507,8 @@ class PACEBMS232:
                 temperature = round(temperature / 10 - 273.15, 2)  # Convert tenths of degrees Kelvin to degrees Celsius
                 temperatures.append(temperature)
                 offset += 2
-            pack_data['temperatures'] = temperatures
+            pack_data['temperatures'] = present_temperatures(temperatures)
+            pack_data['view_num_temps'] = len(pack_data['temperatures'])
     
             # Pack current
             pack_current = fields[offset] + fields[offset + 1]  # Combine two bytes for current
@@ -703,7 +704,8 @@ class PACEBMS232:
                 temperature = round(temperature / 10 - 273.15, 2)  # Convert tenths of degrees Kelvin to degrees Celsius
                 temperatures.append(temperature)
                 offset += 2
-            pack_data['temperatures'] = temperatures
+            pack_data['temperatures'] = present_temperatures(temperatures)
+            pack_data['view_num_temps'] = len(pack_data['temperatures'])
     
             # Pack current
             pack_current = fields[offset] + fields[offset + 1]  # Combine two bytes for current

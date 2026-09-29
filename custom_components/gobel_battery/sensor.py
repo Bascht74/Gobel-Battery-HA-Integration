@@ -4,6 +4,7 @@ from homeassistant.components.sensor import SensorEntity, SensorStateClass, Sens
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -384,14 +385,9 @@ async def async_setup_entry(
             if pack_id in registered_packs:
                 continue
                 
-            num_cells = 16
-            num_temps = 4
-            
-            # Count cells and temps from matching pack data if available
             pack_data = next((p for p in analog_packs if p.get("pack_id") == pack_id), None)
-            if pack_data:
-                num_cells = len(pack_data.get("cell_voltages", []))
-                num_temps = len(pack_data.get("temperatures", []))
+            num_cells = len((pack_data or {}).get("cell_voltages") or [])
+            num_temps = len((pack_data or {}).get("temperatures") or [])
 
             # Add predefined metrics (SOC, SOH, Voltage, Current, Cycle Count, etc.)
             for metric, meta in SENSOR_METADATA.items():
@@ -470,12 +466,41 @@ async def async_setup_entry(
                 
             registered_packs.add(pack_id)
 
+        for pack in analog_packs:
+            _drop_missing_probes(
+                hass,
+                entry,
+                pack.get("pack_id", 0),
+                "temp_",
+                len(pack.get("temperatures") or []),
+            )
+            _drop_missing_probes(
+                hass,
+                entry,
+                pack.get("pack_id", 0),
+                "cell_",
+                len(pack.get("cell_voltages") or []),
+            )
+
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
 
     # Register initial overall sensors + any initially detected packs
     async_add_entities(initial_entities, update_before_add=True)
     async_add_pack_sensors()
+
+
+def _drop_missing_probes(hass, entry, pack_id, marker, count):
+    """Remove cell or temperature entities the BMS does not have."""
+    registry = er.async_get(hass)
+    prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}"
+    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        unique_id = entity.unique_id or ""
+        if not unique_id.startswith(prefix):
+            continue
+        number = unique_id[len(prefix):].split("_", 1)[0]
+        if number.isdigit() and int(number) > count:
+            registry.async_remove(entity.entity_id)
 
     # Listen for future updates
     entry.async_on_unload(

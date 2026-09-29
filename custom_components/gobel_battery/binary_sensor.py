@@ -4,6 +4,7 @@ from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySen
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -122,10 +123,14 @@ async def async_setup_entry(
                     )
 
             warning_pack = next((p for p in warning_packs if p.get("pack_id") == pack_id), None)
+            analog = next(
+                (p for p in (coordinator.data or {}).get("analog", []) if p.get("pack_id") == pack_id),
+                None,
+            )
             cell_warnings = (warning_pack or {}).get("cell_voltage_warnings") or []
             temp_warnings = (warning_pack or {}).get("temp_sensor_warnings") or []
-            num_cells = len(cell_warnings) or 16
-            num_temps = len(temp_warnings) or 4
+            num_cells = len((analog or {}).get("cell_voltages") or []) or len(cell_warnings)
+            num_temps = len((analog or {}).get("temperatures") or []) or len(temp_warnings)
 
             for cell_idx in range(1, num_cells + 1):
                 new_entities.append(
@@ -150,6 +155,9 @@ async def async_setup_entry(
                     GobelBatteryBalanceSensor(coordinator, pack_id, key, name)
                 )
             registered_packs.add(pack_id)
+            if analog is not None:
+                _drop_missing_warnings(hass, entry, pack_id, "temp_sensor_warnings_", num_temps)
+                _drop_missing_warnings(hass, entry, pack_id, "cell_voltage_warnings_", num_cells)
             
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
@@ -161,6 +169,20 @@ async def async_setup_entry(
     entry.async_on_unload(
         coordinator.async_add_listener(async_add_pack_binary_sensors)
     )
+
+
+def _drop_missing_warnings(hass, entry, pack_id, marker, count):
+    """Remove per-cell or per-probe warnings the BMS does not have."""
+    registry = er.async_get(hass)
+    prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}"
+    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+        unique_id = entity.unique_id or ""
+        if not unique_id.startswith(prefix):
+            continue
+        number = unique_id[len(prefix):].split("_", 1)[0]
+        if number.isdigit() and int(number) > count:
+            registry.async_remove(entity.entity_id)
+
 
 class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
     """Binary sensor representing a BMS alarm, warning or status state."""

@@ -4,6 +4,7 @@ from measurements import (
     bms_throughput_kwh,
     integrate_energy_kwh,
     kwh_from_amp_hours,
+    present_temperatures,
     resolve_soc,
     resolve_soh,
     volts_from_millivolts,
@@ -19,6 +20,10 @@ def test_cell_voltage_is_volts_with_three_decimals():
 def test_power_is_converted_from_kilowatts_to_watts():
     assert watts_from_kilowatts(1.25) == 1250.0
     assert watts_from_kilowatts(-0.5) == -500.0
+
+
+def test_missing_temperature_probe_is_not_kept():
+    assert present_temperatures([25.3, 24.1, 26.0, 25.0, -273.15]) == [25.3, 24.1, 26.0, 25.0]
 
 
 def test_amp_hours_become_kwh_with_fixed_cell_voltage():

@@ -1,6 +1,11 @@
 import struct
 import logging
 
+try:
+    from .measurements import present_temperatures
+except ImportError:
+    from measurements import present_temperatures
+
 class TDTBMS232:
 
     def __init__(self, bms_comm, ha_comm, data_refresh_interval, debug, if_random):
@@ -260,7 +265,8 @@ class TDTBMS232:
             temperature = round(temperature / 10 - 273.15, 2)  # Convert tenths of degrees Kelvin to degrees Celsius
             temperatures.append(temperature)
             offset += 2
-        pack_data['temperatures'] = temperatures
+        pack_data['temperatures'] = present_temperatures(temperatures)
+        pack_data['view_num_temps'] = len(pack_data['temperatures'])
 
         # Pack current
         pack_current = fields[offset] + fields[offset + 1]  # Combine two bytes for current

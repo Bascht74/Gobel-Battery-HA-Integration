@@ -3,9 +3,9 @@ import time
 import socket
 
 try:
-    from .measurements import resolve_soc, resolve_soh
+    from .measurements import present_temperatures, resolve_soc, resolve_soh
 except ImportError:  # unit tests load this file outside the HA package
-    from measurements import resolve_soc, resolve_soh
+    from measurements import present_temperatures, resolve_soc, resolve_soh
 
 class PACEBMSWIFI:
     def __init__(self, bms_comm, ha_comm, bms_type, data_refresh_interval, debug, if_random):
@@ -239,7 +239,8 @@ class PACEBMSWIFI:
                 temp_c = round((temp_raw - 2730) / 10.0, 2)
                 temperatures.append(temp_c)
                 offset += 2
-            pack_data['temperatures'] = temperatures
+            pack_data['temperatures'] = present_temperatures(temperatures)
+            pack_data['view_num_temps'] = len(pack_data['temperatures'])
 
             # Pack current
             if offset + 1 >= len(fields):
