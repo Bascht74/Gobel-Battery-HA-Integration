@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.10] - 2026-09-29
+### Changed
+-   Internal Pace Wi-Fi no longer creates the charge and discharge limit sensors. The pushed frames do not contain them.
+
+---------------
+
 ## [2.4.9] - 2026-09-29
 ### Fixed
 -   After a dongle reboot or firmware update the TCP connection is opened again. A Home Assistant reload is no longer required.

@@ -423,7 +423,9 @@ async def async_setup_entry(
                 extra.update(CURRENT_LIMIT_SENSORS)
                 extra.update(JK_CONFIG_SENSORS)
             elif coordinator.bms_type == BMS_TYPE_PACE_LV_WIFI:
-                extra.update(CURRENT_LIMIT_SENSORS)
+                # The battery pushes analog and status frames. It does not answer
+                # the configuration commands, so those sensors are not created.
+                pass
             else:
                 extra.update(_pace_configuration_sensors())
                 extra.update(_pace_readonly_sensors())
