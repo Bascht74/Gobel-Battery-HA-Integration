@@ -1,6 +1,7 @@
 """The setup probe must not confuse a pushed frame with a command reply."""
 
 from pace_probe import ACTIVE, PASSIVE, SILENT, COMMON_TCP_PORTS, classify_pace_traffic
+from pacebms_rs232 import PACEBMS232
 
 
 def test_command_reply_is_active_even_if_the_bms_also_pushes():
@@ -21,6 +22,12 @@ def test_dongle_heartbeat_is_passive():
 
 def test_no_bytes_is_silent():
     assert classify_pace_traffic(b"", b"") == SILENT
+
+
+def test_pushed_frame_is_still_read_in_command_mode():
+    bms = PACEBMS232(object(), object(), "PACE_LV", 5, 0, 0)
+    assert bms.identify_packet_type("~25004642E00201" + "00" * 8) == "analog"
+    assert bms.identify_packet_type("~25004644E00201" + "00" * 8) == "warning"
 
 
 def test_standard_ports_are_gobel_then_hiflying():

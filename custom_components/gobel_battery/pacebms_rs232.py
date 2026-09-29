@@ -49,7 +49,14 @@ class PACEBMS232:
             # Check command success (CID1 = 46, RTN = 00)
             cid1 = response[5:7]
             rtn = response[7:9]
-            if cid1 != '46' or rtn != '00':
+            if cid1 != '46':
+                return None
+            # A dongle forwards frames the BMS sends on its own. CID2 stays 42 or 44.
+            if rtn == '42':
+                return 'analog'
+            if rtn == '44':
+                return 'warning'
+            if rtn != '00':
                 return None
                 
             # Extract LENID (3 characters starting at index 10)
@@ -449,7 +456,7 @@ class PACEBMS232:
         # Debug: Print the fields to verify their contents
         self.logger.debug(f"fields: {fields}")
         # Check the command and response validity
-        if fields[2] != '46' or fields[3] != '00':
+        if fields[2] != '46' or fields[3] not in ('00', '42'):
             self.logger.error(f"Invalid command or response code: {fields[2]} {fields[3]}")
             return None
     
@@ -589,7 +596,7 @@ class PACEBMS232:
         # Debug: Print the fields to verify their contents
         self.logger.debug(f"fields: {fields}")
         # Check the command and response validity
-        if fields[2] != '46' or fields[3] != '00':
+        if fields[2] != '46' or fields[3] not in ('00', '42'):
             self.logger.error(f"Invalid command or response code: {fields[2]} {fields[3]}")
             return None
     
@@ -844,7 +851,7 @@ class PACEBMS232:
         length_low_byte = data[10:12]
 
         # Check the command and response validity
-        if command != '46' or rtn != '00':
+        if command != '46' or rtn not in ('00', '44'):
             self.logger.error(f"Invalid command or response code: {command} {rtn}")
             return None
         

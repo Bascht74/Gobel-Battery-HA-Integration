@@ -68,7 +68,7 @@
       },
       "probe": {
         "title": "Pace connection check",
-        "description": "Detected: {result}. Pace BMS can write limits and switches. Internal Wi-Fi stays display only. If nothing answered, the type you selected is kept."
+        "description": "Detected: {result}. This is Pace BMS with commands, also when the battery sends frames by itself. Internal Wi-Fi is not selected automatically."
       }
     },
     "error": {

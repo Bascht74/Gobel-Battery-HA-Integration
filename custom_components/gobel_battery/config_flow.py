@@ -188,10 +188,9 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._pending_entry[CONF_IP_PORT] = int(port)
         self._probe_result = result
         self._probe_port_note = f", Port {int(port)}"
-        if result == ACTIVE:
+        if result in (ACTIVE, PASSIVE):
+            # Frames that arrive by themselves are still this dongle, not internal Wi-Fi.
             self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV
-        elif result == PASSIVE:
-            self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV_WIFI
         return await self.async_step_probe()
 
     async def async_step_port(self, user_input=None):
@@ -228,7 +227,7 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         german = str(getattr(self.hass.config, "language", "")).startswith("de")
         labels = {
             ACTIVE: "Pace BMS",
-            PASSIVE: "Pace BMS, internes WLAN" if german else "Pace BMS, internal Wi-Fi",
+            PASSIVE: "Pace BMS",
             "silent": "keine Antwort" if german else "no answer",
             "unreachable": "keine Verbindung" if german else "no connection",
         }

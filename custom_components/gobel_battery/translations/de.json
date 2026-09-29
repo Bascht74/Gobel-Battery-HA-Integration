@@ -68,7 +68,7 @@
       },
       "probe": {
         "title": "Pace-Verbindungsprüfung",
-        "description": "Erkannt: {result}. Pace BMS kann Grenzen und Schalter schreiben. Internes WLAN bleibt nur Anzeige. Kam keine Antwort, bleibt deine Auswahl."
+        "description": "Erkannt: {result}. Das bleibt Pace BMS mit Befehlen, auch wenn der Akku von selbst Rahmen schickt. Internes WLAN wird nicht automatisch gewählt."
       }
     },
     "error": {

@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.13] - 2026-09-29
+### Fixed
+-   An external TCP dongle is no longer set up as internal Wi-Fi when the battery sends frames by itself. Commands stay enabled, and those frames are still read.
+
+---------------
+
 ## [2.4.12] - 2026-09-29
 ### Fixed
 -   An empty temperature socket is skipped, but a fitted probe keeps its own number.
