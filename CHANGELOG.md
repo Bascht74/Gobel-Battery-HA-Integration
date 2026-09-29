@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.9] - 2026-09-29
+### Fixed
+-   After a dongle reboot or firmware update the TCP connection is opened again. A Home Assistant reload is no longer required.
+
+---------------
+
 ## [2.4.8] - 2026-09-29
 ### Changed
 -   On RS232, configuration is shown only for the master pack. The other packs keep their own measurements.

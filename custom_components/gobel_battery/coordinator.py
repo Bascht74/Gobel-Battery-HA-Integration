@@ -109,6 +109,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._config_cache = {}
         self._identity = {}
         self._limiter_gear = {}
+        self._last_reopen = 0
         self._bus_lock = threading.Lock()
         self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
 
@@ -278,6 +279,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         # Reconcile with cache to hold old data on occasional read failures
         seen_analog_packs = {item.get("pack_id", i): item for i, item in enumerate(analog_data)}
         seen_warning_packs = {item.get("pack_id", i): item for i, item in enumerate(warning_data)}
+        if not seen_analog_packs and self.connection_type != "serial":
+            self._reopen_link()
         
         final_analog_data = []
         final_warning_data = []
@@ -320,6 +323,20 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             "analog": final_analog_data,
             "warning": final_warning_data,
         }
+
+    def _reopen_link(self):
+        """The dongle keeps no session across a reboot or firmware update."""
+        if not self.bms_comm:
+            return
+        now = time.monotonic()
+        if now - self._last_reopen < 15:
+            return
+        self._last_reopen = now
+        _LOGGER.warning("No BMS data from %s, reconnecting", self.ip_address)
+        try:
+            self.bms_comm.reconnect()
+        except Exception as err:
+            _LOGGER.debug("Reconnect failed: %s", err)
 
     def _attach_current_limits(self, packs):
         """Read a few Pace/TDT configuration groups per poll. JK limits come from the setup frame."""

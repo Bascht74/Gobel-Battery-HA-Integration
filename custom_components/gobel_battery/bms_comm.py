@@ -35,6 +35,7 @@ class BMSCommunication:
                 self.logger.info(f"Trying to connect BMS over {self.ethernet_ip}:{self.ethernet_port}")
                 self.bms_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.bms_connection.settimeout(3)
+                self.bms_connection.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
                 self.bms_connection.connect((self.ethernet_ip, self.ethernet_port))
                 self._tcp_buffer = b''
                 self.logger.info(f"Connected to BMS over Ethernet: {self.ethernet_ip}:{self.ethernet_port}")
@@ -68,8 +69,11 @@ class BMSCommunication:
         else:
             self.logger.warning("No active connection to disconnect.")
 
-
-
+    def reconnect(self):
+        """Drop a dead socket and open a new one. A dongle reboot leaves the old one open."""
+        self.disconnect()
+        self._tcp_buffer = b""
+        return bool(self.connect())
 
     def send_data(self, data):
         try:
@@ -77,8 +81,8 @@ class BMSCommunication:
             if isinstance(data, str):
                 data = data.encode()  # Convert string to bytes if necessary
 
-            if not self.bms_connection:
-                raise ValueError("No active connection")
+            if not self.bms_connection and not self.connect():
+                return False
 
             # Check if the connection is a socket (Ethernet)
             if hasattr(self.bms_connection, 'send'):
@@ -95,8 +99,7 @@ class BMSCommunication:
 
         except Exception as e:
             self.logger.error(f"Error sending data to BMS: {e}")
-            self.disconnect()
-            self.connect()
+            self.reconnect()
             return False
 
     def receive_data(self, return_raw=False):
@@ -130,6 +133,7 @@ class BMSCommunication:
                     if not hasattr(self, '_tcp_buffer'):
                         self._tcp_buffer = b''
                     
+                    peer_closed = False
                     import time
                     start_time = time.time()
                     timeout = self.bms_connection.gettimeout() or 3.0
@@ -141,13 +145,21 @@ class BMSCommunication:
                             # Read chunks of data
                             chunk = self.bms_connection.recv(4096)
                             if not chunk:
+                                peer_closed = True
                                 break
                             self._tcp_buffer += chunk
                         except socket.timeout:
                             break
                         except Exception as e:
                             self.logger.error(f"Error reading socket: {e}")
+                            peer_closed = True
                             break
+
+                    if peer_closed:
+                        self.logger.warning("BMS closed the TCP connection")
+                        self.disconnect()
+                        self._tcp_buffer = b""
+                        return None
                     
                     if b'\r' in self._tcp_buffer:
                         idx = self._tcp_buffer.index(b'\r')
