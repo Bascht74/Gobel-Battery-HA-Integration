@@ -6,6 +6,7 @@ Discharge overcurrent is read as a negative word and written as a positive one.
 """
 
 import logging
+import time
 
 try:
     from .pace_write import build_pace_request
@@ -421,7 +422,17 @@ def read_group(bms, group, pack_number=None):
         bms.bms_comm.flush()
         if not bms.bms_comm.send_data(frame):
             return None
-        return info_payload(bms.bms_comm.receive_data())
+        # The dongle also pushes analog frames. Those are not the reply.
+        deadline = time.monotonic() + 1.5
+        while time.monotonic() < deadline:
+            remaining = max(0.05, deadline - time.monotonic())
+            received = bms.bms_comm.receive_data(timeout=min(0.45, remaining))
+            if not received:
+                continue
+            payload = info_payload(received)
+            if payload:
+                return payload
+        return None
     except Exception as err:
         _LOGGER.debug("Pace config %s failed: %s", group["read"], err)
         return None

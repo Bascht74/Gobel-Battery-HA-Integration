@@ -102,7 +102,7 @@ class BMSCommunication:
             self.reconnect()
             return False
 
-    def receive_data(self, return_raw=False):
+    def receive_data(self, return_raw=False, timeout=None):
         try:
             if not self.bms_connection:
                 raise ValueError("No active connection")
@@ -136,7 +136,7 @@ class BMSCommunication:
                     peer_closed = False
                     import time
                     start_time = time.time()
-                    timeout = self.bms_connection.gettimeout() or 3.0
+                    timeout = timeout if timeout is not None else (self.bms_connection.gettimeout() or 3.0)
                     
                     while b'\r' not in self._tcp_buffer:
                         if time.time() - start_time > timeout:

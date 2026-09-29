@@ -1,6 +1,6 @@
 """Pace configuration frames match the PBmsTools examples."""
 
-from pace_config import GROUPS, decode_group, encode_group, info_payload, write_frame
+from pace_config import GROUPS, decode_group, encode_group, info_payload, read_group, write_frame
 from pacebms_rs232 import PACEBMS232
 
 
@@ -158,3 +158,33 @@ def test_examples_decode_and_write_back_like_pbms_tools():
             assert b"01E100E740D2F00A" in frame
             continue
         assert frame == write_example.encode("ascii")
+
+
+def test_config_read_skips_a_pushed_frame():
+    class Comm:
+        def __init__(self):
+            self.frames = [
+                "~25004642E0020100F000\r",
+                "~25004600400C180815051D1FFB10\r",
+            ]
+
+        def flush(self):
+            return None
+
+        def send_data(self, frame):
+            return True
+
+        def receive_data(self, timeout=None):
+            return self.frames.pop(0) if self.frames else ""
+
+    class Bms:
+        def lchksum_calc(self, length):
+            return "0"
+
+        def chksum_calc(self, request):
+            return "0000"
+
+    bms = Bms()
+    bms.bms_comm = Comm()
+    group = next(item for item in GROUPS if item["name"] == "clock")
+    assert read_group(bms, group) == bytes.fromhex("180815051D1F")

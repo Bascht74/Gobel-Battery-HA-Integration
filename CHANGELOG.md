@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.15] - 2026-09-29
+### Fixed
+-   Configuration replies are no longer dropped when the dongle pushes a measurement frame first. The protection limits stay unavailable until that reply arrives.
+
+---------------
+
 ## [2.4.14] - 2026-09-29
 ### Fixed
 -   Cumulative charge and discharge values that are far above the design capacity are ignored. Energy then counts from power, and a previously stored multi-million kWh total is reset.
