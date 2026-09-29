@@ -519,6 +519,7 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self._key = key
         self._attr_has_entity_name = False
+        self._attr_name = f"{coordinator.device_name} {name}"
         self._attr_translation_key = key
         self._attr_translation_placeholders = {"device": coordinator.device_name}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_total_{key}"

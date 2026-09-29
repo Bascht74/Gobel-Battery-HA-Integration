@@ -42,7 +42,12 @@ from .pace_config import (
 )
 from .pace_identity import pack_owns_configuration, read_identity
 from .pace_write import write_buzzer, write_clock, write_led, write_limiter, write_limiter_gear, write_mosfet
-from .measurements import bms_throughput_kwh, integrate_energy_kwh, watts_from_kilowatts
+from .measurements import (
+    bms_throughput_kwh,
+    integrate_energy_kwh,
+    kwh_from_amp_hours,
+    watts_from_kilowatts,
+)
 from .pacebms_rs232 import PACEBMS232
 from .pacebms_rs485 import PACEBMS485
 from .pacebms_wifi import PACEBMSWIFI
@@ -472,6 +477,14 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             slot = self._energy.setdefault(pack_id, {"charged": 0.0, "discharged": 0.0})
             cell_count = pack.get("view_num_cells") or len(pack.get("cell_voltages") or [])
             design_ah = pack.get("view_design_capacity")
+            cap = None
+            if design_ah and cell_count:
+                cap = kwh_from_amp_hours(float(design_ah) * 2000, cell_count)
+            if cap is not None and (
+                slot.get("charged", 0.0) > cap or slot.get("discharged", 0.0) > cap
+            ):
+                slot["charged"] = 0.0
+                slot["discharged"] = 0.0
             charged = bms_throughput_kwh(
                 pack.get("view_cumulative_charge_ah"),
                 pack.get("view_cumulative_discharge_ah"),
@@ -485,7 +498,9 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                 design_ah,
             )
             source = "bms"
-            if charged is None or discharged is None:
+            charge_from_bms = charged is not None
+            discharge_from_bms = discharged is not None
+            if not charge_from_bms or not discharge_from_bms:
                 source = "integrated"
                 power_w = watts_from_kilowatts(pack.get("view_power")) or 0.0
                 integrated_charged, integrated_discharged = integrate_energy_kwh(
@@ -498,6 +513,10 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                     charged = integrated_charged
                 if discharged is None:
                     discharged = integrated_discharged
+            if not charge_from_bms:
+                pack["view_cumulative_charge_ah"] = None
+            if not discharge_from_bms:
+                pack["view_cumulative_discharge_ah"] = None
             slot["charged"] = round(float(charged), 3)
             slot["discharged"] = round(float(discharged), 3)
             pack["view_energy_charged"] = slot["charged"]

@@ -4,6 +4,13 @@ description:
 
 # Changelog
 
+## [2.4.14] - 2026-09-29
+### Fixed
+-   Cumulative charge and discharge values that are far above the design capacity are ignored. Energy then counts from power, and a previously stored multi-million kWh total is reset.
+-   The bank sensors no longer all share the device name.
+
+---------------
+
 ## [2.4.13] - 2026-09-29
 ### Fixed
 -   An external TCP dongle is no longer set up as internal Wi-Fi when the battery sends frames by itself. Commands stay enabled, and those frames are still read.

@@ -51,6 +51,10 @@ def test_copied_design_capacity_is_not_treated_as_throughput():
     assert bms_throughput_kwh(2500, 1800, 16, 100) == 128.0
 
 
+def test_identical_implausible_counters_are_not_throughput():
+    assert bms_throughput_kwh(2057861800, 2057861800, 16, 314) is None
+
+
 def test_integrated_energy_adds_kwh_and_ignores_long_gaps():
     charged, discharged = integrate_energy_kwh(1.0, 0.5, 3600, 60)
     assert round(charged, 3) == 1.06

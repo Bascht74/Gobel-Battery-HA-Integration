@@ -70,22 +70,31 @@ def resolve_soh(raw_soh, full_ah, design_ah):
     return round(float(raw_soh), 1)
 
 
+# A real lifetime counter stays within this many full cycles of the design capacity.
+# The bytes on these packs decode to the same multi-billion Ah value for charge
+# and discharge, which is a misread field, not throughput.
+MAX_THROUGHPUT_CYCLES = 2000
+
+
 def bms_throughput_kwh(amp_hours, other_amp_hours, cell_count, design_ah):
     """Return kWh from a BMS Ah counter, or None when the counter looks unused.
 
-    Some Pace slave frames copy the design capacity into both cumulative
-    counters. Those values are not lifetime throughput.
+    Some Pace frames copy the design capacity into both cumulative counters.
+    Others repeat one implausible integer for charge and discharge.
     """
     if amp_hours is None:
         return None
     amp_hours = float(amp_hours)
     if amp_hours <= 0:
         return None
-    if design_ah and other_amp_hours is not None:
+    if design_ah:
         design_ah = float(design_ah)
-        other_amp_hours = float(other_amp_hours)
-        if abs(amp_hours - design_ah) < 1.0 and abs(other_amp_hours - design_ah) < 1.0:
+        if amp_hours > design_ah * MAX_THROUGHPUT_CYCLES:
             return None
+        if other_amp_hours is not None:
+            other_amp_hours = float(other_amp_hours)
+            if abs(amp_hours - design_ah) < 1.0 and abs(other_amp_hours - design_ah) < 1.0:
+                return None
     return kwh_from_amp_hours(amp_hours, cell_count)
 
 
