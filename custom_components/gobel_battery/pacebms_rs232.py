@@ -1496,6 +1496,8 @@ class PACEBMS232:
                 remaining = max(0.05, deadline - time.monotonic())
                 response = self.bms_comm.receive_data(timeout=min(0.4, remaining))
                 if not response:
+                    if not self.bms_comm.bms_connection:
+                        break
                     continue
                 parsed = self.process_incoming_response(response, "analog")
                 if parsed:
@@ -1536,6 +1538,8 @@ class PACEBMS232:
                 remaining = max(0.05, deadline - time.monotonic())
                 response = self.bms_comm.receive_data(timeout=min(0.4, remaining))
                 if not response:
+                    if not self.bms_comm.bms_connection:
+                        break
                     continue
                 parsed = self.process_incoming_response(response, "warning")
                 if parsed:

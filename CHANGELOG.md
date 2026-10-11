@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.18] - 2026-10-11
+### Fixed
+-   When the dongle resets the TCP session during a poll, the poll stops waiting for a reply at once. It no longer retries without a pause and writes thousands of warnings per second.
+
+---------------
+
 ## [2.4.17] - 2026-09-29
 ### Changed
 -   Protection, faults, warnings, cell voltages and temperatures are diagnostic. The device page keeps SOC, voltage, current, power, remaining capacity and energy. Configuration stays the values that can be set.

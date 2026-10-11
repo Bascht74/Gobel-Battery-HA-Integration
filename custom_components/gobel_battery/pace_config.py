@@ -428,6 +428,8 @@ def read_group(bms, group, pack_number=None):
             remaining = max(0.05, deadline - time.monotonic())
             received = bms.bms_comm.receive_data(timeout=min(0.35, remaining))
             if not received:
+                if not bms.bms_comm.bms_connection:
+                    break
                 continue
             payload = info_payload(received)
             if payload:
