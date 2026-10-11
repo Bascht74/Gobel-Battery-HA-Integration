@@ -1,4 +1,4 @@
-"""A dead dongle fails every poll. The log gets each kind of problem once a minute."""
+"""A dead dongle fails every poll. The log gets one connection message a minute."""
 
 import logging
 import socket as real_socket
@@ -93,14 +93,7 @@ def _poll(comm, bms, clock, caplog, seconds):
     return lines
 
 
-def _by_call_site(lines):
-    sites = {}
-    for when, record in lines:
-        sites.setdefault((record.pathname, record.lineno), []).append(when)
-    return sites
-
-
-def test_outage_logs_each_problem_once_a_minute(monkeypatch, caplog):
+def test_outage_logs_one_line_a_minute(monkeypatch, caplog):
     from pacebms_rs232 import PACEBMS232
 
     clock, dongle = _Clock(), _Dongle()
@@ -108,14 +101,11 @@ def test_outage_logs_each_problem_once_a_minute(monkeypatch, caplog):
     bms = PACEBMS232(comm, object(), "PACE_LV", 5, 0, 0)
 
     lines = _poll(comm, bms, clock, caplog, 300)
-    sites = _by_call_site(lines)
+    times = [when for when, record in lines if "again" not in record.getMessage()]
 
-    messages = {record.getMessage().split(":")[0].split(".")[0] for _, record in lines}
-    assert {"Error sending data to BMS", "Ethernet connection error", "Error reading socket", "BMS closed the TCP connection"} <= messages
-    for times in sites.values():
-        assert len(times) <= 5
-        assert all(later - earlier >= 60 for earlier, later in zip(times, times[1:]))
-    assert any("more since the last report" in record.getMessage() for _, record in lines)
+    assert 1 <= len(times) <= 5
+    assert all(later - earlier >= 60 for earlier, later in zip(times, times[1:]))
+    assert any("more connection messages since the last report" in record.getMessage() for _, record in lines)
 
 
 def test_recovery_logs_one_line(monkeypatch, caplog):
@@ -148,7 +138,7 @@ def test_new_outage_after_a_quiet_minute_logs_at_once(monkeypatch, caplog):
     comm.disconnect()
 
     lines = [record.getMessage() for record in caplog.records if "No active connection" in record.getMessage()]
-    assert lines == ["No active connection to disconnect.", "No active connection to disconnect. (1 more since the last report)"]
+    assert lines == ["No active connection to disconnect.", "No active connection to disconnect. (1 more connection messages since the last report)"]
 
 
 def test_each_connection_keeps_its_own_count(monkeypatch, caplog):

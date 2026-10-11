@@ -1,9 +1,10 @@
 import serial
 import socket
 import logging
+import threading
 from time import monotonic
 
-# A dead link fails every poll. Each kind of problem is logged once per this many seconds.
+# A dead link fails every poll. Connection problems are logged once per this many seconds.
 PROBLEM_LOG_SECONDS = 60
 
 class BMSCommunication:
@@ -17,6 +18,7 @@ class BMSCommunication:
         self.bms_connection = None
         self._tcp_buffer = b''
         self._problem_log = {}
+        self._log_lock = threading.Lock()
         self._link_down = False
 
         # Configure logging
@@ -24,20 +26,23 @@ class BMSCommunication:
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger(__name__)
 
-    def _repeat_note(self, kind):
-        """None inside the minute after the last line of this kind, else a suffix that counts the dropped ones."""
-        now = monotonic()
-        last = self._problem_log.get(kind)
-        if last and now - last[0] < PROBLEM_LOG_SECONDS:
-            last[1] += 1
-            return None
-        self._problem_log[kind] = [now, 0]
-        return f" ({last[1]} more since the last report)" if last and last[1] else ""
+    def _repeat_note(self, key):
+        """None inside the minute after the last line under this key, else a suffix that counts the dropped ones."""
+        # The JK listener thread and the poll can report at the same time
+        with self._log_lock:
+            now = monotonic()
+            last = self._problem_log.get(key)
+            if last and now - last[0] < PROBLEM_LOG_SECONDS:
+                last[1] += 1
+                return None
+            self._problem_log[key] = [now, 0]
+            return f" ({last[1]} more connection messages since the last report)" if last and last[1] else ""
 
     def problem_note(self, kind):
-        """Gate for a connection problem line: log it only when this returns a string, and append that."""
+        """Gate for a connection problem line: log it only when this returns a string, and append that.
+        All kinds share one gate, so a dead link writes one line a minute."""
         self._link_down = True
-        return self._repeat_note(kind)
+        return self._repeat_note("problem")
 
     def link_works(self):
         """One line when data arrives again after a connection problem."""

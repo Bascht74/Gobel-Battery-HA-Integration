@@ -4,6 +4,10 @@ description:
 
 # Changelog
 
+## [2.4.20] - 2026-10-11
+### Fixed
+-   While the BMS does not answer, the integration writes at most one connection message a minute, with a count of the ones it left out.
+
 ## [2.4.19] - 2026-10-11
 ### Fixed
 -   While the BMS does not answer, each connection message appears at most once a minute and counts the repeats it left out. One line says when data arrives again.
