@@ -339,7 +339,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         if now - self._last_reopen < 15:
             return
         self._last_reopen = now
-        _LOGGER.warning("No BMS data from %s, reconnecting", self.ip_address)
+        if (note := self.bms_comm.problem_note("no_data")) is not None:
+            _LOGGER.warning("No BMS data from %s, reconnecting%s", self.ip_address, note)
         try:
             self.bms_comm.reconnect()
         except Exception as err:

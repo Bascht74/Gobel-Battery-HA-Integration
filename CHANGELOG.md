@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.19] - 2026-10-11
+### Fixed
+-   While the BMS does not answer, each connection message appears at most once a minute and counts the repeats it left out. One line says when data arrives again.
+
+---------------
+
 ## [2.4.18] - 2026-10-11
 ### Fixed
 -   When the dongle resets the TCP session during a poll, the poll stops waiting for a reply at once. It no longer retries without a pause and writes thousands of warnings per second.

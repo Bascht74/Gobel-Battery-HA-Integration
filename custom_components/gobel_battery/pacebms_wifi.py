@@ -98,7 +98,8 @@ class PACEBMSWIFI:
             try:
                 conn = self.bms_comm.bms_connection
                 if not conn:
-                    self.logger.warning("BMS connection is missing. Reconnecting...")
+                    if (note := self.bms_comm.problem_note("wifi_no_connection")) is not None:
+                        self.logger.warning(f"BMS connection is missing. Reconnecting...{note}")
                     self.bms_comm.connect()
                     time.sleep(0.5)
                     continue
@@ -109,6 +110,7 @@ class PACEBMSWIFI:
                     if not raw_chunk:
                         time.sleep(0.1)
                         continue
+                    self.bms_comm.link_works()
                     chunk = raw_chunk.decode('ascii', errors='ignore')
                     self.buffer += chunk
                 elif hasattr(conn, 'readline'):
@@ -117,6 +119,7 @@ class PACEBMSWIFI:
                     if not raw_chunk:
                         time.sleep(0.1)
                         continue
+                    self.bms_comm.link_works()
                     chunk = raw_chunk.decode('ascii', errors='ignore')
                     self.buffer += chunk
                 else:
@@ -125,7 +128,8 @@ class PACEBMSWIFI:
             except socket.timeout:
                 pass
             except Exception as e:
-                self.logger.error(f"Error reading passive data: {e}")
+                if (note := self.bms_comm.problem_note("wifi_read")) is not None:
+                    self.logger.error(f"Error reading passive data: {e}{note}")
                 time.sleep(0.5)
                 self.bms_comm.connect()
         return None
