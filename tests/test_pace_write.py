@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pace_write import build_pace_request, write_limiter_gear, write_mosfet, write_overcurrent
+from pace_write import build_pace_request, write_buzzer, write_limiter_gear, write_mosfet, write_overcurrent
 from pacebms_rs232 import PACEBMS232
 
 
@@ -61,7 +61,7 @@ def test_discharge_protection_is_written_positive_not_twos_complement():
 def test_write_helpers_only_accept_a_successful_response():
     bms = _bms()
     assert write_mosfet(bms, "charge", True) is True
-    assert bms.bms_comm.sent[-1] == b"~2500469AE00201FD1D\r"
+    assert bms.bms_comm.sent[-1] == b"~2500469AE00200FD1E\r"
     assert write_overcurrent(bms, "discharge", 105, 110, 10) is True
     assert b"010069006E0A" in bms.bms_comm.sent[-1]
     assert write_limiter_gear(bms, "high") is True
@@ -69,3 +69,21 @@ def test_write_helpers_only_accept_a_successful_response():
 
     bms.bms_comm.response = "~250046010000FD00\r"
     assert write_mosfet(bms, "discharge", False) is False
+
+
+def test_switching_a_mosfet_on_sends_00_and_off_sends_01():
+    # Protocol doc 9AH/9BH: 00 = on, 01 = off. A PBmsTools capture shows 9A 01
+    # clearing the charge-MOSFET bit.
+    bms = _bms()
+    write_mosfet(bms, "charge", True)
+    assert bms.bms_comm.sent[-1] == b"~2500469AE00200FD1E\r"
+    write_mosfet(bms, "charge", False)
+    assert bms.bms_comm.sent[-1] == b"~2500469AE00201FD1D\r"
+
+
+def test_switching_the_buzzer_on_sends_0d():
+    bms = _bms()
+    write_buzzer(bms, True)
+    assert bms.bms_comm.sent[-1] == b"~25004699E0020DFD12\r"
+    write_buzzer(bms, False)
+    assert bms.bms_comm.sent[-1] == b"~25004699E0020CFD13\r"

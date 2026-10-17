@@ -4,16 +4,17 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-# MOSFET close (01) connects the path. Open (00) disconnects it.
-MOSFET_ON = "01"
-MOSFET_OFF = "00"
+# 9AH/9BH: 00 switches the MOSFET on, 01 switches it off (protocol doc; a PBmsTools
+# capture shows 9A 01 clearing the CFET bit).
+MOSFET_ON = "00"
+MOSFET_OFF = "01"
 LIMITER_ON = "0B"
 LIMITER_OFF = "0A"
 GEAR_HIGH = "08"
 GEAR_LOW = "09"
-# PBmsTools on the wire. The header enum has the buzzer bytes reversed.
-BUZZER_ON = "0C"
-BUZZER_OFF = "0D"
+# 0D switches the buzzer alarm on, 0C off (protocol doc and PBmsTools capture).
+BUZZER_ON = "0D"
+BUZZER_OFF = "0C"
 LED_ON = "07"
 LED_OFF = "06"
 

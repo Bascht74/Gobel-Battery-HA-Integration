@@ -4,6 +4,13 @@ description:
 
 # Changelog
 
+## [2.4.24] - 2026-10-18
+### Fixed
+-   The charge and discharge switches sent the opposite command: switching one on turned the MOSFET off. They now send 00 to switch on and 01 to switch off, as the Pace protocol and a PBmsTools capture show.
+-   The buzzer switch sent the opposite command. It now sends 0D to switch on and 0C to switch off.
+
+---------------
+
 ## [2.4.23] - 2026-10-18
 ### Fixed
 -   Setting up a JK or TDT BMS over the network without a port shows a readable message instead of the key `port_required`.
