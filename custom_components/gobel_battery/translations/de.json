@@ -49,31 +49,13 @@
           "baud_rate": "Baudrate"
         }
       },
-      "init": {
-        "title": "Gobel-Battery-Optionen",
-        "description": "Der Expertenmodus macht die Pace- und TDT-Konfiguration beschreibbar. Falsche Stromgrenzen oder MOSFET-Schalter können den Akku trennen oder seinen Schutz aufheben. Nach der Änderung den Modus wieder ausschalten. Dann verschwinden die Steuerelemente und die Nur-Lese-Sensoren kommen zurück. JK und Pace BMS, internes WLAN bleiben nur lesbar.",
-        "data": {
-          "poll_interval": "Abfrageintervall (Sekunden)",
-          "max_parallel_allowed": "Max. parallele Packs",
-          "jk_display_index_start": "JK-Pack-Indexstart",
-          "expert_writable_config": "Expertenmodus: BMS-Konfiguration beschreibbar"
-        }
-      },
-      "expert_warning": {
-        "title": "Expertenmodus",
-        "description": "Die BMS-Konfiguration wird beschreibbar. Eine falsche Ladegrenze, Entladegrenze oder ein MOSFET-Schalter kann Laden oder Entladen abschalten oder den eingestellten Schutz aufheben. Nur fortfahren, wenn dieses Risiko klar ist. Der Modus lässt sich danach wieder ausschalten.",
-        "data": {
-          "confirm_expert": "Ich habe die Warnung verstanden und möchte BMS-Werte ändern"
-        }
-      },
       "probe": {
         "title": "Pace-Verbindungsprüfung",
         "description": "Erkannt: {result}. Das bleibt Pace BMS mit Befehlen, auch wenn der Akku von selbst Rahmen schickt. Internes WLAN wird nicht automatisch gewählt."
       }
     },
     "error": {
-      "already_configured": "Diese Verbindung ist bereits eingerichtet.",
-      "expert_not_confirmed": "Die Warnung muss bestätigt werden, bevor der Expertenmodus aktiv wird."
+      "already_configured": "Diese Verbindung ist bereits eingerichtet."
     },
     "abort": {
       "already_configured": "Diese Verbindung ist bereits eingerichtet.",
@@ -752,6 +734,30 @@
       "set_bms_clock": {
         "name": "BMS-Uhr stellen"
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gobel-Battery-Optionen",
+        "description": "Mit änderbaren BMS-Einstellungen werden die Pace- und TDT-Einstellungen zu Zahlen, Auswahlen und Schaltern unter Konfiguration, die Nur-Lese-Kopien werden entfernt. Falsche Stromgrenzen oder MOSFET-Schalter können den Akku trennen oder seinen Schutz aufheben. Nach der Änderung die Option wieder ausschalten: Die änderbaren Entitäten werden entfernt und die Nur-Lese-Sensoren kommen zurück. JK und Pace BMS, internes WLAN bleiben nur lesbar.",
+        "data": {
+          "poll_interval": "Abfrageintervall (Sekunden)",
+          "max_parallel_allowed": "Max. parallele Packs",
+          "jk_display_index_start": "JK-Pack-Indexstart",
+          "expert_writable_config": "BMS-Einstellungen als änderbare Entitäten anlegen"
+        }
+      },
+      "expert_warning": {
+        "title": "Änderbare BMS-Einstellungen",
+        "description": "Die BMS-Einstellungen werden zu änderbaren Entitäten. Eine falsche Ladegrenze, Entladegrenze oder ein MOSFET-Schalter kann Laden oder Entladen abschalten oder den eingestellten Schutz aufheben. Nur fortfahren, wenn dieses Risiko klar ist. Der Modus lässt sich danach wieder ausschalten.",
+        "data": {
+          "confirm_expert": "Ich habe die Warnung verstanden und möchte BMS-Werte ändern"
+        }
+      }
+    },
+    "error": {
+      "expert_not_confirmed": "Die Warnung muss bestätigt werden, bevor die Einstellungen änderbar werden."
     }
   }
 }

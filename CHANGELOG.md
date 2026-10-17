@@ -4,6 +4,16 @@ description:
 
 # Changelog
 
+## [2.4.22] - 2026-10-18
+### Changed
+-   The option is now called **Expose BMS settings as changeable entities** (German: **BMS-Einstellungen als änderbare Entitäten anlegen**).
+-   Switching the option on removes the read-only setting sensors and status flags that numbers, selects and switches replace. Switching it off removes the changeable entities. Before, the replaced entities stayed as unavailable.
+### Fixed
+-   The options dialog shows its labels and the warning text. They were filed under the setup dialog, so Home Assistant showed the raw option name.
+-   With changeable settings on RS232, the packs behind the master keep their charge, discharge, limiter, buzzer and LED flags. Only the master gets switches for them.
+
+---------------
+
 ## [2.4.21] - 2026-10-17
 ### Fixed
 -   The read-only BMS settings of the first pack appear again (protocols, BMS clock, calibrated capacities, temperature and current limits, MOSFET, buzzer and LED states). Home Assistant refused them because a sensor may not use the configuration category; they are diagnostic now.

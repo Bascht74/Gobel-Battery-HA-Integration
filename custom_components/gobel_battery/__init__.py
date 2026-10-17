@@ -4,9 +4,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers import entity_registry as er
 
 from .const import DOMAIN
 from .coordinator import GobelBatteryUpdateCoordinator
+from .mode_cleanup import stale_unique_ids
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,10 +37,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
+    _remove_other_mode_entities(hass, entry, coordinator)
+
     # Forward setup to the sensor and binary_sensor platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+
+def _remove_other_mode_entities(hass: HomeAssistant, entry: ConfigEntry, coordinator) -> None:
+    """Drop what the changeable-settings option replaced, in either direction."""
+    registry = er.async_get(hass)
+    entries = er.async_entries_for_config_entry(registry, entry.entry_id)
+    stale = stale_unique_ids(
+        entry.entry_id,
+        [item.unique_id for item in entries],
+        coordinator.can_write_config,
+        coordinator.owns_configuration,
+    )
+    for item in entries:
+        if item.unique_id in stale:
+            registry.async_remove(item.entity_id)
+    if stale:
+        _LOGGER.info("Removed %s entities of the other settings mode", len(stale))
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

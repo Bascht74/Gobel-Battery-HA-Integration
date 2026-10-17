@@ -116,7 +116,8 @@ async def async_setup_entry(
                     if key not in sub_data:
                         continue
                     present_keys.add((sub_dict, key))
-                    if coordinator.can_write_config and key in (
+                    # A switch replaces the flag, but only on a pack whose settings can be written.
+                    if coordinator.can_write_config and coordinator.owns_configuration(pack_id) and key in (
                         "status_charge_enabled",
                         "status_discharge_enabled",
                         "status_current_limit_enabled",

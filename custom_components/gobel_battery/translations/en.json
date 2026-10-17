@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Gobel Battery",
-        "description": "Choose the BMS and how Home Assistant should connect. You can change this later via Reconfigure.",
+        "description": "Choose the BMS and how Home Assistant reaches it. An external Wi-Fi dongle such as the Gobel-PWB1 is Pace BMS, not the internal Wi-Fi entry. The setup checks the answer and switches only if the battery pushes data by itself.",
         "data": {
           "device_name": "Device name",
           "bms_type": "BMS type",
@@ -49,14 +49,9 @@
           "baud_rate": "Baud rate"
         }
       },
-      "init": {
-        "title": "Gobel Battery options",
-        "description": "These values are applied immediately. To change IP address, serial port or BMS type, use Reconfigure on the integration.",
-        "data": {
-          "poll_interval": "Poll interval (seconds)",
-          "max_parallel_allowed": "Max parallel packs",
-          "jk_display_index_start": "JK pack index start"
-        }
+      "probe": {
+        "title": "Pace connection check",
+        "description": "Detected: {result}. This is Pace BMS with commands, also when the battery sends frames by itself. Internal Wi-Fi is not selected automatically."
       }
     },
     "error": {
@@ -65,6 +60,29 @@
     "abort": {
       "already_configured": "This connection is already configured.",
       "reconfigure_successful": "Configuration updated. The device will reload."
+    }
+  },
+  "selector": {
+    "bms_type": {
+      "options": {
+        "PACE_LV": "Pace BMS",
+        "PACE_LV_WIFI": "Pace BMS, internal Wi-Fi",
+        "JK_PB": "JK BMS",
+        "TDT": "TDT BMS"
+      }
+    },
+    "connection_type": {
+      "options": {
+        "ethernet": "Network, cable",
+        "wifi": "Network, Wi-Fi",
+        "serial": "USB serial"
+      }
+    },
+    "battery_port": {
+      "options": {
+        "rs232": "RS232",
+        "rs485": "RS485"
+      }
     }
   },
   "entity": {
@@ -716,6 +734,30 @@
       "set_bms_clock": {
         "name": "Set BMS clock"
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gobel Battery options",
+        "description": "With changeable BMS settings, Pace and TDT settings become numbers, selects and switches under Configuration, and the read-only copies are removed. Wrong current limits or MOSFET switches can disconnect the battery or remove its protection. Turn the option off again after the change: the changeable entities are removed and the read-only sensors return. JK and Pace BMS, internal Wi-Fi stay read-only.",
+        "data": {
+          "poll_interval": "Poll interval (seconds)",
+          "max_parallel_allowed": "Max parallel packs",
+          "jk_display_index_start": "JK pack index start",
+          "expert_writable_config": "Expose BMS settings as changeable entities"
+        }
+      },
+      "expert_warning": {
+        "title": "Changeable BMS settings",
+        "description": "The BMS settings become changeable entities. A wrong charge limit, discharge limit or MOSFET switch can stop charging, stop discharging, or leave the battery without its configured protection. Continue only if that risk is understood. The mode can be switched off afterwards.",
+        "data": {
+          "confirm_expert": "I understand the risk and want to change BMS settings"
+        }
+      }
+    },
+    "error": {
+      "expert_not_confirmed": "Confirm the warning before the settings become changeable."
     }
   }
 }

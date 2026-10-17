@@ -49,31 +49,13 @@
           "baud_rate": "Baud rate"
         }
       },
-      "init": {
-        "title": "Gobel Battery options",
-        "description": "Expert mode makes Pace and TDT settings writable. Wrong current limits or MOSFET switches can disconnect the battery or remove its protection. Turn the option off again after the change. The controls disappear and the read-only sensors return. JK and Pace BMS, internal Wi-Fi stay read-only.",
-        "data": {
-          "poll_interval": "Poll interval (seconds)",
-          "max_parallel_allowed": "Max parallel packs",
-          "jk_display_index_start": "JK pack index start",
-          "expert_writable_config": "Expert mode: writable BMS configuration"
-        }
-      },
-      "expert_warning": {
-        "title": "Expert mode",
-        "description": "The BMS configuration becomes writable. A wrong charge limit, discharge limit or MOSFET switch can stop charging, stop discharging, or leave the battery without its configured protection. Continue only if that risk is understood. The mode can be switched off afterwards.",
-        "data": {
-          "confirm_expert": "I understand the risk and want to change BMS settings"
-        }
-      },
       "probe": {
         "title": "Pace connection check",
         "description": "Detected: {result}. This is Pace BMS with commands, also when the battery sends frames by itself. Internal Wi-Fi is not selected automatically."
       }
     },
     "error": {
-      "already_configured": "This connection is already configured.",
-      "expert_not_confirmed": "Confirm the warning before enabling expert mode."
+      "already_configured": "This connection is already configured."
     },
     "abort": {
       "already_configured": "This connection is already configured.",
@@ -752,6 +734,30 @@
       "set_bms_clock": {
         "name": "Set BMS clock"
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gobel Battery options",
+        "description": "With changeable BMS settings, Pace and TDT settings become numbers, selects and switches under Configuration, and the read-only copies are removed. Wrong current limits or MOSFET switches can disconnect the battery or remove its protection. Turn the option off again after the change: the changeable entities are removed and the read-only sensors return. JK and Pace BMS, internal Wi-Fi stay read-only.",
+        "data": {
+          "poll_interval": "Poll interval (seconds)",
+          "max_parallel_allowed": "Max parallel packs",
+          "jk_display_index_start": "JK pack index start",
+          "expert_writable_config": "Expose BMS settings as changeable entities"
+        }
+      },
+      "expert_warning": {
+        "title": "Changeable BMS settings",
+        "description": "The BMS settings become changeable entities. A wrong charge limit, discharge limit or MOSFET switch can stop charging, stop discharging, or leave the battery without its configured protection. Continue only if that risk is understood. The mode can be switched off afterwards.",
+        "data": {
+          "confirm_expert": "I understand the risk and want to change BMS settings"
+        }
+      }
+    },
+    "error": {
+      "expert_not_confirmed": "Confirm the warning before the settings become changeable."
     }
   }
 }
