@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.23] - 2026-10-18
+### Fixed
+-   Setting up a JK or TDT BMS over the network without a port shows a readable message instead of the key `port_required`.
+
+---------------
+
 ## [2.4.22] - 2026-10-18
 ### Changed
 -   The option is now called **Expose BMS settings as changeable entities** (German: **BMS-Einstellungen als änderbare Entitäten anlegen**).
