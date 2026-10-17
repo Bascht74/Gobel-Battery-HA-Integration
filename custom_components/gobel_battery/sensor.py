@@ -31,7 +31,8 @@ def _pace_configuration_sensors():
             "device_class": _DEVICE_CLASS.get(field["device_class"]),
             "state_class": SensorStateClass.MEASUREMENT,
             "icon": field["icon"],
-            "category": EntityCategory.CONFIG,
+            "category": EntityCategory.DIAGNOSTIC,
+            "setting": True,
             "precision": field["precision"],
         }
         for field in FIELDS
@@ -48,7 +49,8 @@ def _pace_readonly_sensors():
             "device_class": None,
             "state_class": None,
             "icon": field["icon"],
-            "category": EntityCategory.CONFIG,
+            "category": EntityCategory.DIAGNOSTIC,
+            "setting": True,
             "precision": field["precision"],
             "read_only": True,
         }
@@ -57,7 +59,8 @@ def _pace_readonly_sensors():
 
 # Predefined metadata for overall and pack sensors.
 # entity_category None keeps the value on the device page.
-# CONFIG = BMS setpoints, DIAGNOSTIC = detail that is not needed for daily use.
+# DIAGNOSTIC = detail that is not needed for daily use. Home Assistant does not
+# allow CONFIG on a sensor; "setting" marks the read-only copies of BMS settings.
 # state_class is what enables long-term statistics. ENERGY + total_increasing
 # is what the Energy dashboard can use.
 SENSOR_METADATA = {
@@ -226,7 +229,8 @@ CURRENT_LIMIT_SENSORS = {
         "device_class": SensorDeviceClass.CURRENT,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:current-dc",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
         "precision": 1,
     },
     "discharge_current_limit": {
@@ -236,7 +240,8 @@ CURRENT_LIMIT_SENSORS = {
         "device_class": SensorDeviceClass.CURRENT,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:current-dc",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
         "precision": 1,
     },
 }
@@ -249,7 +254,8 @@ PACE_CONFIG_SENSORS = {
         "device_class": SensorDeviceClass.CURRENT,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:current-dc",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
         "precision": 1,
     },
     "discharge_current_alarm": {
@@ -259,7 +265,8 @@ PACE_CONFIG_SENSORS = {
         "device_class": SensorDeviceClass.CURRENT,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:current-dc",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
         "precision": 1,
     },
     "limiter_gear": {
@@ -269,7 +276,8 @@ PACE_CONFIG_SENSORS = {
         "device_class": None,
         "state_class": None,
         "icon": "mdi:speedometer",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
     },
 }
 
@@ -282,7 +290,8 @@ JK_CONFIG_SENSORS = {
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:battery-alert",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
     },
     "cell_uvp": {
         "name": "Cell Undervoltage Protection",
@@ -291,7 +300,8 @@ JK_CONFIG_SENSORS = {
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:battery-alert",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
     },
     "float_charge_voltage": {
         "name": "Float Charge Voltage",
@@ -300,7 +310,8 @@ JK_CONFIG_SENSORS = {
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:battery-charging",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
     },
     "max_charge_voltage": {
         "name": "Inverter Max Charge Voltage",
@@ -309,7 +320,8 @@ JK_CONFIG_SENSORS = {
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:battery-charging-high",
-        "category": EntityCategory.CONFIG,
+        "category": EntityCategory.DIAGNOSTIC,
+        "setting": True,
     },
 }
 
@@ -422,12 +434,9 @@ async def async_setup_entry(
             if coordinator.bms_type in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 extra.update(PACE_COUNTER_SENSORS)
             for metric, meta in extra.items():
-                if (
-                    meta.get("category") == EntityCategory.CONFIG
-                    and not coordinator.owns_configuration(pack_id)
-                ):
+                if meta.get("setting") and not coordinator.owns_configuration(pack_id):
                     continue
-                if coordinator.can_write_config and meta.get("category") == EntityCategory.CONFIG and not meta.get("read_only"):
+                if coordinator.can_write_config and meta.get("setting") and not meta.get("read_only"):
                     continue
                 source_key = meta.get("key")
                 if metric == "limiter_gear":

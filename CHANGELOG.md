@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.21] - 2026-10-17
+### Fixed
+-   The read-only BMS settings of the first pack appear again (protocols, BMS clock, calibrated capacities, temperature and current limits, MOSFET, buzzer and LED states). Home Assistant refused them because a sensor may not use the configuration category; they are diagnostic now.
+
+---------------
+
 ## [2.4.20] - 2026-10-11
 ### Fixed
 -   While the BMS does not answer, the integration writes at most one connection message a minute, with a count of the ones it left out.

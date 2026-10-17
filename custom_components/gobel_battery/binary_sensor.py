@@ -49,13 +49,13 @@ BINARY_SENSORS_METADATA = {
         "status_heating": ("Heating Switch Active", BinarySensorDeviceClass.HEAT, EntityCategory.DIAGNOSTIC),
         "status_charger_avaliable": ("Charger Available", BinarySensorDeviceClass.PLUG, EntityCategory.DIAGNOSTIC),
         "status_reverse_connected": ("Reverse Connected Alert", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
-        "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
-        "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
-        "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.CONFIG),
+        "status_discharge_enabled": ("Discharge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.DIAGNOSTIC),
+        "status_charge_enabled": ("Charge Enabled Status", BinarySensorDeviceClass.POWER, EntityCategory.DIAGNOSTIC),
+        "status_current_limit_enabled": ("Current Limiter Active", BinarySensorDeviceClass.POWER, EntityCategory.DIAGNOSTIC),
     },
     "control_state": {
-        "buzzer_warn_function": ("Buzzer Enabled", None, EntityCategory.CONFIG),
-        "led_warn_function": ("LED Alarm Enabled", None, EntityCategory.CONFIG),
+        "buzzer_warn_function": ("Buzzer Enabled", None, EntityCategory.DIAGNOSTIC),
+        "led_warn_function": ("LED Alarm Enabled", None, EntityCategory.DIAGNOSTIC),
     },
     "warn_state_1": {
         "warn_high_discharge_current": ("Discharge Overcurrent Warning", BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
