@@ -2,10 +2,7 @@ import logging
 import time
 import socket
 
-try:
-    from .measurements import present_temperatures, resolve_soc, resolve_soh
-except ImportError:  # unit tests load this file outside the HA package
-    from measurements import present_temperatures, resolve_soc, resolve_soh
+from .measurements import present_temperatures, resolve_soc, resolve_soh
 
 class PACEBMSWIFI:
     def __init__(self, bms_comm, ha_comm, bms_type, data_refresh_interval, debug, if_random):

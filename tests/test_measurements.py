@@ -1,6 +1,6 @@
 """Tests for unit conversion, SOC fallback and energy counters."""
 
-from measurements import (
+from custom_components.gobel_battery.measurements import (
     bms_throughput_kwh,
     integrate_energy_kwh,
     kwh_from_amp_hours,

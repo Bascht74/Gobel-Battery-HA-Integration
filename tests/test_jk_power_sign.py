@@ -3,7 +3,7 @@
 import logging
 import struct
 
-from jkbms_rs485 import JKBMS485
+from custom_components.gobel_battery.jkbms_rs485 import JKBMS485
 
 
 def _parser():

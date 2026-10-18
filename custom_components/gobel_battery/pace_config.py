@@ -8,10 +8,7 @@ Discharge overcurrent is read as a negative word and written as a positive one.
 import logging
 import time
 
-try:
-    from .pace_write import build_pace_request
-except ImportError:
-    from pace_write import build_pace_request
+from .pace_write import build_pace_request
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ Example: on RS232 only pack 0 (the master on the cable) has settings that can
 be written. "cell_ov_alarm" is one Pace setting; "soc" is a measurement.
 """
 
-from mode_cleanup import stale_unique_ids
+from custom_components.gobel_battery.mode_cleanup import stale_unique_ids
 
 ENTRY = "abc"
 

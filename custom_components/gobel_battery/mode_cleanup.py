@@ -5,10 +5,7 @@ read-only setting sensors and status flags. Turning the option on or off
 would otherwise leave the replaced entities behind as unavailable.
 """
 
-try:
-    from .pace_config import FIELDS
-except ImportError:
-    from pace_config import FIELDS
+from .pace_config import FIELDS
 
 # Setting sensors that a number or select replaces. Read-only values are not here.
 REPLACED_SETTINGS = frozenset({field["key"] for field in FIELDS} | {"limiter_gear"})

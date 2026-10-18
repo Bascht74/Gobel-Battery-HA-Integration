@@ -1,7 +1,16 @@
-"""Load BMS modules without importing the Home Assistant package entry point."""
+"""Tests import the integration as the package custom_components.gobel_battery.
+
+pyserial is a requirement of the integration but not part of the Home Assistant
+test environment. No test opens a serial port, so a stub is enough.
+"""
 
 import sys
-from pathlib import Path
+import types
 
-COMPONENT = Path(__file__).resolve().parents[1] / "custom_components" / "gobel_battery"
-sys.path.insert(0, str(COMPONENT))
+try:
+    import serial  # noqa: F401
+except ImportError:
+    serial_stub = types.ModuleType("serial")
+    serial_stub.Serial = object
+    serial_stub.SerialException = OSError
+    sys.modules["serial"] = serial_stub

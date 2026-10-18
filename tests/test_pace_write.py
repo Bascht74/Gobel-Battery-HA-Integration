@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
-from pace_write import build_pace_request, write_buzzer, write_limiter_gear, write_mosfet, write_overcurrent
-from pacebms_rs232 import PACEBMS232
+from custom_components.gobel_battery.pace_write import build_pace_request, write_buzzer, write_limiter_gear, write_mosfet, write_overcurrent
+from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
 
 class _Comm:

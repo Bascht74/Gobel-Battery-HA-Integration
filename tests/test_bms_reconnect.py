@@ -1,11 +1,6 @@
 """A dongle reboot closes the TCP session. The old socket must not stay in use."""
 
-import sys
-import types
-
-sys.modules.setdefault("serial", types.ModuleType("serial"))
-
-from bms_comm import BMSCommunication
+from custom_components.gobel_battery.bms_comm import BMSCommunication
 
 
 class _ClosedSocket:
@@ -60,7 +55,7 @@ def _reset_comm():
 
 
 def test_pace_poll_stops_waiting_after_peer_reset():
-    from pacebms_rs232 import PACEBMS232
+    from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
     for name in ("get_analog_data", "get_warning_data"):
         comm, reads = _reset_comm()
@@ -71,8 +66,8 @@ def test_pace_poll_stops_waiting_after_peer_reset():
 
 
 def test_pace_config_read_stops_waiting_after_peer_reset():
-    from pace_config import GROUPS, read_group
-    from pacebms_rs232 import PACEBMS232
+    from custom_components.gobel_battery.pace_config import GROUPS, read_group
+    from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
     comm, reads = _reset_comm()
     bms = PACEBMS232(comm, object(), "PACE_LV", 5, 0, 0)

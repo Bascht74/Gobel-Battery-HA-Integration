@@ -1,7 +1,7 @@
 """The setup probe must not confuse a pushed frame with a command reply."""
 
-from pace_probe import ACTIVE, PASSIVE, SILENT, COMMON_TCP_PORTS, classify_pace_traffic
-from pacebms_rs232 import PACEBMS232
+from custom_components.gobel_battery.pace_probe import ACTIVE, PASSIVE, SILENT, COMMON_TCP_PORTS, classify_pace_traffic
+from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
 
 def test_command_reply_is_active_even_if_the_bms_also_pushes():

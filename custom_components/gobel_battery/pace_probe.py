@@ -3,10 +3,7 @@
 import socket
 import time
 
-try:
-    from .pacebms_rs232 import PACEBMS232
-except ImportError:
-    from pacebms_rs232 import PACEBMS232
+from .pacebms_rs232 import PACEBMS232
 
 ACTIVE = "active"
 PASSIVE = "passive"

@@ -1,11 +1,7 @@
 """Pace identity frames: firmware C1, serial C2, hardware C6."""
 
-try:
-    from .pace_config import info_payload
-    from .pace_write import build_pace_request
-except ImportError:
-    from pace_config import info_payload
-    from pace_write import build_pace_request
+from .pace_config import info_payload
+from .pace_write import build_pace_request
 
 
 def _text(payload, start, length):

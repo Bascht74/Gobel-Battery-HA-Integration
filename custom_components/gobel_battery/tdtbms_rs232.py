@@ -1,10 +1,7 @@
 import struct
 import logging
 
-try:
-    from .measurements import present_temperatures
-except ImportError:
-    from measurements import present_temperatures
+from .measurements import present_temperatures
 
 class TDTBMS232:
 

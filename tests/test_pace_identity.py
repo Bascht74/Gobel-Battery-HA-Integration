@@ -1,7 +1,7 @@
 """Identity frames use the Pace examples, not the mislabeled hardware name."""
 
-from pace_config import info_payload
-from pace_identity import (
+from custom_components.gobel_battery.pace_config import info_payload
+from custom_components.gobel_battery.pace_identity import (
     pack_owns_configuration,
     parse_internal_version,
     parse_product_info,

@@ -1,7 +1,7 @@
 """Pace configuration frames match the PBmsTools examples."""
 
-from pace_config import GROUPS, decode_group, encode_group, info_payload, read_group, write_frame
-from pacebms_rs232 import PACEBMS232
+from custom_components.gobel_battery.pace_config import GROUPS, decode_group, encode_group, info_payload, read_group, write_frame
+from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
 
 class _Comm:

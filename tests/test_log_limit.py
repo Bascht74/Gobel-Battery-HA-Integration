@@ -2,13 +2,10 @@
 
 import logging
 import socket as real_socket
-import sys
 import types
 
-sys.modules.setdefault("serial", types.ModuleType("serial"))
-
-import bms_comm
-from bms_comm import BMSCommunication
+from custom_components.gobel_battery import bms_comm
+from custom_components.gobel_battery.bms_comm import BMSCommunication
 
 
 class _Clock:
@@ -94,7 +91,7 @@ def _poll(comm, bms, clock, caplog, seconds):
 
 
 def test_outage_logs_one_line_a_minute(monkeypatch, caplog):
-    from pacebms_rs232 import PACEBMS232
+    from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
     clock, dongle = _Clock(), _Dongle()
     comm = _comm(monkeypatch, clock, dongle)
@@ -109,7 +106,7 @@ def test_outage_logs_one_line_a_minute(monkeypatch, caplog):
 
 
 def test_recovery_logs_one_line(monkeypatch, caplog):
-    from pacebms_rs232 import PACEBMS232
+    from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
     clock, dongle = _Clock(), _Dongle()
     comm = _comm(monkeypatch, clock, dongle)

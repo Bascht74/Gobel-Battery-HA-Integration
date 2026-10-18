@@ -2,10 +2,7 @@ import struct
 import logging
 import time
 
-try:
-    from .measurements import present_temperatures, resolve_soc, resolve_soh
-except ImportError:  # unit tests load this file outside the HA package
-    from measurements import present_temperatures, resolve_soc, resolve_soh
+from .measurements import present_temperatures, resolve_soc, resolve_soh
 
 class PACEBMS232:
 

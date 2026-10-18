@@ -1,11 +1,11 @@
 """Tests for Pace D9H/DBH current-limit frames."""
 
-from pace_limits import (
+from custom_components.gobel_battery.pace_limits import (
     parse_pace_overcurrent_response,
     read_pace_current_limits,
 )
-from pacebms_rs232 import PACEBMS232
-from pacebms_rs485 import PACEBMS485
+from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
+from custom_components.gobel_battery.pacebms_rs485 import PACEBMS485
 
 
 def _frame(payload):
