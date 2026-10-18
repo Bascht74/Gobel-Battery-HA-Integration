@@ -4,7 +4,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .const import DOMAIN
 from .coordinator import GobelBatteryUpdateCoordinator
@@ -41,6 +41,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
+    # The pack devices link to the bank device by its id, so it must exist first.
+    bank = dr.async_get(hass).async_get_or_create(
+        config_entry_id=entry.entry_id, **coordinator.total_device_info()
+    )
+    coordinator.bank_device_id = bank.id
 
     _remove_other_mode_entities(hass, entry, coordinator)
 

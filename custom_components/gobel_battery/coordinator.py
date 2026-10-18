@@ -7,6 +7,7 @@ from datetime import timedelta
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.storage import Store
+from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
@@ -55,6 +56,9 @@ from .jkbms_rs485 import JKBMS485
 from .tdtbms_rs232 import TDTBMS232
 
 _LOGGER = logging.getLogger(__name__)
+
+# Home Assistant 2026.8 links a pack to its bank by device id and deprecates the identifier link.
+LINK_BY_DEVICE_ID = (MAJOR_VERSION, MINOR_VERSION) >= (2026, 8)
 
 class DummyHAComm:
     """Mock class to satisfy driver dependencies on HA_MQTT without publishing."""
@@ -119,6 +123,8 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._last_reopen = 0
         self._bus_lock = threading.Lock()
         self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
+        # Set by async_setup_entry once the bank device is registered.
+        self.bank_device_id = None
 
     def _setup_bms_sync(self):
         """Synchronous setup of the BMS communication and driver."""
@@ -457,10 +463,13 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         info = {
             "identifiers": {(DOMAIN, f"{self.entry.entry_id}_pack_{pack_id}")},
             "name": f"{self.device_name} Pack {display:02d}",
-            "via_device": (DOMAIN, f"{self.entry.entry_id}_total"),
             "manufacturer": "Gobel Power",
             "model": self.bms_type,
         }
+        if not LINK_BY_DEVICE_ID:
+            info["via_device"] = (DOMAIN, f"{self.entry.entry_id}_total")
+        elif self.bank_device_id:
+            info["via_device_id"] = self.bank_device_id
         info.update(self.version_fields(pack_id))
         return info
 
