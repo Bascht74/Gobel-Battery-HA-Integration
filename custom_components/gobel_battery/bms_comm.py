@@ -190,13 +190,21 @@ class BMSCommunication:
                     peer_closed = False
                     import time
                     start_time = time.time()
-                    timeout = timeout if timeout is not None else (self.bms_connection.gettimeout() or 3.0)
+                    socket_timeout = self.bms_connection.gettimeout()
+                    timeout = timeout if timeout is not None else (socket_timeout or 3.0)
                     
                     while b'\r' not in self._tcp_buffer:
-                        if time.time() - start_time > timeout:
+                        remaining = timeout - (time.time() - start_time)
+                        if remaining <= 0:
                             break
                         try:
-                            # Read chunks of data
+                            # Read chunks of data. Until the reply starts, a short timeout from the caller
+                            # also limits each recv(). Once it has started, recv() waits with the socket's
+                            # own timeout, so a frame split over two TCP parts still arrives whole.
+                            if self._tcp_buffer:
+                                self.bms_connection.settimeout(socket_timeout)
+                            else:
+                                self.bms_connection.settimeout(min(remaining, socket_timeout or remaining))
                             chunk = self.bms_connection.recv(4096)
                             if not chunk:
                                 peer_closed = True
@@ -209,6 +217,8 @@ class BMSCommunication:
                                 self.logger.error(f"Error reading socket: {e}{note}")
                             peer_closed = True
                             break
+                    # Each error above ends the loop, so later reads always get the socket's own timeout back.
+                    self.bms_connection.settimeout(socket_timeout)
 
                     if peer_closed:
                         if (note := self.problem_note("peer_closed")) is not None:

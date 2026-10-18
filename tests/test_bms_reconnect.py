@@ -10,6 +10,9 @@ class _ClosedSocket:
     def gettimeout(self):
         return 1
 
+    def settimeout(self, _timeout):
+        return None
+
     def close(self):
         return None
 
