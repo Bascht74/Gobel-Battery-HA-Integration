@@ -101,6 +101,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=f"Gobel Battery {self.device_name}",
             update_interval=timedelta(seconds=poll_interval),
         )
