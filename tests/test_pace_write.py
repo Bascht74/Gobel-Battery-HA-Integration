@@ -2,7 +2,15 @@
 
 from datetime import datetime
 
-from custom_components.gobel_battery.pace_write import build_pace_request, write_buzzer, write_limiter_gear, write_mosfet, write_overcurrent
+from custom_components.gobel_battery.pace_write import (
+    build_pace_request,
+    write_buzzer,
+    write_led,
+    write_limiter,
+    write_limiter_gear,
+    write_mosfet,
+    write_overcurrent,
+)
 from custom_components.gobel_battery.pacebms_rs232 import PACEBMS232
 
 
@@ -87,3 +95,21 @@ def test_switching_the_buzzer_on_sends_0d():
     assert bms.bms_comm.sent[-1] == b"~25004699E0020DFD12\r"
     write_buzzer(bms, False)
     assert bms.bms_comm.sent[-1] == b"~25004699E0020CFD13\r"
+
+
+def test_switching_the_led_alarm_on_sends_06():
+    # Protocol table A.43 (99H): 06 = enable LED alarm, 07 = disable.
+    bms = _bms()
+    write_led(bms, True)
+    assert bms.bms_comm.sent[-1] == b"~25004699E00206FD20\r"
+    write_led(bms, False)
+    assert bms.bms_comm.sent[-1] == b"~25004699E00207FD1F\r"
+
+
+def test_switching_the_current_limiter_on_sends_0a():
+    # Protocol table A.43 (99H): 0A = enable current limiting, 0B = disable.
+    bms = _bms()
+    write_limiter(bms, True)
+    assert bms.bms_comm.sent[-1] == b"~25004699E0020AFD15\r"
+    write_limiter(bms, False)
+    assert bms.bms_comm.sent[-1] == b"~25004699E0020BFD14\r"

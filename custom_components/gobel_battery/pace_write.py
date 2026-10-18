@@ -9,15 +9,17 @@ _LOGGER = logging.getLogger(__name__)
 # capture shows 9A 01 clearing the CFET bit).
 MOSFET_ON = "00"
 MOSFET_OFF = "01"
-LIMITER_ON = "0B"
-LIMITER_OFF = "0A"
+# 99H: 0A switches the current limiter on, 0B off (protocol table A.43).
+LIMITER_ON = "0A"
+LIMITER_OFF = "0B"
 GEAR_HIGH = "08"
 GEAR_LOW = "09"
 # 0D switches the buzzer alarm on, 0C off (protocol doc and PBmsTools capture).
 BUZZER_ON = "0D"
 BUZZER_OFF = "0C"
-LED_ON = "07"
-LED_OFF = "06"
+# 99H: 06 switches the LED alarm on, 07 off (protocol table A.43).
+LED_ON = "06"
+LED_OFF = "07"
 
 # A write is confirmed by RTN 00 with an empty INFO (LENID 0). Only 9AH and 9BH answer
 # with one status byte instead (LENID 2, protocol tables A.46 and A.48).
