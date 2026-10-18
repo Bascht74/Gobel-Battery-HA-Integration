@@ -415,8 +415,11 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             if slot["cursor"] >= len(GROUPS):
                 slot["cursor"] = 0
                 slot["ts"] = now
-                slot["rounds"] = slot.get("rounds", 0) + 1
-                self.config_round_results[cache_key] = (slot["rounds"], set(answered))
+                # A round without a single answer means the link was busy or down, not
+                # that the BMS lacks these settings, so it does not count for the cleanup.
+                if answered:
+                    slot["rounds"] = slot.get("rounds", 0) + 1
+                    self.config_round_results[cache_key] = (slot["rounds"], set(answered))
                 answered.clear()
                 self.config_rounds += 1
 

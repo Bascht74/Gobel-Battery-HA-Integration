@@ -28,3 +28,32 @@ def test_one_round_reads_every_group_once_then_pauses(monkeypatch):
 
     assert slices == [(0, 4), (4, 4), (8, 4), (12, 4), (16, 3)]
     assert coordinator.config_rounds == 1
+
+
+def test_a_round_without_any_answer_does_not_count_for_the_cleanup(monkeypatch):
+    # The TCP serial server is busy (PBmsTools holds it): every settings read in the round
+    # times out. That says nothing about which settings the BMS has, so no entity may go.
+    monkeypatch.setattr(coordinator_module, "read_configuration_slice", lambda *_a, **_k: ({}, {}))
+    coordinator = make_coordinator()
+    coordinator.bms = PACEBMS232(None, object(), "PACE_LV", 5, 0, 0)
+
+    for _poll in range(5):  # one full round of 5 polls
+        coordinator._attach_current_limits([{"pack_id": 0}])
+
+    assert coordinator.config_rounds == 1
+    assert coordinator.config_round_results == {}
+
+
+def test_a_round_with_answers_counts_for_the_cleanup(monkeypatch):
+    # Only the first group (cell overvoltage) answers; the other groups stay empty.
+    def read_slice(_bms, start, count, pack_number=None):
+        return ({"view_cell_ov_alarm": 3.6}, {}) if start == 0 else ({}, {})
+
+    monkeypatch.setattr(coordinator_module, "read_configuration_slice", read_slice)
+    coordinator = make_coordinator()
+    coordinator.bms = PACEBMS232(None, object(), "PACE_LV", 5, 0, 0)
+
+    for _poll in range(5):
+        coordinator._attach_current_limits([{"pack_id": 0}])
+
+    assert coordinator.config_round_results == {"all": (1, {"view_cell_ov_alarm"})}
