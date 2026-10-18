@@ -36,6 +36,7 @@ from .pace_config import (
     FIELD_BY_KEY,
     GROUP_BY_NAME,
     GROUPS,
+    GROUPS_PER_POLL,
     decode_group,
     read_configuration_slice,
     read_group,
@@ -372,16 +373,21 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             )
             if slot["cursor"] == 0 and slot["values"] and now - slot["ts"] < LIMIT_POLL_SECONDS:
                 continue
+            # The last slice of a round is shorter, so each group is read once per round.
+            count = min(GROUPS_PER_POLL, len(GROUPS) - slot["cursor"])
             try:
-                values, raw = read_configuration_slice(self.bms, slot["cursor"], pack_number=target)
+                values, raw = read_configuration_slice(
+                    self.bms, slot["cursor"], count=count, pack_number=target
+                )
             except Exception as err:
                 _LOGGER.debug("Configuration read failed: %s", err)
                 values, raw = {}, {}
             slot["values"].update(values)
             slot["raw"].update(raw)
             self.config_answered.update(key for key, value in values.items() if value is not None)
-            slot["cursor"] = (slot["cursor"] + 4) % len(GROUPS)
-            if slot["cursor"] == 0:
+            slot["cursor"] += count
+            if slot["cursor"] >= len(GROUPS):
+                slot["cursor"] = 0
                 slot["ts"] = now
                 self.config_rounds += 1
 
