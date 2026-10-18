@@ -99,43 +99,43 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_network()
             return await self.async_step_serial()
 
-        data_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_DEVICE_NAME,
-                    default=defaults.get(CONF_DEVICE_NAME, DEFAULT_DEVICE_NAME),
-                ): str,
-                vol.Required(
-                    CONF_BMS_TYPE,
-                    default=defaults.get(CONF_BMS_TYPE, BMS_TYPES[0]).lower(),
-                ): _dropdown(list(BMS_TYPE_BY_OPTION), "bms_type"),
-                vol.Required(
-                    CONF_CONNECTION_TYPE,
-                    default=defaults.get(CONF_CONNECTION_TYPE, CONNECTION_TYPES[0]),
-                ): _dropdown(CONNECTION_TYPES, "connection_type"),
-                vol.Required(
-                    CONF_BATTERY_PORT,
-                    default=defaults.get(CONF_BATTERY_PORT, BATTERY_PORTS[0]),
-                ): _dropdown(BATTERY_PORTS, "battery_port"),
-                vol.Optional(
-                    CONF_POLL_INTERVAL,
-                    default=defaults.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=3600)),
-                vol.Optional(
-                    CONF_MAX_PARALLEL,
-                    default=defaults.get(CONF_MAX_PARALLEL, DEFAULT_MAX_PARALLEL),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=32)),
-                vol.Optional(
-                    CONF_JK_DISPLAY_INDEX_START,
-                    default=defaults.get(
-                        CONF_JK_DISPLAY_INDEX_START, DEFAULT_JK_DISPLAY_INDEX_START
-                    ),
-                ): vol.In(["00", "01"]),
-            }
-        )
+        fields = {
+            vol.Required(
+                CONF_DEVICE_NAME,
+                default=defaults.get(CONF_DEVICE_NAME, DEFAULT_DEVICE_NAME),
+            ): str,
+            vol.Required(
+                CONF_BMS_TYPE,
+                default=defaults.get(CONF_BMS_TYPE, BMS_TYPES[0]).lower(),
+            ): _dropdown(list(BMS_TYPE_BY_OPTION), "bms_type"),
+            vol.Required(
+                CONF_CONNECTION_TYPE,
+                default=defaults.get(CONF_CONNECTION_TYPE, CONNECTION_TYPES[0]),
+            ): _dropdown(CONNECTION_TYPES, "connection_type"),
+            vol.Required(
+                CONF_BATTERY_PORT,
+                default=defaults.get(CONF_BATTERY_PORT, BATTERY_PORTS[0]),
+            ): _dropdown(BATTERY_PORTS, "battery_port"),
+        }
+        if not self._reconfigure:
+            # Initial values only. Later changes go through the options flow.
+            fields.update(
+                {
+                    vol.Optional(
+                        CONF_POLL_INTERVAL, default=DEFAULT_POLL_INTERVAL
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=3600)),
+                    vol.Optional(
+                        CONF_MAX_PARALLEL, default=DEFAULT_MAX_PARALLEL
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=32)),
+                    vol.Optional(
+                        CONF_JK_DISPLAY_INDEX_START,
+                        default=DEFAULT_JK_DISPLAY_INDEX_START,
+                    ): vol.In(["00", "01"]),
+                }
+            )
 
         return self.async_show_form(
-            step_id=step_id, data_schema=data_schema, errors=errors
+            step_id=step_id, data_schema=vol.Schema(fields), errors=errors
         )
 
     async def async_step_network(self, user_input=None):
@@ -245,16 +245,9 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _create_from_data(self, user_data):
         unique_id = f"{user_data[CONF_IP_ADDRESS]}_{user_data[CONF_IP_PORT]}"
-        await self.async_set_unique_id(unique_id)
         if self._reconfigure:
-            self._abort_if_unique_id_configured()
-            return self.async_update_reload_and_abort(
-                self._get_reconfigure_entry(),
-                title=user_data[CONF_DEVICE_NAME],
-                data=user_data,
-                options={},
-                unique_id=unique_id,
-            )
+            return self._finish_reconfigure(user_data, unique_id)
+        await self.async_set_unique_id(unique_id)
         self._abort_if_unique_id_configured()
         return self.async_create_entry(title=user_data[CONF_DEVICE_NAME], data=user_data)
 
@@ -266,16 +259,9 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             user_data = self._connection_data(user_input, network=False)
             unique_id = user_data[CONF_USB_PORT]
-            await self.async_set_unique_id(unique_id)
             if self._reconfigure:
-                self._abort_if_unique_id_configured()
-                return self.async_update_reload_and_abort(
-                    self._get_reconfigure_entry(),
-                    title=user_data[CONF_DEVICE_NAME],
-                    data=user_data,
-                    options={},
-                    unique_id=unique_id,
-                )
+                return self._finish_reconfigure(user_data, unique_id)
+            await self.async_set_unique_id(unique_id)
             self._abort_if_unique_id_configured()
             return self.async_create_entry(
                 title=user_data[CONF_DEVICE_NAME], data=user_data
@@ -295,6 +281,17 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="serial", data_schema=serial_schema, errors=errors
         )
+
+    def _finish_reconfigure(self, user_data, unique_id):
+        """Save the new connection and keep the options; the update listener reloads."""
+        entry = self._get_reconfigure_entry()
+        other = self.hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, unique_id)
+        if other is not None and other.entry_id != entry.entry_id:
+            return self.async_abort(reason="already_configured")
+        self.hass.config_entries.async_update_entry(
+            entry, title=user_data[CONF_DEVICE_NAME], data=user_data, unique_id=unique_id
+        )
+        return self.async_abort(reason="reconfigure_successful")
 
     def _connection_data(self, user_input: dict, network: bool) -> dict:
         """Build a clean config dict so a switched connection type drops stale keys."""

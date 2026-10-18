@@ -21,10 +21,7 @@
           "device_name": "Device name",
           "bms_type": "BMS type",
           "connection_type": "Connection",
-          "battery_port": "Battery port",
-          "poll_interval": "Poll interval (seconds)",
-          "max_parallel_allowed": "Max parallel packs",
-          "jk_display_index_start": "JK pack index start"
+          "battery_port": "Battery port"
         }
       },
       "network": {
