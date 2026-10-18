@@ -18,7 +18,7 @@ class _Comm:
         self.sent.append(data)
         return True
 
-    def receive_data(self):
+    def receive_data(self, timeout=None):
         return self.response
 
 

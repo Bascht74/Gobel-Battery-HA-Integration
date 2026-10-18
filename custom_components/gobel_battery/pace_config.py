@@ -8,7 +8,7 @@ Discharge overcurrent is read as a negative word and written as a positive one.
 import logging
 import time
 
-from .pace_write import build_pace_request
+from .pace_write import await_ack, build_pace_request, reply_is_from_target
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -428,8 +428,9 @@ def read_group(bms, group, pack_number=None):
                 if not bms.bms_comm.bms_connection:
                     break
                 continue
+            text = received.strip().removeprefix("~")
             payload = info_payload(received)
-            if payload:
+            if payload and reply_is_from_target(bms, text, pack_number):
                 return payload
             identify = getattr(bms, "identify_packet_type", None)
             packet = identify(received) if identify else None
@@ -472,13 +473,8 @@ def write_configuration_field(bms, key, value, raw_payload, pack_number=None):
         bms.bms_comm.flush()
         if not bms.bms_comm.send_data(frame):
             return None
-        response = bms.bms_comm.receive_data()
+        accepted = await_ack(bms, group["write"], pack_number)
     except Exception as err:
         _LOGGER.warning("Pace config write %s failed: %s", key, err)
         return None
-    text = (response or "").strip()
-    if text.startswith("~"):
-        text = text[1:]
-    if len(text) < 8 or text[4:6] != "46" or text[6:8] != "00":
-        return None
-    return payload
+    return payload if accepted else None

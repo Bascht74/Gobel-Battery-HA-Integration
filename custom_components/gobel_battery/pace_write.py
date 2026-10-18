@@ -1,6 +1,7 @@
 """Write Pace configuration frames. Values are always positive amps."""
 
 import logging
+from time import monotonic
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +18,14 @@ BUZZER_ON = "0D"
 BUZZER_OFF = "0C"
 LED_ON = "07"
 LED_OFF = "06"
+
+# A write is confirmed by RTN 00 with an empty INFO (LENID 0). Only 9AH and 9BH answer
+# with one status byte instead (LENID 2, protocol tables A.46 and A.48).
+STATUS_BYTE_REPLIES = ("9A", "9B")
+# A dongle forwards frames the BMS sends on its own; they keep CID2 42 (analog) or 44 (warning).
+PUSHED_FRAMES = ("42", "44")
+# Longest wait for the confirmation. Pushed analog frames that arrive meanwhile are skipped.
+ACK_WAIT_SECONDS = 3.0
 
 
 def build_pace_request(bms, cid2, info, pack_number=None):
@@ -106,6 +115,51 @@ def _address(bms, pack_number):
     return b"00"
 
 
+def reply_is_from_target(bms, reply_text, pack_number):
+    """On RS485 every pack shares the bus, so the reply must carry the addressed pack.
+    RS232 and the dongles link to one BMS only, and its reply address is not checked."""
+    if type(bms).__name__ != "PACEBMS485":
+        return True
+    return reply_text[2:4] == _address(bms, pack_number).decode("ascii")
+
+
+def ack_state(bms, cid2, reply, pack_number=None):
+    """Classify one received frame: "ack", "rejected" (the target said no) or "other"."""
+    text = (reply or "").strip()
+    if text.startswith("~"):
+        text = text[1:]
+    if len(text) < 12 or text[4:6] != "46" or not reply_is_from_target(bms, text, pack_number):
+        return "other"
+    if text[6:8] in PUSHED_FRAMES:
+        return "other"
+    try:
+        lenid = int(text[9:12], 16)
+    except ValueError:
+        return "other"
+    allowed = (0, 2) if cid2 in STATUS_BYTE_REPLIES else (0,)
+    if lenid not in allowed:
+        return "other"
+    return "ack" if text[6:8] == "00" else "rejected"
+
+
+def await_ack(bms, cid2, pack_number=None):
+    """Read replies until the write is confirmed, refused, or the wait is over."""
+    deadline = monotonic() + ACK_WAIT_SECONDS
+    while (remaining := deadline - monotonic()) > 0:
+        reply = bms.bms_comm.receive_data(timeout=remaining)
+        if not reply:
+            _LOGGER.warning("Pace write %s got no reply", cid2)
+            return False
+        state = ack_state(bms, cid2, reply, pack_number)
+        if state == "ack":
+            return True
+        if state == "rejected":
+            _LOGGER.warning("Pace write %s was rejected: %s", cid2, reply)
+            return False
+    _LOGGER.warning("Pace write %s was not confirmed", cid2)
+    return False
+
+
 def _send(bms, cid2, info, pack_number):
     frame = build_pace_request(bms, cid2, info, pack_number)
     if not frame:
@@ -114,16 +168,7 @@ def _send(bms, cid2, info, pack_number):
         bms.bms_comm.flush()
         if not bms.bms_comm.send_data(frame):
             return False
-        response = bms.bms_comm.receive_data()
+        return await_ack(bms, cid2, pack_number)
     except Exception as err:
         _LOGGER.warning("Pace write %s failed: %s", cid2, err)
         return False
-    if not response:
-        return False
-    text = response.strip()
-    if text.startswith("~"):
-        text = text[1:]
-    accepted = len(text) >= 8 and text[4:6] == "46" and text[6:8] == "00"
-    if not accepted:
-        _LOGGER.warning("Pace write %s was rejected: %s", cid2, response)
-    return accepted

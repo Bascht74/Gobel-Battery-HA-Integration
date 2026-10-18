@@ -571,9 +571,9 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                     cache_key, {"cursor": 0, "values": {}, "raw": {}, "ts": 0}
                 )
                 group = GROUP_BY_NAME[FIELD_BY_KEY[kind]["group"]]
-                raw = slot["raw"].get(group["name"])
-                if raw is None:
-                    raw = read_group(self.bms, group, pack_id)
+                # Read the group again: the cached copy can be minutes old, and a value
+                # changed meanwhile in PBmsTools would be written back.
+                raw = read_group(self.bms, group, pack_id)
                 if raw is None:
                     return False
                 updated = write_configuration_field(self.bms, kind, value, raw, pack_id)
