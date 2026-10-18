@@ -287,6 +287,9 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.hass.config_entries.async_update_entry(
             entry, title=user_data[CONF_DEVICE_NAME], data=user_data, unique_id=unique_id
         )
+        if not entry.update_listeners:
+            # A failed setup added no update listener, so start the setup with the new data here.
+            self.hass.config_entries.async_schedule_reload(entry.entry_id)
         return self.async_abort(reason="reconfigure_successful")
 
     def _connection_data(self, user_input: dict, network: bool) -> dict:
