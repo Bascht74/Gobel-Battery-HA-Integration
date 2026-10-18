@@ -4,7 +4,6 @@ import asyncio
 import time
 import threading
 from datetime import timedelta
-import async_timeout
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.storage import Store
@@ -625,7 +624,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         """Fetch data from BMS."""
         # First fetch needs more time for pack discovery (up to 15s wait + processing)
         timeout_seconds = 45 if not getattr(self, '_first_fetch_done', False) else 20
-        async with async_timeout.timeout(timeout_seconds):
+        async with asyncio.timeout(timeout_seconds):
             try:
                 data = await self.hass.async_add_executor_job(self._fetch_data_sync)
                 self._first_fetch_done = True
