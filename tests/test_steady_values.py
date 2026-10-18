@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 from custom_components.gobel_battery.steady import (
     CLOCK_REFRESH_SECONDS,
+    POWER_DIGITS,
     STEP_HOLD_SECONDS,
     ClockHold,
     StepHold,
@@ -24,26 +25,26 @@ def _show(hold, values):
 
 
 def test_a_cell_that_flickers_by_one_millivolt_stays_put():
-    # 3.281 V and 3.282 V take turns for 2 minutes: nothing new to store.
-    cell = StepHold(0.001)
-    shown = _show(cell, [3.281, 3.282] * 12)
-    assert set(shown) == {3.281}
+    # 3281 mV and 3282 mV take turns for 2 minutes: nothing new to store.
+    cell = StepHold(1)
+    shown = _show(cell, [3281, 3282] * 12)
+    assert set(shown) == {3281}
 
 
 def test_a_one_millivolt_change_shows_after_a_minute():
-    # The cell moves from 3.281 V to 3.282 V and stays there.
+    # The cell moves from 3281 mV to 3282 mV and stays there.
     assert STEP_HOLD_SECONDS == 60
-    cell = StepHold(0.001)
-    shown = _show(cell, [3.281] + [3.282] * 14)
+    cell = StepHold(1)
+    shown = _show(cell, [3281] + [3282] * 14)
     # Poll 1 sees the new value at 5 s; 60 s later, at poll 13, it is shown.
-    assert shown[12] == 3.281
-    assert shown[13] == 3.282
+    assert shown[12] == 3281
+    assert shown[13] == 3282
 
 
 def test_a_change_of_two_millivolts_or_more_shows_at_once():
-    # Charging starts: the cell jumps from 3.281 V to 3.290 V.
-    cell = StepHold(0.001)
-    assert _show(cell, [3.281, 3.290]) == [3.281, 3.290]
+    # Charging starts: the cell jumps from 3281 mV to 3290 mV.
+    cell = StepHold(1)
+    assert _show(cell, [3281, 3290]) == [3281, 3290]
 
 
 def test_a_missing_value_is_passed_on():
@@ -52,8 +53,8 @@ def test_a_missing_value_is_passed_on():
 
 
 def test_power_is_whole_watts_and_energy_is_ten_watt_hours():
-    # 52.31 V x 17.33 A = 906.53 W. The tenths come from rounding V and A, not from the BMS.
-    assert rounded(906.5323, 0) == 907.0
+    # 52.31 V x 17.33 A = 0.90653 kW. Below a whole watt (0.001 kW) is rounding noise of V and A.
+    assert rounded(0.9065323, POWER_DIGITS) == 0.907
     # The counter grows 1.25 Wh per 5 s at 900 W: shown in 0.01 kWh it changes every 40 s.
     assert rounded(0.04425, 2) == 0.04
     assert rounded(None, 2) is None

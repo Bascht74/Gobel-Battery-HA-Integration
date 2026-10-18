@@ -1,7 +1,7 @@
 """The sensor entities publish the steady values, not the raw ones.
 
 Scenario: one Pace pack on RS232 discharges at 906.73 W and its cell 1 flickers
-between 3.281 V and 3.282 V.
+between 3281 mV and 3282 mV. Native units are the upstream ones: kW and mV.
 """
 
 from types import SimpleNamespace
@@ -20,10 +20,10 @@ def _coordinator(power_kw, cell_mv):
     return coordinator
 
 
-def test_pack_power_is_published_in_whole_watts():
+def test_pack_power_is_published_in_kilowatts_to_the_whole_watt():
     coordinator = _coordinator(-0.90673, 3281)
-    power = GobelBatteryPackSensor(coordinator, 0, "power", "Power", "W", None, None, None, None)
-    assert power.native_value == -907.0
+    power = GobelBatteryPackSensor(coordinator, 0, "power", "Power", "kW", None, None, None, None)
+    assert power.native_value == -0.907
 
 
 def test_cell_flicker_is_not_published(monkeypatch):
@@ -36,4 +36,10 @@ def test_cell_flicker_is_not_published(monkeypatch):
         coordinator.data["analog"][0]["cell_voltages"] = [3281 if poll % 2 == 0 else 3282]
         shown.append(cell.native_value)
         clock.now += 5
-    assert set(shown) == {3.281}
+    assert set(shown) == {3281}
+
+
+def test_cell_voltage_is_published_in_millivolts():
+    cell = GobelBatteryCellVoltageSensor(_coordinator(0.0, 3281), 0, 1)
+    assert cell.native_unit_of_measurement == "mV"
+    assert cell.native_value == 3281

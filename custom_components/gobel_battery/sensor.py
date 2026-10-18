@@ -11,7 +11,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI
-from .measurements import volts_from_millivolts, watts_from_kilowatts
 from .pace_config import FIELDS, READ_ONLY
 from .stale_entities import pack_is_fresh, remove_stale
 from .steady import ENERGY_DIGITS, POWER_DIGITS, ClockHold, StepHold, rounded
@@ -86,12 +85,12 @@ SENSOR_METADATA = {
     },
     "power": {
         "name": "Power",
-        "unit": "W",
+        "unit": "kW",
         "device_class": SensorDeviceClass.POWER,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:battery-charging",
         "category": None,
-        "precision": 0,
+        "precision": 3,
     },
     "soc": {
         "name": "SOC",
@@ -144,30 +143,30 @@ SENSOR_METADATA = {
     },
     "cell_voltage_max": {
         "name": "Highest Cell Voltage",
-        "unit": "V",
+        "unit": "mV",
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:align-vertical-top",
         "category": EntityCategory.DIAGNOSTIC,
-        "precision": 3,
+        "precision": 0,
     },
     "cell_voltage_min": {
         "name": "Lowest Cell Voltage",
-        "unit": "V",
+        "unit": "mV",
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:align-vertical-bottom",
         "category": EntityCategory.DIAGNOSTIC,
-        "precision": 3,
+        "precision": 0,
     },
     "cell_voltage_diff": {
         "name": "Cell Voltage Delta",
-        "unit": "V",
+        "unit": "mV",
         "device_class": SensorDeviceClass.VOLTAGE,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:format-align-middle",
         "category": EntityCategory.DIAGNOSTIC,
-        "precision": 3,
+        "precision": 0,
     },
     "cell_voltage_max_index": {
         "name": "Highest Cell",
@@ -366,12 +365,12 @@ async def async_setup_entry(
         ("total_current", "Total Current", "A", SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT, "mdi:current-dc", None, 2),
         ("total_soc", "Total SOC", "%", SensorDeviceClass.BATTERY, SensorStateClass.MEASUREMENT, "mdi:battery-70", None, 1),
         ("total_voltage", "Total Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:sine-wave", None, 2),
-        ("total_power", "Total Power", "W", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, "mdi:battery-charging", None, 0),
+        ("total_power", "Total Power", "kW", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, "mdi:battery-charging", None, 3),
         ("total_energy_charged", "Total Energy Charged", "kWh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-positive", None, 2),
         ("total_energy_discharged", "Total Energy Discharged", "kWh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-negative", None, 2),
-        ("total_cell_voltage_max", "Max Cell Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-top", EntityCategory.DIAGNOSTIC, 3),
-        ("total_cell_voltage_min", "Min Cell Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-bottom", EntityCategory.DIAGNOSTIC, 3),
-        ("total_cell_voltage_diff", "Cell Voltage Delta", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:format-align-middle", EntityCategory.DIAGNOSTIC, 3),
+        ("total_cell_voltage_max", "Max Cell Voltage", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-top", EntityCategory.DIAGNOSTIC, 0),
+        ("total_cell_voltage_min", "Min Cell Voltage", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-bottom", EntityCategory.DIAGNOSTIC, 0),
+        ("total_cell_voltage_diff", "Cell Voltage Delta", "mV", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:format-align-middle", EntityCategory.DIAGNOSTIC, 0),
     ]
 
     for key, name, unit, dev_class, state_class, icon, category, precision in overall_sensors:
@@ -570,20 +569,20 @@ def _drop_missing_probes(hass, entry, coordinator, registered, pack_id, marker, 
     ):
         registered.discard((pack_id, f"{marker}_{numbers[unique_id]}"))
 
-# Last digit of the voltages that flicker. A one-digit change waits until it is steady.
+# Last digit of the voltages that flicker (pack and total in V, cells in mV). A one-digit change waits until it is steady.
 OVERALL_STEPS = {
     "total_voltage": 0.01,
-    "total_cell_voltage_max": 0.001,
-    "total_cell_voltage_min": 0.001,
-    "total_cell_voltage_diff": 0.001,
+    "total_cell_voltage_max": 1,
+    "total_cell_voltage_min": 1,
+    "total_cell_voltage_diff": 1,
 }
 PACK_STEPS = {
     "voltage": 0.01,
-    "cell_voltage_max": 0.001,
-    "cell_voltage_min": 0.001,
-    "cell_voltage_diff": 0.001,
+    "cell_voltage_max": 1,
+    "cell_voltage_min": 1,
+    "cell_voltage_diff": 1,
 }
-CELL_STEP = 0.001
+CELL_STEP = 1  # mV
 
 
 def _hold(steps, key):
@@ -665,7 +664,7 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
         elif self._key == "total_voltage":
             return round(sum(d.get("view_voltage", 0) for d in analog_packs) / total_packs_num, 2)
         elif self._key == "total_power":
-            return rounded(watts_from_kilowatts(sum(d.get("view_power", 0) for d in analog_packs)), POWER_DIGITS)
+            return rounded(sum(d.get("view_power", 0) for d in analog_packs), POWER_DIGITS)
         elif self._key == "total_energy_charged":
             return rounded(sum(d.get("view_energy_charged", 0) or 0 for d in analog_packs), ENERGY_DIGITS)
         elif self._key == "total_energy_discharged":
@@ -677,11 +676,11 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
             return None
 
         if self._key == "total_cell_voltage_max":
-            return volts_from_millivolts(max(all_cell_voltages))
+            return max(all_cell_voltages)
         elif self._key == "total_cell_voltage_min":
-            return volts_from_millivolts(min(all_cell_voltages))
+            return min(all_cell_voltages)
         elif self._key == "total_cell_voltage_diff":
-            return volts_from_millivolts(max(all_cell_voltages) - min(all_cell_voltages))
+            return max(all_cell_voltages) - min(all_cell_voltages)
 
         return None
 
@@ -760,7 +759,7 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         elif self._metric == "current":
             return pack_data.get("view_current")
         elif self._metric == "power":
-            return rounded(watts_from_kilowatts(pack_data.get("view_power")), POWER_DIGITS)
+            return rounded(pack_data.get("view_power"), POWER_DIGITS)
         elif self._metric == "soc":
             return pack_data.get("view_SOC")
         elif self._metric == "soh":
@@ -774,11 +773,11 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         elif self._metric == "design_capacity":
             return pack_data.get("view_design_capacity")
         elif self._metric == "cell_voltage_max":
-            return volts_from_millivolts(pack_data.get("cell_voltage_max"))
+            return pack_data.get("cell_voltage_max")
         elif self._metric == "cell_voltage_min":
-            return volts_from_millivolts(pack_data.get("cell_voltage_min"))
+            return pack_data.get("cell_voltage_min")
         elif self._metric == "cell_voltage_diff":
-            return volts_from_millivolts(pack_data.get("cell_voltage_diff"))
+            return pack_data.get("cell_voltage_diff")
         elif self._metric == "cell_voltage_max_index":
             return pack_data.get("cell_voltage_max_index")
         elif self._metric == "cell_voltage_min_index":
@@ -828,10 +827,10 @@ class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
         self._attr_translation_placeholders = {"index": f"{cell_index:02d}"}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_cell_{cell_index}_voltage"
         self._steady = StepHold(CELL_STEP)
-        self._attr_native_unit_of_measurement = "V"
+        self._attr_native_unit_of_measurement = "mV"
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_suggested_display_precision = 3
+        self._attr_suggested_display_precision = 0
         self._attr_icon = "mdi:sine-wave"
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
@@ -869,7 +868,7 @@ class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
 
         voltages = pack_data.get("cell_voltages", [])
         if self.cell_index - 1 < len(voltages):
-            return volts_from_millivolts(voltages[self.cell_index - 1])
+            return voltages[self.cell_index - 1]
 
         return None
 

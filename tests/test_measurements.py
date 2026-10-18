@@ -7,17 +7,11 @@ from custom_components.gobel_battery.measurements import (
     present_temperatures,
     resolve_soc,
     resolve_soh,
-    volts_from_millivolts,
     watts_from_kilowatts,
 )
 
 
-def test_cell_voltage_is_volts_with_three_decimals():
-    assert volts_from_millivolts(3321) == 3.321
-    assert volts_from_millivolts(None) is None
-
-
-def test_power_is_converted_from_kilowatts_to_watts():
+def test_power_is_converted_from_kilowatts_to_watts_for_the_energy_counters():
     assert watts_from_kilowatts(1.25) == 1250.0
     assert watts_from_kilowatts(-0.5) == -500.0
 

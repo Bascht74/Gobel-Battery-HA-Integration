@@ -20,10 +20,10 @@ CLOCK_FORMAT = "%Y-%m-%d %H:%M:%S"
 class StepHold:
     """Shows a measurement, but holds back a change of a single step.
 
-    step is the last digit of the value, for example 0.001 V for a cell. A change
+    step is the last digit of the value, for example 1 mV for a cell. A change
     of two steps or more is shown at once. A change of one step is shown once it
     has been there for hold_seconds without going back, so a value that flickers
-    between 3.281 V and 3.282 V stays at 3.281 V.
+    between 3281 mV and 3282 mV stays at 3281 mV.
     """
 
     def __init__(self, step, hold_seconds=STEP_HOLD_SECONDS):
@@ -93,10 +93,10 @@ class ClockHold:
         return self.shown
 
 
-# Digits published per value type. The BMS reports power from 0.01 V x 0.01 A, so
-# tenths of a watt are noise. Energy counters step in 0.01 kWh (10 Wh), which is
-# finer than the hourly statistics of the Energy dashboard.
-POWER_DIGITS = 0
+# Digits published per value type. Power is in kW; the BMS reports it from 0.01 V x 0.01 A,
+# so anything below a whole watt (0.001 kW) is noise. Energy counters step in 0.01 kWh
+# (10 Wh), which is finer than the hourly statistics of the Energy dashboard.
+POWER_DIGITS = 3
 ENERGY_DIGITS = 2
 
 

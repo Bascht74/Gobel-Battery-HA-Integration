@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.26] - 2026-10-18
+### Changed
+-   Native units are back to the original integration's: cell voltages (each cell, highest, lowest, delta) in mV and power in kW. Home Assistant keeps showing volts and watts if the entity's display unit is set to them; see the README.
+
+---------------
+
 ## [2.4.25] - 2026-10-18
 ### Fixed
 -   hassfest passes again: translation keys are lower case. Stored BMS types and entity IDs stay the same.

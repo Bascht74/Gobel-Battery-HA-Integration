@@ -3,15 +3,8 @@
 NOMINAL_LFP_CELL_VOLTAGE = 3.2
 
 
-def volts_from_millivolts(millivolts):
-    """Cell voltages are parsed in mV. Home Assistant should show volts."""
-    if millivolts is None:
-        return None
-    return round(float(millivolts) / 1000.0, 3)
-
-
 def watts_from_kilowatts(kilowatts):
-    """Pack power is calculated in kW. Publish it in watts."""
+    """Pack power is calculated in kW; the energy counters integrate watts."""
     if kilowatts is None:
         return None
     return round(float(kilowatts) * 1000.0, 1)
