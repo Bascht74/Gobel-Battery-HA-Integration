@@ -4,6 +4,12 @@ description:
 
 # Changelog
 
+## [2.4.27] - 2026-10-18
+### Fixed
+-   Over TCP, a single read now ends when its short wait is over (Pace poll 0.4 s, settings read 0.35 s). Before, a silent BMS could hold one read for the full 3 s socket timeout. A reply that has already started still waits for its rest, so a frame split over two TCP parts arrives whole.
+
+---------------
+
 ## [2.4.26] - 2026-10-18
 ### Changed
 -   Native units are back to the original integration's: cell voltages (each cell, highest, lowest, delta) in mV and power in kW. Home Assistant keeps showing volts and watts if the entity's display unit is set to them; see the README.
