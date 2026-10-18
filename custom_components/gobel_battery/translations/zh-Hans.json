@@ -1,4 +1,92 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gobel Battery",
+        "data": {
+          "device_name": "设备名称",
+          "bms_type": "BMS 类型",
+          "connection_type": "连接方式",
+          "battery_port": "电池端口",
+          "poll_interval": "轮询间隔（秒）",
+          "max_parallel_allowed": "最大并联电池包数",
+          "jk_display_index_start": "JK 电池包起始编号"
+        }
+      },
+      "reconfigure": {
+        "title": "重新配置 Gobel Battery",
+        "description": "修改连接或 BMS 设置。之后 Home Assistant 会重新加载设备。",
+        "data": {
+          "device_name": "设备名称",
+          "bms_type": "BMS 类型",
+          "connection_type": "连接方式",
+          "battery_port": "电池端口"
+        }
+      },
+      "network": {
+        "title": "网络连接",
+        "data": {
+          "ip_address": "IP 地址",
+          "ip_port": "TCP 端口"
+        }
+      },
+      "port": {
+        "title": "TCP 端口",
+        "data": {
+          "ip_port": "TCP 端口"
+        }
+      },
+      "serial": {
+        "title": "串口连接",
+        "data": {
+          "usb_port": "串口设备",
+          "baud_rate": "波特率"
+        }
+      },
+      "probe": {
+        "title": "Pace 连接检查",
+        "description": "检测结果：{result}，端口 {port}。即使电池自行发送数据帧，这也是使用命令的 Pace BMS。不会自动选择内置 Wi-Fi。"
+      }
+    },
+    "error": {
+      "already_configured": "此连接已配置。"
+    },
+    "abort": {
+      "already_configured": "此连接已配置。",
+      "reconfigure_successful": "配置已更新，设备将重新加载。"
+    }
+  },
+  "selector": {
+    "bms_type": {
+      "options": {
+        "pace_lv": "Pace BMS",
+        "pace_lv_wifi": "Pace BMS，内置 Wi-Fi",
+        "jk_pb": "JK BMS",
+        "tdt": "TDT BMS"
+      }
+    },
+    "connection_type": {
+      "options": {
+        "ethernet": "网络，有线",
+        "wifi": "网络，Wi-Fi",
+        "serial": "USB 串口"
+      }
+    },
+    "battery_port": {
+      "options": {
+        "rs232": "RS232",
+        "rs485": "RS485"
+      }
+    },
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "无应答",
+        "unreachable": "无法连接"
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "voltage": {
@@ -650,14 +738,26 @@
       }
     }
   },
-  "selector": {
-    "probe_result": {
-      "options": {
-        "active": "Pace BMS",
-        "passive": "Pace BMS",
-        "silent": "无应答",
-        "unreachable": "无法连接"
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gobel Battery 选项",
+        "data": {
+          "poll_interval": "轮询间隔（秒）",
+          "max_parallel_allowed": "最大并联电池包数",
+          "jk_display_index_start": "JK 电池包起始编号",
+          "expert_writable_config": "将 BMS 设置创建为可修改的实体"
+        }
+      },
+      "expert_warning": {
+        "title": "可修改的 BMS 设置",
+        "data": {
+          "confirm_expert": "我了解风险并希望修改 BMS 设置"
+        }
       }
+    },
+    "error": {
+      "expert_not_confirmed": "请先确认警告，然后设置才能修改。"
     }
   },
   "exceptions": {

@@ -1,4 +1,92 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gobel Battery",
+        "data": {
+          "device_name": "Nom de l'appareil",
+          "bms_type": "Type de BMS",
+          "connection_type": "Connexion",
+          "battery_port": "Port de la batterie",
+          "poll_interval": "Intervalle de lecture (secondes)",
+          "max_parallel_allowed": "Packs en parallèle max.",
+          "jk_display_index_start": "Index de départ des packs JK"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigurer Gobel Battery",
+        "description": "Modifiez la connexion ou les réglages du BMS. Home Assistant recharge ensuite l'appareil.",
+        "data": {
+          "device_name": "Nom de l'appareil",
+          "bms_type": "Type de BMS",
+          "connection_type": "Connexion",
+          "battery_port": "Port de la batterie"
+        }
+      },
+      "network": {
+        "title": "Connexion réseau",
+        "data": {
+          "ip_address": "Adresse IP",
+          "ip_port": "Port TCP"
+        }
+      },
+      "port": {
+        "title": "Port TCP",
+        "data": {
+          "ip_port": "Port TCP"
+        }
+      },
+      "serial": {
+        "title": "Connexion série",
+        "data": {
+          "usb_port": "Périphérique série",
+          "baud_rate": "Débit en bauds"
+        }
+      },
+      "probe": {
+        "title": "Vérification de la connexion Pace",
+        "description": "Détecté : {result}, port {port}. C'est Pace BMS avec commandes, même lorsque la batterie envoie des trames d'elle-même. Le Wi-Fi interne n'est pas sélectionné automatiquement."
+      }
+    },
+    "error": {
+      "already_configured": "Cette connexion est déjà configurée."
+    },
+    "abort": {
+      "already_configured": "Cette connexion est déjà configurée.",
+      "reconfigure_successful": "Configuration mise à jour. L'appareil va être rechargé."
+    }
+  },
+  "selector": {
+    "bms_type": {
+      "options": {
+        "pace_lv": "Pace BMS",
+        "pace_lv_wifi": "Pace BMS, Wi-Fi interne",
+        "jk_pb": "JK BMS",
+        "tdt": "TDT BMS"
+      }
+    },
+    "connection_type": {
+      "options": {
+        "ethernet": "Réseau, câble",
+        "wifi": "Réseau, Wi-Fi",
+        "serial": "Série USB"
+      }
+    },
+    "battery_port": {
+      "options": {
+        "rs232": "RS232",
+        "rs485": "RS485"
+      }
+    },
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "aucune réponse",
+        "unreachable": "aucune connexion"
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "voltage": {
@@ -650,14 +738,26 @@
       }
     }
   },
-  "selector": {
-    "probe_result": {
-      "options": {
-        "active": "Pace BMS",
-        "passive": "Pace BMS",
-        "silent": "aucune réponse",
-        "unreachable": "aucune connexion"
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options de Gobel Battery",
+        "data": {
+          "poll_interval": "Intervalle de lecture (secondes)",
+          "max_parallel_allowed": "Packs en parallèle max.",
+          "jk_display_index_start": "Index de départ des packs JK",
+          "expert_writable_config": "Créer les réglages du BMS comme entités modifiables"
+        }
+      },
+      "expert_warning": {
+        "title": "Réglages du BMS modifiables",
+        "data": {
+          "confirm_expert": "Je comprends le risque et je veux modifier les réglages du BMS"
+        }
       }
+    },
+    "error": {
+      "expert_not_confirmed": "Confirmez l'avertissement avant que les réglages deviennent modifiables."
     }
   },
   "exceptions": {
