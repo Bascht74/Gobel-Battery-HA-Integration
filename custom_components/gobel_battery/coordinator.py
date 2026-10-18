@@ -293,7 +293,12 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         # Reconcile with cache to hold old data on occasional read failures
         seen_analog_packs = {item.get("pack_id", i): item for i, item in enumerate(analog_data)}
         seen_warning_packs = {item.get("pack_id", i): item for i, item in enumerate(warning_data)}
-        if not seen_analog_packs and self.connection_type != "serial":
+        # The JK listener thread reconnects on its own. A second reconnect from here races with it.
+        if (
+            not seen_analog_packs
+            and self.connection_type != "serial"
+            and self.bms_type != BMS_TYPE_JK_PB
+        ):
             self._reopen_link()
         
         final_analog_data = []

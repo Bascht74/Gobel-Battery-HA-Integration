@@ -54,7 +54,19 @@ class BMSCommunication:
             peer = f"{self.ethernet_ip}:{self.ethernet_port}" if self.interface in ['ethernet', 'wifi'] else self.serial_port
             self.logger.warning(f"Receiving data from BMS {peer} again{note}")
 
+    def _close_existing(self):
+        """Close a connection that is still open, so a new connect() does not leave it behind."""
+        if self.bms_connection is None:
+            return
+        try:
+            self.bms_connection.close()
+        except Exception as e:
+            self.logger.debug(f"Error closing the previous BMS connection: {e}")
+        self.bms_connection = None
+
     def connect(self):
+        # Dongles that accept only one client refuse the new session while the old one is open.
+        self._close_existing()
         if self.interface == 'serial' and self.serial_port and self.baud_rate:
             try:
                 self.logger.info(f"Trying to connect BMS over {self.serial_port}:{self.baud_rate}")
