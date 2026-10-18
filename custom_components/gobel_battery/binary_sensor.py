@@ -9,6 +9,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import BMS_TYPE_JK_PB, DOMAIN
+from .stale_entities import pack_is_fresh, remove_stale
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -174,13 +175,24 @@ async def async_setup_entry(
                     continue
                 new_entities.append(GobelBatteryBalanceSensor(coordinator, pack_id, key, name))
 
-            _drop_absent_status(hass, entry, pack_id, present_keys, registered)
-            if temps:
-                _drop_missing_warnings(hass, entry, pack_id, "temp_sensor_warnings_", set(fitted_temps))
-            if num_cells:
-                _drop_missing_warnings(
-                    hass, entry, pack_id, "cell_voltage_warnings_", set(range(1, num_cells + 1))
-                )
+            # Only rounds that really read the pack count towards removing an entity.
+            if pack_is_fresh(data, "warning", pack_id):
+                _drop_absent_status(hass, entry, coordinator, pack_id, present_keys, registered)
+            if pack_is_fresh(data, "analog", pack_id):
+                if temps:
+                    _drop_missing_warnings(
+                        hass, entry, coordinator, pack_id, "temp_sensor_warnings", set(fitted_temps), registered
+                    )
+                if num_cells:
+                    _drop_missing_warnings(
+                        hass,
+                        entry,
+                        coordinator,
+                        pack_id,
+                        "cell_voltage_warnings",
+                        set(range(1, num_cells + 1)),
+                        registered,
+                    )
 
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
@@ -194,8 +206,8 @@ async def async_setup_entry(
     )
 
 
-def _drop_absent_status(hass, entry, pack_id, present, registered):
-    """Remove a status entity whose byte is not in the frames we received."""
+def _drop_absent_status(hass, entry, coordinator, pack_id, present, registered):
+    """Remove a status entity whose byte stayed out of the frames after a (re)load."""
     present_markers = {f"{sub}_{key}" for sub, key in present}
     known = {
         f"{sub}_{key}"
@@ -204,29 +216,37 @@ def _drop_absent_status(hass, entry, pack_id, present, registered):
     }
     registry = er.async_get(hass)
     prefix = f"{entry.entry_id}_pack_{pack_id}_"
-    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
-        unique_id = entity.unique_id or ""
-        if not unique_id.startswith(prefix):
-            continue
-        marker = unique_id[len(prefix):]
-        if marker in known and marker not in present_markers:
-            registry.async_remove(entity.entity_id)
-            registered.discard((pack_id, marker))
+    candidates = {
+        entity.unique_id: entity.entity_id
+        for entity in er.async_entries_for_config_entry(registry, entry.entry_id)
+        if (entity.unique_id or "").startswith(prefix) and entity.unique_id[len(prefix):] in known
+    }
+    present_ids = {prefix + marker for marker in present_markers}
+    for unique_id in remove_stale(
+        registry, coordinator.stale_watch, f"status_{pack_id}", coordinator.poll_number, candidates, present_ids
+    ):
+        registered.discard((pack_id, unique_id[len(prefix):]))
 
 
-def _drop_missing_warnings(hass, entry, pack_id, marker, present):
-    """Remove a warning only when that slot has no probe or cell."""
+def _drop_missing_warnings(hass, entry, coordinator, pack_id, list_key, present, registered):
+    """Remove a warning whose cell or probe slot stayed empty after a (re)load."""
     if not present:
         return
     registry = er.async_get(hass)
-    prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}"
-    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+    prefix = f"{entry.entry_id}_pack_{pack_id}_{list_key}_"
+    candidates = {}
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
         unique_id = entity.unique_id or ""
-        if not unique_id.startswith(prefix):
-            continue
-        number = unique_id[len(prefix):].split("_", 1)[0]
-        if number.isdigit() and int(number) not in present:
-            registry.async_remove(entity.entity_id)
+        if unique_id.startswith(prefix) and unique_id[len(prefix):].split("_", 1)[0].isdigit():
+            candidates[unique_id] = entity.entity_id
+    present_ids = {
+        unique_id for unique_id in candidates if int(unique_id[len(prefix):].split("_", 1)[0]) in present
+    }
+    marker = "cell_warn" if list_key == "cell_voltage_warnings" else "temp_warn"
+    for unique_id in remove_stale(
+        registry, coordinator.stale_watch, f"{list_key}_{pack_id}", coordinator.poll_number, candidates, present_ids
+    ):
+        registered.discard((pack_id, f"{marker}_{int(unique_id[len(prefix):].split('_', 1)[0])}"))
 
 
 class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):

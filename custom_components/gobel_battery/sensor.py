@@ -11,6 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import DOMAIN, BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI
 from .measurements import volts_from_millivolts, watts_from_kilowatts
 from .pace_config import FIELDS, READ_ONLY
+from .stale_entities import pack_is_fresh, remove_stale
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -472,13 +473,18 @@ async def async_setup_entry(
                     continue
                 new_entities.append(GobelBatteryTemperatureSensor(coordinator, pack_id, temp_idx))
 
+            # Only rounds that really read the pack count towards removing an entity.
+            if not pack_is_fresh(data, "analog", pack_id):
+                continue
             temps = pack_data.get("temperatures") or []
             if temps:
                 _drop_missing_probes(
                     hass,
                     entry,
+                    coordinator,
+                    registered,
                     pack_id,
-                    "temp_",
+                    "temp",
                     {index for index, reading in enumerate(temps, start=1) if reading is not None},
                 )
             cells = pack_data.get("cell_voltages") or []
@@ -486,13 +492,14 @@ async def async_setup_entry(
                 _drop_missing_probes(
                     hass,
                     entry,
+                    coordinator,
+                    registered,
                     pack_id,
-                    "cell_",
+                    "cell",
                     set(range(1, len(cells) + 1)),
                 )
 
-        if coordinator.config_rounds:
-            _drop_unanswered_config(hass, entry, coordinator, registered)
+        _drop_unanswered_config(hass, entry, coordinator, registered)
 
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
@@ -504,42 +511,61 @@ async def async_setup_entry(
 
 
 def _drop_unanswered_config(hass, entry, coordinator, registered):
-    """Remove a setting that a full read cycle never returned."""
-    answered = coordinator.config_answered
+    """Remove a setting that the settings rounds after a (re)load never returned."""
+    if not coordinator.config_round_results:
+        return
     optional = {field["key"] for field in list(FIELDS) + list(READ_ONLY)}
     optional.add("limiter_gear")
     registry = er.async_get(hass)
     prefix = f"{entry.entry_id}_pack_"
-    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+    by_slot = {}
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
         unique_id = entity.unique_id or ""
         if not unique_id.startswith(prefix):
             continue
-        rest = unique_id[len(prefix):]
-        pack, _, metric = rest.partition("_")
-        if metric not in optional:
+        pack, _, metric = unique_id[len(prefix):].partition("_")
+        if metric not in optional or not pack.isdigit():
             continue
-        if metric == "limiter_gear" and pack.isdigit() and int(pack) in coordinator._limiter_gear:
-            continue
-        if f"view_{metric}" in answered:
-            continue
-        registry.async_remove(entity.entity_id)
-        if pack.isdigit():
-            registered.discard((int(pack), metric))
+        slot = coordinator.config_slot(int(pack))
+        by_slot.setdefault(slot, {})[unique_id] = (entity.entity_id, int(pack), metric)
+
+    for slot, (round_number, answered) in coordinator.config_round_results.items():
+        found = by_slot.get(slot, {})
+        present = {
+            unique_id
+            for unique_id, (_entity_id, pack, metric) in found.items()
+            if f"view_{metric}" in answered
+            or (metric == "limiter_gear" and pack in coordinator._limiter_gear)
+        }
+        candidates = {unique_id: entity_id for unique_id, (entity_id, _pack, _metric) in found.items()}
+        for unique_id in remove_stale(
+            registry, coordinator.stale_watch, f"config_{slot}", round_number, candidates, present
+        ):
+            _entity_id, pack, metric = found[unique_id]
+            registered.discard((pack, metric))
 
 
-def _drop_missing_probes(hass, entry, pack_id, marker, present):
-    """Remove a probe entity only when that slot has no sensor fitted."""
+def _drop_missing_probes(hass, entry, coordinator, registered, pack_id, marker, present):
+    """Remove a probe or cell entity whose slot stayed empty after a (re)load."""
     if not present:
         return
     registry = er.async_get(hass)
-    prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}"
-    for entity in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+    prefix = f"{entry.entry_id}_pack_{pack_id}_{marker}_"
+    candidates = {}
+    numbers = {}
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
         unique_id = entity.unique_id or ""
         if not unique_id.startswith(prefix):
             continue
         number = unique_id[len(prefix):].split("_", 1)[0]
-        if number.isdigit() and int(number) not in present:
-            registry.async_remove(entity.entity_id)
+        if number.isdigit():
+            candidates[unique_id] = entity.entity_id
+            numbers[unique_id] = int(number)
+    present_ids = {unique_id for unique_id, number in numbers.items() if number in present}
+    for unique_id in remove_stale(
+        registry, coordinator.stale_watch, f"{marker}_{pack_id}", coordinator.poll_number, candidates, present_ids
+    ):
+        registered.discard((pack_id, f"{marker}_{numbers[unique_id]}"))
 
 class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
     """Sensor representing aggregate battery bank metrics."""

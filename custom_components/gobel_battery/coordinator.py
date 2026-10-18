@@ -43,6 +43,7 @@ from .pace_config import (
     write_configuration_field,
 )
 from .pace_identity import pack_owns_configuration, read_identity
+from .stale_entities import StaleEntityWatch
 from .pace_write import write_buzzer, write_clock, write_led, write_limiter, write_limiter_gear, write_mosfet
 from .measurements import (
     bms_throughput_kwh,
@@ -126,8 +127,12 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._energy_ts = None
         self._limit_cache = {}
         self._config_cache = {}
-        self.config_answered = set()
         self.config_rounds = 0
+        # Per settings slot: (number of the finished round, keys that round answered)
+        self.config_round_results = {}
+        # Successful polls since the (re)load, and the watch that removes stale entities
+        self.poll_number = 0
+        self.stale_watch = StaleEntityWatch()
         self._identity = {}
         self._limiter_gear = {}
         self._last_reopen = 0
@@ -219,6 +224,12 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
     def expert_config(self):
         """True when the user enabled writable BMS configuration."""
         return bool(self.entry.options.get(CONF_EXPERT_CONFIG, False))
+
+    def config_slot(self, pack_id):
+        """Key of the settings cache that holds this pack's values."""
+        if self.bms_type != BMS_TYPE_JK_PB and self.battery_port == "rs485":
+            return str(pack_id)
+        return "all"
 
     def owns_configuration(self, pack_id):
         """True when a write to this pack reaches its own BMS."""
@@ -351,6 +362,11 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         return {
             "analog": final_analog_data,
             "warning": final_warning_data,
+            # Packs read in this poll. The others come from the cache.
+            "fresh": {
+                "analog": set(seen_analog_packs),
+                "warning": set(seen_warning_packs),
+            },
         }
 
     def _reopen_link(self):
@@ -393,11 +409,15 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
                 values, raw = {}, {}
             slot["values"].update(values)
             slot["raw"].update(raw)
-            self.config_answered.update(key for key, value in values.items() if value is not None)
+            answered = slot.setdefault("answered", set())
+            answered.update(key for key, value in values.items() if value is not None)
             slot["cursor"] += count
             if slot["cursor"] >= len(GROUPS):
                 slot["cursor"] = 0
                 slot["ts"] = now
+                slot["rounds"] = slot.get("rounds", 0) + 1
+                self.config_round_results[cache_key] = (slot["rounds"], set(answered))
+                answered.clear()
                 self.config_rounds += 1
 
         for pack in packs:
@@ -673,6 +693,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             try:
                 data = await self.hass.async_add_executor_job(self._fetch_data_sync)
                 self._first_fetch_done = True
+                self.poll_number += 1
                 self._schedule_energy_save()
                 return data
             except Exception as err:
