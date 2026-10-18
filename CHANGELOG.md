@@ -4,6 +4,25 @@ description:
 
 # Changelog
 
+## [2.4.25] - 2026-10-18
+### Fixed
+-   hassfest passes again: translation keys are lower case. Stored BMS types and entity IDs stay the same.
+-   Works on Home Assistant 2026.10 without the async_timeout package.
+-   Reconfigure accepts the entry's own address and keeps the options (poll interval, pack limit, JK index); these are set under **Configure** only.
+-   Write errors and the probe result are shown in the Home Assistant language.
+-   A failed setup closes its connection before Home Assistant retries.
+-   Pack devices link to the bank by device ID, so Home Assistant 2026.8 and later show no deprecation warning (upstream issue fancyui#31).
+-   JK over TCP: only the listener reconnects, and an old socket is closed before a new connect.
+-   A settings write reads the group from the BMS first and counts only the addressed pack's confirmation.
+-   Each settings group is read once per round.
+-   Entities are removed only after a reload, and only when their value was missing in 5 complete rounds. A single missed poll no longer deletes a renamed entity.
+-   The energy file is written once a minute instead of after every poll, and deleted when the entry is removed.
+### Changed
+-   Fewer recorder rows: a voltage that changes only in its last digit is shown once it has stayed for a minute, power is shown in whole watts, energy in 0.01 kWh, and the BMS clock every 15 minutes or at once when it is set or drifts. Alarms and protections still change at once.
+-   Spanish, French and Chinese have the setup and options texts.
+
+---------------
+
 ## [2.4.24] - 2026-10-18
 ### Fixed
 -   The charge and discharge switches sent the opposite command: switching one on turned the MOSFET off. They now send 00 to switch on and 01 to switch off, as the Pace protocol and a PBmsTools capture show.
