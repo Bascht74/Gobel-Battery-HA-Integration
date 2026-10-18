@@ -58,6 +58,11 @@ from .tdtbms_rs232 import TDTBMS232
 
 _LOGGER = logging.getLogger(__name__)
 
+def energy_store(hass, entry_id):
+    """The file that keeps the energy counters of one entry across restarts."""
+    return Store(hass, 1, f"{DOMAIN}.energy.{entry_id}")
+
+
 # The energy counters are saved at most once a minute; unload and HA stop save at once.
 ENERGY_SAVE_SECONDS = 60
 
@@ -127,7 +132,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._limiter_gear = {}
         self._last_reopen = 0
         self._bus_lock = threading.Lock()
-        self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
+        self._store = energy_store(hass, entry.entry_id)
         self._next_energy_save = 0.0
         # Set by async_setup_entry once the bank device is registered.
         self.bank_device_id = None

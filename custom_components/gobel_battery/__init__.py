@@ -7,7 +7,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .const import DOMAIN
-from .coordinator import GobelBatteryUpdateCoordinator
+from .coordinator import GobelBatteryUpdateCoordinator, energy_store
 from .mode_cleanup import stale_unique_ids
 
 _LOGGER = logging.getLogger(__name__)
@@ -88,3 +88,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         await hass.async_add_executor_job(coordinator.shutdown)
 
     return unload_ok
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Delete the energy file of a removed entry; a new entry starts from zero."""
+    await energy_store(hass, entry.entry_id).async_remove()
