@@ -649,5 +649,23 @@
         "name": "Régler l'horloge BMS"
       }
     }
+  },
+  "selector": {
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "aucune réponse",
+        "unreachable": "aucune connexion"
+      }
+    }
+  },
+  "exceptions": {
+    "write_not_supported": {
+      "message": "Ce BMS ne permet pas d'écrire les réglages."
+    },
+    "write_not_confirmed": {
+      "message": "Le BMS n'a pas confirmé la modification."
+    }
   }
 }

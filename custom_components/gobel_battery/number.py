@@ -10,7 +10,6 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
@@ -92,7 +91,4 @@ class GobelExpertNumber(GobelExpertEntity, NumberEntity):
         return None if value is None else float(value)
 
     async def async_set_native_value(self, value: float):
-        try:
-            await self.coordinator.async_apply_expert_change(self.pack_id, self._key, float(value))
-        except RuntimeError as err:
-            raise HomeAssistantError(str(err)) from err
+        await self.coordinator.async_apply_expert_change(self.pack_id, self._key, float(value))

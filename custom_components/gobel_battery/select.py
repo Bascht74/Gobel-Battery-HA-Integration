@@ -3,7 +3,6 @@
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
@@ -52,7 +51,4 @@ class GobelLimiterGearSelect(GobelExpertEntity, SelectEntity):
         return self.coordinator._limiter_gear.get(self.pack_id)
 
     async def async_select_option(self, option: str):
-        try:
-            await self.coordinator.async_apply_expert_change(self.pack_id, "limiter_gear", option)
-        except RuntimeError as err:
-            raise HomeAssistantError(str(err)) from err
+        await self.coordinator.async_apply_expert_change(self.pack_id, "limiter_gear", option)

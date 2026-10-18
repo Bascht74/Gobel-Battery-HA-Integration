@@ -48,7 +48,7 @@
       },
       "probe": {
         "title": "Pace connection check",
-        "description": "Detected: {result}. This is Pace BMS with commands, also when the battery sends frames by itself. Internal Wi-Fi is not selected automatically."
+        "description": "Detected: {result}, port {port}. This is Pace BMS with commands, also when the battery sends frames by itself. Internal Wi-Fi is not selected automatically."
       }
     },
     "error": {
@@ -80,6 +80,14 @@
       "options": {
         "rs232": "RS232",
         "rs485": "RS485"
+      }
+    },
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "no answer",
+        "unreachable": "no connection"
       }
     }
   },
@@ -756,6 +764,14 @@
     },
     "error": {
       "expert_not_confirmed": "Confirm the warning before the settings become changeable."
+    }
+  },
+  "exceptions": {
+    "write_not_supported": {
+      "message": "This BMS does not support writing settings."
+    },
+    "write_not_confirmed": {
+      "message": "The BMS did not confirm the change."
     }
   }
 }

@@ -5,6 +5,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
@@ -197,7 +198,6 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 result = "unreachable"
         self._pending_entry[CONF_IP_PORT] = int(port)
         self._probe_result = result
-        self._probe_port_note = f", Port {int(port)}"
         if result in (ACTIVE, PASSIVE):
             # Frames that arrive by themselves are still this dongle, not internal Wi-Fi.
             self._pending_entry[CONF_BMS_TYPE] = BMS_TYPE_PACE_LV
@@ -230,18 +230,19 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="probe",
             data_schema=vol.Schema({}),
-            description_placeholders={"result": self._probe_label()},
+            description_placeholders={
+                "result": await self._probe_label(),
+                "port": str(self._pending_entry[CONF_IP_PORT]),
+            },
         )
 
-    def _probe_label(self):
-        german = str(getattr(self.hass.config, "language", "")).startswith("de")
-        labels = {
-            ACTIVE: "Pace BMS",
-            PASSIVE: "Pace BMS",
-            "silent": "keine Antwort" if german else "no answer",
-            "unreachable": "keine Verbindung" if german else "no connection",
-        }
-        return labels.get(self._probe_result, self._probe_result) + getattr(self, "_probe_port_note", "")
+    async def _probe_label(self):
+        """The probe result in the Home Assistant language (selector.probe_result)."""
+        strings = await async_get_translations(
+            self.hass, self.hass.config.language, "selector", {DOMAIN}
+        )
+        key = f"component.{DOMAIN}.selector.probe_result.options.{self._probe_result}"
+        return strings.get(key, self._probe_result)
 
     async def _create_from_data(self, user_data):
         unique_id = f"{user_data[CONF_IP_ADDRESS]}_{user_data[CONF_IP_PORT]}"

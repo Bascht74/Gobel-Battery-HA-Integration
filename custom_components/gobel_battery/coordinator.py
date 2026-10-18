@@ -9,6 +9,7 @@ import async_timeout
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.storage import Store
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     DOMAIN,
@@ -535,10 +536,14 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
     async def async_apply_expert_change(self, pack_id, kind, value):
         """Write one BMS setting. Caller must only expose this in expert mode."""
         if self.bms_type == BMS_TYPE_JK_PB or not hasattr(self.bms, "generate_bms_request"):
-            raise RuntimeError("Dieses BMS unterstützt das Schreiben der Konfiguration nicht.")
+            raise HomeAssistantError(
+                translation_domain=DOMAIN, translation_key="write_not_supported"
+            )
         ok = await self.hass.async_add_executor_job(self._apply_expert_change_sync, pack_id, kind, value)
         if not ok:
-            raise RuntimeError("Das BMS hat die Änderung nicht bestätigt.")
+            raise HomeAssistantError(
+                translation_domain=DOMAIN, translation_key="write_not_confirmed"
+            )
         await self.async_request_refresh()
 
     def _apply_expert_change_sync(self, pack_id, kind, value):

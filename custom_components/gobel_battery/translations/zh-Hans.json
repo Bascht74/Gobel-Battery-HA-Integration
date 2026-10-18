@@ -649,5 +649,23 @@
         "name": "设置BMS时钟"
       }
     }
+  },
+  "selector": {
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "无应答",
+        "unreachable": "无法连接"
+      }
+    }
+  },
+  "exceptions": {
+    "write_not_supported": {
+      "message": "此 BMS 不支持写入设置。"
+    },
+    "write_not_confirmed": {
+      "message": "BMS 未确认此更改。"
+    }
   }
 }

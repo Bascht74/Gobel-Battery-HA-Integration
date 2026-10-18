@@ -3,7 +3,6 @@
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
@@ -48,7 +47,4 @@ class GobelSetClockButton(GobelExpertEntity, ButtonEntity):
 
     async def async_press(self):
         moment = dt_util.now().replace(microsecond=0, tzinfo=None)
-        try:
-            await self.coordinator.async_apply_expert_change(self.pack_id, "set_clock", moment)
-        except RuntimeError as err:
-            raise HomeAssistantError(str(err)) from err
+        await self.coordinator.async_apply_expert_change(self.pack_id, "set_clock", moment)

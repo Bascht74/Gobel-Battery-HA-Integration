@@ -3,7 +3,6 @@
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
@@ -81,7 +80,4 @@ class GobelExpertSwitch(GobelExpertEntity, SwitchEntity):
         await self._set(False)
 
     async def _set(self, value):
-        try:
-            await self.coordinator.async_apply_expert_change(self.pack_id, self._key, value)
-        except RuntimeError as err:
-            raise HomeAssistantError(str(err)) from err
+        await self.coordinator.async_apply_expert_change(self.pack_id, self._key, value)

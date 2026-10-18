@@ -48,7 +48,7 @@
       },
       "probe": {
         "title": "Pace-Verbindungsprüfung",
-        "description": "Erkannt: {result}. Das bleibt Pace BMS mit Befehlen, auch wenn der Akku von selbst Rahmen schickt. Internes WLAN wird nicht automatisch gewählt."
+        "description": "Erkannt: {result}, Port {port}. Das bleibt Pace BMS mit Befehlen, auch wenn der Akku von selbst Rahmen schickt. Internes WLAN wird nicht automatisch gewählt."
       }
     },
     "error": {
@@ -80,6 +80,14 @@
       "options": {
         "rs232": "RS232",
         "rs485": "RS485"
+      }
+    },
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "keine Antwort",
+        "unreachable": "keine Verbindung"
       }
     }
   },
@@ -756,6 +764,14 @@
     },
     "error": {
       "expert_not_confirmed": "Die Warnung muss bestätigt werden, bevor die Einstellungen änderbar werden."
+    }
+  },
+  "exceptions": {
+    "write_not_supported": {
+      "message": "Dieses BMS unterstützt das Schreiben der Einstellungen nicht."
+    },
+    "write_not_confirmed": {
+      "message": "Das BMS hat die Änderung nicht bestätigt."
     }
   }
 }

@@ -649,5 +649,23 @@
         "name": "Ajustar reloj del BMS"
       }
     }
+  },
+  "selector": {
+    "probe_result": {
+      "options": {
+        "active": "Pace BMS",
+        "passive": "Pace BMS",
+        "silent": "sin respuesta",
+        "unreachable": "sin conexión"
+      }
+    }
+  },
+  "exceptions": {
+    "write_not_supported": {
+      "message": "Este BMS no permite escribir ajustes."
+    },
+    "write_not_confirmed": {
+      "message": "El BMS no confirmó el cambio."
+    }
   }
 }
