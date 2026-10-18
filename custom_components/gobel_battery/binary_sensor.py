@@ -239,7 +239,8 @@ class GobelBatteryBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self._sub_dict = sub_dict
         self._key = key
         self._attr_has_entity_name = True
-        self._attr_translation_key = key
+        # Translation keys must be lower case; the unique ID keeps the frame key.
+        self._attr_translation_key = key.lower()
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{sub_dict}_{key}"
         self._attr_device_class = device_class
         self._attr_entity_category = category

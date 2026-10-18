@@ -66,10 +66,10 @@
   "selector": {
     "bms_type": {
       "options": {
-        "PACE_LV": "Pace BMS",
-        "PACE_LV_WIFI": "Pace BMS, internes WLAN",
-        "JK_PB": "JK-BMS",
-        "TDT": "TDT-BMS"
+        "pace_lv": "Pace BMS",
+        "pace_lv_wifi": "Pace BMS, internes WLAN",
+        "jk_pb": "JK-BMS",
+        "tdt": "TDT-BMS"
       }
     },
     "connection_type": {
@@ -417,7 +417,7 @@
       "protect_high_charge_temp": {
         "name": "Laden Übertemperaturschutz"
       },
-      "protect_high_MOS_temp": {
+      "protect_high_mos_temp": {
         "name": "MOSFET-Übertemperaturschutz"
       },
       "protect_high_discharge_temp": {
@@ -447,13 +447,13 @@
       "fault_cell": {
         "name": "Zellenanzahlfehler"
       },
-      "fault_NTC": {
+      "fault_ntc": {
         "name": "Temperatursensorfehler"
       },
-      "fault_discharge_MOS": {
+      "fault_discharge_mos": {
         "name": "Entlade-MOSFET-Fehler"
       },
-      "fault_charge_MOS": {
+      "fault_charge_mos": {
         "name": "Lade-MOSFET-Fehler"
       },
       "status_heating": {
@@ -498,10 +498,10 @@
       "warn_high_cell_voltage": {
         "name": "Zell-Überspannungswarnung"
       },
-      "warn_low_SOC": {
+      "warn_low_soc": {
         "name": "Niedriger SOC Warnung"
       },
-      "warn_high_MOS_temp": {
+      "warn_high_mos_temp": {
         "name": "MOSFET-Übertemperaturwarnung"
       },
       "warn_low_env_temp": {

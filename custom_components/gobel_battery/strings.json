@@ -66,10 +66,10 @@
   "selector": {
     "bms_type": {
       "options": {
-        "PACE_LV": "Pace BMS",
-        "PACE_LV_WIFI": "Pace BMS, internal Wi-Fi",
-        "JK_PB": "JK BMS",
-        "TDT": "TDT BMS"
+        "pace_lv": "Pace BMS",
+        "pace_lv_wifi": "Pace BMS, internal Wi-Fi",
+        "jk_pb": "JK BMS",
+        "tdt": "TDT BMS"
       }
     },
     "connection_type": {
@@ -417,7 +417,7 @@
       "protect_high_charge_temp": {
         "name": "Charge High Temp Protection"
       },
-      "protect_high_MOS_temp": {
+      "protect_high_mos_temp": {
         "name": "MOS High Temp Protection"
       },
       "protect_high_discharge_temp": {
@@ -447,13 +447,13 @@
       "fault_cell": {
         "name": "Cell Count Mismatch/Fault"
       },
-      "fault_NTC": {
+      "fault_ntc": {
         "name": "Temperature Sensor Fault"
       },
-      "fault_discharge_MOS": {
+      "fault_discharge_mos": {
         "name": "Discharge MOS Fault"
       },
-      "fault_charge_MOS": {
+      "fault_charge_mos": {
         "name": "Charge MOS Fault"
       },
       "status_heating": {
@@ -498,10 +498,10 @@
       "warn_high_cell_voltage": {
         "name": "Cell Over-Voltage Warning"
       },
-      "warn_low_SOC": {
+      "warn_low_soc": {
         "name": "Low SOC Warning"
       },
-      "warn_high_MOS_temp": {
+      "warn_high_mos_temp": {
         "name": "MOS High Temp Warning"
       },
       "warn_low_env_temp": {

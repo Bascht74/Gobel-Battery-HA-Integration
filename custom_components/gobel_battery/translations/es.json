@@ -330,7 +330,7 @@
       "protect_high_charge_temp": {
         "name": "Protección de alta temperatura de carga"
       },
-      "protect_high_MOS_temp": {
+      "protect_high_mos_temp": {
         "name": "Protección de alta temperatura del MOSFET"
       },
       "protect_high_discharge_temp": {
@@ -360,13 +360,13 @@
       "fault_cell": {
         "name": "Fallo de número de celdas"
       },
-      "fault_NTC": {
+      "fault_ntc": {
         "name": "Fallo del sensor de temperatura"
       },
-      "fault_discharge_MOS": {
+      "fault_discharge_mos": {
         "name": "Fallo del MOSFET de descarga"
       },
-      "fault_charge_MOS": {
+      "fault_charge_mos": {
         "name": "Fallo del MOSFET de carga"
       },
       "status_heating": {
@@ -411,10 +411,10 @@
       "warn_high_cell_voltage": {
         "name": "Aviso de sobretensión de celda"
       },
-      "warn_low_SOC": {
+      "warn_low_soc": {
         "name": "Aviso de SOC bajo"
       },
-      "warn_high_MOS_temp": {
+      "warn_high_mos_temp": {
         "name": "Aviso de alta temperatura del MOSFET"
       },
       "warn_low_env_temp": {

@@ -45,6 +45,11 @@ from .pace_probe import ACTIVE, PASSIVE, probe_pace_tcp, probe_standard_ports
 _LOGGER = logging.getLogger(__name__)
 
 
+# The selector shows lower-case options (translation keys must be lower case);
+# the entry keeps storing PACE_LV etc. so existing entries stay valid.
+BMS_TYPE_BY_OPTION = {bms_type.lower(): bms_type for bms_type in BMS_TYPES}
+
+
 def _is_network(connection_type: str) -> bool:
     return connection_type in (CONN_TYPE_ETHERNET, CONN_TYPE_WIFI)
 
@@ -85,6 +90,10 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         defaults = self.config_data if self._reconfigure else {}
 
         if user_input is not None:
+            user_input = {
+                **user_input,
+                CONF_BMS_TYPE: BMS_TYPE_BY_OPTION[user_input[CONF_BMS_TYPE]],
+            }
             self.config_data = {**defaults, **user_input}
             if _is_network(user_input[CONF_CONNECTION_TYPE]):
                 return await self.async_step_network()
@@ -97,8 +106,9 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     default=defaults.get(CONF_DEVICE_NAME, DEFAULT_DEVICE_NAME),
                 ): str,
                 vol.Required(
-                    CONF_BMS_TYPE, default=defaults.get(CONF_BMS_TYPE, BMS_TYPES[0])
-                ): _dropdown(BMS_TYPES, "bms_type"),
+                    CONF_BMS_TYPE,
+                    default=defaults.get(CONF_BMS_TYPE, BMS_TYPES[0]).lower(),
+                ): _dropdown(list(BMS_TYPE_BY_OPTION), "bms_type"),
                 vol.Required(
                     CONF_CONNECTION_TYPE,
                     default=defaults.get(CONF_CONNECTION_TYPE, CONNECTION_TYPES[0]),

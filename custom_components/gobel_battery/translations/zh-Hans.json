@@ -330,7 +330,7 @@
       "protect_high_charge_temp": {
         "name": "充电高温保护"
       },
-      "protect_high_MOS_temp": {
+      "protect_high_mos_temp": {
         "name": "MOS高温保护"
       },
       "protect_high_discharge_temp": {
@@ -360,13 +360,13 @@
       "fault_cell": {
         "name": "单体数量故障"
       },
-      "fault_NTC": {
+      "fault_ntc": {
         "name": "温度传感器故障"
       },
-      "fault_discharge_MOS": {
+      "fault_discharge_mos": {
         "name": "放电MOS故障"
       },
-      "fault_charge_MOS": {
+      "fault_charge_mos": {
         "name": "充电MOS故障"
       },
       "status_heating": {
@@ -411,10 +411,10 @@
       "warn_high_cell_voltage": {
         "name": "单体过压告警"
       },
-      "warn_low_SOC": {
+      "warn_low_soc": {
         "name": "SOC过低告警"
       },
-      "warn_high_MOS_temp": {
+      "warn_high_mos_temp": {
         "name": "MOS高温告警"
       },
       "warn_low_env_temp": {
