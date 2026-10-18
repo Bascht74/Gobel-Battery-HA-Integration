@@ -1,5 +1,6 @@
 """Sensor platform for the Gobel Battery Monitor integration."""
 import logging
+import time
 from homeassistant.components.sensor import SensorEntity, SensorStateClass, SensorDeviceClass
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -7,11 +8,13 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, BMS_TYPE_JK_PB, BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI
 from .measurements import volts_from_millivolts, watts_from_kilowatts
 from .pace_config import FIELDS, READ_ONLY
 from .stale_entities import pack_is_fresh, remove_stale
+from .steady import ENERGY_DIGITS, POWER_DIGITS, ClockHold, StepHold, rounded
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -88,7 +91,7 @@ SENSOR_METADATA = {
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:battery-charging",
         "category": None,
-        "precision": 1,
+        "precision": 0,
     },
     "soc": {
         "name": "SOC",
@@ -206,7 +209,7 @@ SENSOR_METADATA = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
         "icon": "mdi:battery-positive",
         "category": None,
-        "precision": 3,
+        "precision": 2,
     },
     "energy_discharged": {
         "name": "Energy Discharged",
@@ -215,7 +218,7 @@ SENSOR_METADATA = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
         "icon": "mdi:battery-negative",
         "category": None,
-        "precision": 3,
+        "precision": 2,
     },
 }
 
@@ -363,9 +366,9 @@ async def async_setup_entry(
         ("total_current", "Total Current", "A", SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT, "mdi:current-dc", None, 2),
         ("total_soc", "Total SOC", "%", SensorDeviceClass.BATTERY, SensorStateClass.MEASUREMENT, "mdi:battery-70", None, 1),
         ("total_voltage", "Total Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:sine-wave", None, 2),
-        ("total_power", "Total Power", "W", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, "mdi:battery-charging", None, 1),
-        ("total_energy_charged", "Total Energy Charged", "kWh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-positive", None, 3),
-        ("total_energy_discharged", "Total Energy Discharged", "kWh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-negative", None, 3),
+        ("total_power", "Total Power", "W", SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, "mdi:battery-charging", None, 0),
+        ("total_energy_charged", "Total Energy Charged", "kWh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-positive", None, 2),
+        ("total_energy_discharged", "Total Energy Discharged", "kWh", SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING, "mdi:battery-negative", None, 2),
         ("total_cell_voltage_max", "Max Cell Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-top", EntityCategory.DIAGNOSTIC, 3),
         ("total_cell_voltage_min", "Min Cell Voltage", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:align-vertical-bottom", EntityCategory.DIAGNOSTIC, 3),
         ("total_cell_voltage_diff", "Cell Voltage Delta", "V", SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, "mdi:format-align-middle", EntityCategory.DIAGNOSTIC, 3),
@@ -567,6 +570,34 @@ def _drop_missing_probes(hass, entry, coordinator, registered, pack_id, marker, 
     ):
         registered.discard((pack_id, f"{marker}_{numbers[unique_id]}"))
 
+# Last digit of the voltages that flicker. A one-digit change waits until it is steady.
+OVERALL_STEPS = {
+    "total_voltage": 0.01,
+    "total_cell_voltage_max": 0.001,
+    "total_cell_voltage_min": 0.001,
+    "total_cell_voltage_diff": 0.001,
+}
+PACK_STEPS = {
+    "voltage": 0.01,
+    "cell_voltage_max": 0.001,
+    "cell_voltage_min": 0.001,
+    "cell_voltage_diff": 0.001,
+}
+CELL_STEP = 0.001
+
+
+def _hold(steps, key):
+    step = steps.get(key)
+    return StepHold(step) if step else None
+
+
+def _shown(hold, value):
+    """What the entity shows: the value itself, or its steady copy."""
+    if hold is None:
+        return value
+    return hold.update(value, time.monotonic())
+
+
 class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
     """Sensor representing aggregate battery bank metrics."""
 
@@ -579,6 +610,7 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
         self._attr_translation_key = key
         self._attr_translation_placeholders = {"device": coordinator.device_name}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_total_{key}"
+        self._steady = _hold(OVERALL_STEPS, key)
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
         self._attr_state_class = state_class
@@ -604,7 +636,11 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        """Calculate and return the native value of the aggregate sensor."""
+        """The aggregate value, without one-digit flicker."""
+        return _shown(self._steady, self._value())
+
+    def _value(self):
+        """Calculate the native value of the aggregate sensor."""
         data = self.coordinator.data
         if not data:
             return None
@@ -629,11 +665,11 @@ class GobelBatteryOverallSensor(CoordinatorEntity, SensorEntity):
         elif self._key == "total_voltage":
             return round(sum(d.get("view_voltage", 0) for d in analog_packs) / total_packs_num, 2)
         elif self._key == "total_power":
-            return watts_from_kilowatts(sum(d.get("view_power", 0) for d in analog_packs))
+            return rounded(watts_from_kilowatts(sum(d.get("view_power", 0) for d in analog_packs)), POWER_DIGITS)
         elif self._key == "total_energy_charged":
-            return round(sum(d.get("view_energy_charged", 0) or 0 for d in analog_packs), 3)
+            return rounded(sum(d.get("view_energy_charged", 0) or 0 for d in analog_packs), ENERGY_DIGITS)
         elif self._key == "total_energy_discharged":
-            return round(sum(d.get("view_energy_discharged", 0) or 0 for d in analog_packs), 3)
+            return rounded(sum(d.get("view_energy_discharged", 0) or 0 for d in analog_packs), ENERGY_DIGITS)
         
         # Cell Voltages aggregate
         all_cell_voltages = [v for d in analog_packs for v in d.get("cell_voltages", [])]
@@ -661,6 +697,8 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         self._attr_has_entity_name = True
         self._attr_translation_key = metric
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_{metric}"
+        self._steady = _hold(PACK_STEPS, metric)
+        self._clock = ClockHold() if metric == "bms_clock" else None
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
         self._attr_state_class = state_class
@@ -692,6 +730,13 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
+        """The pack value, without one-digit flicker and with a calm BMS clock."""
+        value = self._value()
+        if self._clock is not None:
+            return self._clock.update(value, dt_util.now().replace(tzinfo=None))
+        return _shown(self._steady, value)
+
+    def _value(self):
         """Return value of pack metric."""
         data = self.coordinator.data
         if not data:
@@ -715,7 +760,7 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         elif self._metric == "current":
             return pack_data.get("view_current")
         elif self._metric == "power":
-            return watts_from_kilowatts(pack_data.get("view_power"))
+            return rounded(watts_from_kilowatts(pack_data.get("view_power")), POWER_DIGITS)
         elif self._metric == "soc":
             return pack_data.get("view_SOC")
         elif self._metric == "soh":
@@ -743,9 +788,9 @@ class GobelBatteryPackSensor(CoordinatorEntity, SensorEntity):
         elif self._metric == "balance_current":
             return pack_data.get("view_balance_current")
         elif self._metric == "energy_charged":
-            return pack_data.get("view_energy_charged")
+            return rounded(pack_data.get("view_energy_charged"), ENERGY_DIGITS)
         elif self._metric == "energy_discharged":
-            return pack_data.get("view_energy_discharged")
+            return rounded(pack_data.get("view_energy_discharged"), ENERGY_DIGITS)
 
         return None
 
@@ -782,6 +827,7 @@ class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
         self._attr_translation_key = "cell_voltage"
         self._attr_translation_placeholders = {"index": f"{cell_index:02d}"}
         self._attr_unique_id = f"{coordinator.entry.entry_id}_pack_{pack_id}_cell_{cell_index}_voltage"
+        self._steady = StepHold(CELL_STEP)
         self._attr_native_unit_of_measurement = "V"
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_state_class = SensorStateClass.MEASUREMENT
@@ -807,6 +853,10 @@ class GobelBatteryCellVoltageSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
+        """The cell voltage, without one-millivolt flicker."""
+        return _shown(self._steady, self._value())
+
+    def _value(self):
         """Return cell voltage."""
         data = self.coordinator.data
         if not data:
