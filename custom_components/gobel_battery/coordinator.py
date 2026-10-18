@@ -58,6 +58,9 @@ from .tdtbms_rs232 import TDTBMS232
 
 _LOGGER = logging.getLogger(__name__)
 
+# The energy counters are saved at most once a minute; unload and HA stop save at once.
+ENERGY_SAVE_SECONDS = 60
+
 # Home Assistant 2026.8 links a pack to its bank by device id and deprecates the identifier link.
 LINK_BY_DEVICE_ID = (MAJOR_VERSION, MINOR_VERSION) >= (2026, 8)
 
@@ -125,6 +128,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
         self._last_reopen = 0
         self._bus_lock = threading.Lock()
         self._store = Store(hass, 1, f"{DOMAIN}.energy.{entry.entry_id}")
+        self._next_energy_save = 0.0
         # Set by async_setup_entry once the bank device is registered.
         self.bank_device_id = None
 
@@ -549,9 +553,24 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             pack["view_energy_discharged"] = slot["discharged"]
             pack["energy_source"] = source
 
+    def _energy_data(self):
+        return {"packs": self._energy}
+
     async def async_save_energy(self):
         """Persist integrated energy so a reload does not start from zero."""
-        await self._store.async_save({"packs": self._energy})
+        await self._store.async_save(self._energy_data())
+
+    def _schedule_energy_save(self):
+        """Write the energy file at most once a minute instead of after every poll.
+
+        A new async_delay_save postpones a pending one, so with a 5 s poll a 60 s delay
+        would never fire. Instead the poll asks for a write only once the minute is over.
+        """
+        now = time.monotonic()
+        if now < self._next_energy_save:
+            return
+        self._next_energy_save = now + ENERGY_SAVE_SECONDS
+        self._store.async_delay_save(self._energy_data)
 
     async def async_apply_expert_change(self, pack_id, kind, value):
         """Write one BMS setting. Caller must only expose this in expert mode."""
@@ -649,7 +668,7 @@ class GobelBatteryUpdateCoordinator(DataUpdateCoordinator):
             try:
                 data = await self.hass.async_add_executor_job(self._fetch_data_sync)
                 self._first_fetch_done = True
-                await self.async_save_energy()
+                self._schedule_energy_save()
                 return data
             except Exception as err:
                 raise UpdateFailed(f"BMS communication error: {err}") from err
