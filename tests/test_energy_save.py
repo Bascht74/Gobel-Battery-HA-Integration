@@ -1,7 +1,7 @@
 """The energy file is written once a minute, not after every 5 s poll.
 
 17,280 writes a day per battery wear out an SD card. Unload and Home Assistant
-stop still write at once (async_unload_entry, and the Store's final write).
+stop still write at once (async_unload_entry and a stop listener in __init__.py).
 """
 
 from types import SimpleNamespace

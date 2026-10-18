@@ -1,6 +1,7 @@
 """The Gobel Battery Monitor integration."""
 import logging
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 import homeassistant.helpers.config_validation as cv
@@ -41,6 +42,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
+    async def _save_energy_on_stop(_event) -> None:
+        # Polls save at most once a minute; a restart must not lose that minute.
+        await coordinator.async_save_energy()
+
+    entry.async_on_unload(hass.bus.async_listen(EVENT_HOMEASSISTANT_STOP, _save_energy_on_stop))
 
     # The pack devices link to the bank device by its id, so it must exist first.
     bank = dr.async_get(hass).async_get_or_create(
