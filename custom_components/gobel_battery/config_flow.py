@@ -149,12 +149,7 @@ class GobelBatteryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if user_data[CONF_BMS_TYPE] in (BMS_TYPE_PACE_LV, BMS_TYPE_PACE_LV_WIFI):
                 self._pending_entry = user_data
                 return await self._probe_and_continue(user_data[CONF_IP_ADDRESS], None)
-            if CONF_IP_PORT not in user_data:
-                return self.async_show_form(
-                    step_id="network",
-                    data_schema=self._network_schema(defaults, include_port=True),
-                    errors={"base": "port_required"},
-                )
+            # Other BMS types always see the required port field.
             return await self._create_from_data(user_data)
 
         include_port = self.config_data.get(CONF_BMS_TYPE) not in (

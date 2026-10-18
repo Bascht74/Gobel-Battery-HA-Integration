@@ -52,8 +52,7 @@
       }
     },
     "error": {
-      "already_configured": "This connection is already configured.",
-      "port_required": "This BMS needs a TCP port. Enter the port of the dongle."
+      "already_configured": "This connection is already configured."
     },
     "abort": {
       "already_configured": "This connection is already configured.",
