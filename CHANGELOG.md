@@ -17,6 +17,10 @@ description:
 -   Each settings group is read once per round.
 -   Entities are removed only after a reload, and only when their value was missing in 5 complete rounds. A single missed poll no longer deletes a renamed entity.
 -   The energy file is written once a minute instead of after every poll, and deleted when the entry is removed.
+-   The energy counters are also saved when Home Assistant stops, so no counted energy is lost on a restart.
+-   A settings round in which the BMS did not answer (for example while another program holds the link) does not count towards removing entities.
+-   Reconfiguring an entry whose setup failed sets it up at once.
+-   The LED alarm and current limiter switches send the commands in the polarity of the Pace protocol: LED alarm on 06, off 07; current limiter on 0A, off 0B.
 ### Changed
 -   Fewer recorder rows: a voltage that changes only in its last digit is shown once it has stayed for a minute, power is shown in whole watts, energy in 0.01 kWh, and the BMS clock every 15 minutes or at once when it is set or drifts. Alarms and protections still change at once.
 -   Spanish, French and Chinese have the setup and options texts.
